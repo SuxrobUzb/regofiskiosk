@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Xizmat tanlash</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: var(--text);
+        }
+        :root {
+            --bg: #f4f7fa;
+            --text: #2d3748;
+            --card-bg: #ffffff;
+            --primary: #1a73e8;
+            --secondary: #34c759;
+            --danger: #e53e3e;
+        }
+        body.dark {
+            --bg: #1a202c;
+            --text: #e2e8f0;
+            --card-bg: #2d3748;
+            --primary: #63b3ed;
+            --secondary: #68d391;
+            --danger: #f56565;
+        }
+        h1 { font-size: 36px; font-weight: 600; color: var(--primary); margin-bottom: 40px; }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            width: 90%;
+            max-width: 1200px;
+        }
+        .card {
+            background: var(--card-bg);
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .dark .card { border-color: #4a5568; }
+        .category-card {
+            background: #e6f0ff;
+            border: 2px solid var(--primary);
+            font-weight: 600;
+        }
+        .subcategory-card {
+            background: #f0f5ff;
+            border: 2px dashed var(--primary);
+        }
+        .service-card {
+            background: #e6ffed;
+            border: 2px solid var(--secondary);
+        }
+        .dark .category-card { background: #2c5282; }
+        .dark .subcategory-card { background: #3b5998; }
+        .dark .service-card { background: #2f855a; }
+        .card:hover {
+            border-color: var(--primary);
+            background: #eef4fd;
+            transform: scale(1.05);
+        }
+        .dark .card:hover { background: #4a5568; }
+        .card span { font-size: 18px; font-weight: 400; }
+        .controls {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+        }
+        .lang-btn, .theme-toggle, .back-btn, .retry-btn, .page-btn, .return-btn, .status-btn {
+            padding: 8px 16px;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #4a5568;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .dark .lang-btn, .dark .theme-toggle, .dark .retry-btn, .dark .page-btn, .dark .return-btn, .dark .status-btn { 
+            background: #2d3748; 
+            border-color: #4a5568; 
+            color: #e2e8f0; 
+        }
+        .lang-btn:hover, .theme-toggle:hover, .back-btn:hover, .retry-btn:hover, .page-btn:hover, .return-btn:hover, .status-btn:hover { 
+            background: #eef4fd; 
+        }
+        .dark .lang-btn:hover, .dark .theme-toggle:hover, .dark .retry-btn:hover, .dark .page-btn:hover, .dark .return-btn:hover, .dark .status-btn:hover { 
+            background: #4a5568; 
+        }
+        .lang-btn.active { 
+            background: var(--primary); 
+            color: #ffffff; 
+            border-color: var(--primary); 
+        }
+        .notification {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--secondary);
+            color: #ffffff;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 20px;
+            z-index: 1000;
+            transition: opacity 0.3s;
+            text-align: center;
+        }
+        .error-message {
+            color: var(--danger);
+            font-size: 18px;
+            text-align: center;
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            align-items: center;
+        }
+        #backButton { display: none; margin-bottom: 20px; }
+        .pagination {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .ticket-container {
+            display: none;
+            background: var(--card-bg);
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            margin-top: 20px;
+            width: 90%;
+            max-width: 400px;
+        }
+        .dark .ticket-container { border-color: #4a5568; }
+        .ticket-container h2 { font-size: 24px; font-weight: 600; color: var(--primary); }
+        .ticket-container p { font-size: 18px; margin: 10px 0; }
+        .ticket-container img { max-width: 150px; margin-top: 10px; }
+        .line { border-top: 1px dashed #ccc; margin: 10px 0; }
+        .ticket-buttons { display: flex; gap: 10px; justify-content: center; margin-top: 10px; }
+        iframe#printFrame { display: none; }
+    </style>
+</head>
+<body>
+    <div class="controls">
+        <button class="lang-btn active" onclick="setLanguage('uz_lat')">Uz (Lat)</button>
+        <button class="lang-btn" onclick="setLanguage('uz_cyr')">Ўз (Кирилл)</button>
+        <button class="lang-btn" onclick="setLanguage('ru')">Ру</button>
+        <button class="lang-btn" onclick="setLanguage('en')">En</button>
+        <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
+        <button class="lang-btn" onclick="loadCategories()">Refresh</button>
+    </div>
+    <h1 id="title">Xizmat tanlash</h1>
+    <button id="backButton" class="back-btn" onclick="goBack()">Orqaga</button>
+    <div class="grid" id="content"></div>
+    <div class="pagination" id="pagination"></div>
+    <div class="ticket-container" id="ticketContainer">
+        <h2 id="ticketTitle">Sizning navbatingiz</h2>
+        <div class="line"></div>
+        <p id="ticketNumber"></p>
+        <p id="ticketService"></p>
+        <p id="ticketOperator"></p>
+        <p id="ticketWaitTime"></p>
+        <div class="line"></div>
+        <p id="ticketDateTime"></p>
+        <img id="ticketQR" src="" alt="QR Code">
+        <div class="ticket-buttons">
+            <button class="status-btn" onclick="viewStatus()">Navbat holatini ko‘rish</button>
+            <button class="return-btn" onclick="returnToServices()">Xizmatlarga qaytish</button>
+        </div>
+    </div>
+    <iframe id="printFrame"></iframe>
+    <script>
+        const translations = {
+            uz_lat: { 
+                title: "Xizmat tanlash", ticket: "Sizning navbatingiz", wait: "Taxminiy kutish vaqti", 
+                error: "Xatolik yuz berdi", no_items: "Hech narsa topilmadi", back: "Orqaga", 
+                retry: "Qayta urinish", prev: "Oldingi", next: "Keyingi", service: "Xizmat", 
+                dateTime: "Sana va vaqt", return: "Xizmatlarga qaytish", status: "Navbat holatini ko‘rish",
+                printing: "Talon chop etilmoqda...", print_error: "Chop etishda xato yuz berdi!"
+            },
+            uz_cyr: { 
+                title: "Хизмат танлаш", ticket: "Сизнинг навбатингиз", wait: "Тахминий кутиш вақти", 
+                error: "Хатолик юз берди", no_items: "Ҳеч нарса топилмади", back: "Оръага",
+                retry: "Қайта уриниш", prev: "Олдинги", next: "Кейинги", service: "Хизмат", 
+                dateTime: "Сана ва вақт", return: "Хизматларга қайтиш", status: "Навбат ҳолатини кўриш",
+                printing: "Талон чоп этилмоқда...", print_error: "Чоп этишда хато юз берди!"
+            },
+            ru: { 
+                title: "Выберите услугу", ticket: "Ваш талон", wait: "Примерное время ожидания", 
+                error: "Произошла ошибка", no_items: "Ничего не найдено", back: "Назад", 
+                retry: "Повторить попытку", prev: "Предыдущая", next: "Следующая", service: "Услуга", 
+                dateTime: "Дата и время", return: "Вернуться к услугам", status: "Посмотреть статус очереди",
+                printing: "Талон печатается...", print_error: "Ошибка при печати!"
+            },
+            en: { 
+                title: "Select a service", ticket: "Your ticket", wait: "Estimated wait time", 
+                error: "An error occurred", no_items: "Nothing found", back: "Back", 
+                retry: "Retry", prev: "Previous", next: "Next", service: "Service", 
+                dateTime: "Date and time", return: "Return to services", status: "View queue status",
+                printing: "Ticket is being printed...", print_error: "Printing error occurred!"
+            }
+        };
+        let currentLang = "uz_lat";
+        const serverUrl = "{{ server_url }}";
+        // Исправлено: если kiosk_id не передан, будет 1
+        const kioskId = {{ kiosk_id if kiosk_id is defined else 1 }};
+        let lastTicket = null;
+        let categoryStack = [];
+        let currentPage = 1;
+        let totalItems = 0;
+        let perPage = 10;
+
+        async function loadCategories() {
+            try {
+                const response = await fetch(`${serverUrl}/categories`);
+                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                const categories = await response.json();
+                categoryStack = [];
+                currentPage = 1;
+                document.getElementById("ticketContainer").style.display = "none";
+                document.getElementById("content").style.display = "grid";
+                document.getElementById("pagination").style.display = "flex";
+                renderItems(categories);
+                document.getElementById("backButton").style.display = "none";
+                renderPagination(categories.length);
+            } catch (error) {
+                document.getElementById("content").innerHTML = `
+                    <div class="error-message">
+                        <p>${translations[currentLang].error}: ${translations[currentLang].no_items}</p>
+                        <button class="retry-btn" onclick="loadCategories()">${translations[currentLang].retry}</button>
+                    </div>`;
+                document.getElementById("pagination").innerHTML = "";
+            }
+        }
+
+        async function loadItems(categoryId, page = 1) {
+            try {
+                const response = await fetch(`${serverUrl}/services/${categoryId}?page=${page}`);
+                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                const data = await response.json();
+                if (page === 1 && !categoryStack.includes(categoryId)) {
+                    categoryStack.push(categoryId);
+                }
+                currentPage = data.page;
+                totalItems = data.total;
+                perPage = data.per_page;
+                document.getElementById("ticketContainer").style.display = "none";
+                document.getElementById("content").style.display = "grid";
+                document.getElementById("pagination").style.display = "flex";
+                renderItems(data.items);
+                document.getElementById("backButton").style.display = categoryStack.length > 0 ? "block" : "none";
+                document.getElementById("backButton").innerText = translations[currentLang].back;
+                renderPagination(totalItems, categoryId);
+            } catch (error) {
+                document.getElementById("content").innerHTML = `
+                    <div class="error-message">
+                        <p>${translations[currentLang].error}: ${error.message}</p>
+                        <button class="retry-btn" onclick="loadItems(${categoryId})">${translations[currentLang].retry}</button>
+                    </div>`;
+                document.getElementById("pagination").innerHTML = "";
+            }
+        }
+
+        function renderItems(items) {
+            const container = document.getElementById("content");
+            container.innerHTML = "";
+            if (!items || items.length === 0) {
+                container.innerHTML = `
+                    <div class="error-message">
+                        <p>${translations[currentLang].no_items}</p>
+                        <button class="retry-btn" onclick="${categoryStack.length > 0 ? `loadItems(${categoryStack[categoryStack.length - 1]})` : 'loadCategories()'}">${translations[currentLang].retry}</button>
+                    </div>`;
+                return;
+            }
+            items.forEach(item => {
+                const card = document.createElement("div");
+                card.className = `card ${item.isCategory ? (item.isSubcategory ? 'subcategory-card' : 'category-card') : 'service-card'}`;
+                card.innerHTML = `<span>${item.name}</span>`;
+                let isProcessing = false;
+                card.onclick = () => {
+                    if (isProcessing) return;
+                    isProcessing = true;
+                    if (item.isCategory) {
+                        loadItems(item.id).finally(() => isProcessing = false);
+                    } else {
+                        getTicket(item.id, item.name).finally(() => isProcessing = false);
+                    }
+                };
+                container.appendChild(card);
+            });
+        }
+
+        function renderPagination(total, categoryId = null) {
+            const container = document.getElementById("pagination");
+            container.innerHTML = "";
+            if (total <= perPage) return;
+
+            const totalPages = Math.ceil(total / perPage);
+            if (currentPage > 1) {
+                const prevBtn = document.createElement("button");
+                prevBtn.className = "page-btn";
+                prevBtn.innerText = translations[currentLang].prev;
+                prevBtn.onclick = () => categoryId ? loadItems(categoryId, currentPage - 1) : loadCategories();
+                container.appendChild(prevBtn);
+            }
+            if (currentPage < totalPages) {
+                const nextBtn = document.createElement("button");
+                nextBtn.className = "page-btn";
+                nextBtn.innerText = translations[currentLang].next;
+                nextBtn.onclick = () => categoryId ? loadItems(categoryId, currentPage + 1) : loadCategories();
+                container.appendChild(nextBtn);
+            }
+        }
+
+        async function getTicket(serviceId, serviceName) {
+            try {
+                const response = await fetch(`${serverUrl}/get_ticket`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ service_id: serviceId, lang: currentLang, kiosk_id: kioskId })
+                });
+                if (!response.ok) {
+                    let msg = translations[currentLang].error;
+                    try {
+                        const errData = await response.json();
+                        msg = errData.error || msg;
+                    } catch {}
+                    throw new Error(msg);
+                }
+                const data = await response.json();
+                lastTicket = data;
+                showTicket(data.ticket, serviceName, data.wait_time, data.ticket_id, data.status_url);
+                printTicket(data.ticket, serviceName, data.wait_time, data.ticket_id, data.qr_data);
+            } catch (error) {
+                showTicket(`${translations[currentLang].error}: ${error.message}`);
+            }
+        }
+
+        function showTicket(ticket, serviceName, waitTime, ticketId, statusUrl) {
+            document.getElementById("content").style.display = "none";
+            document.getElementById("pagination").style.display = "none";
+            document.getElementById("backButton").style.display = "none";
+            document.getElementById("ticketContainer").style.display = "block";
+            document.getElementById("ticketTitle").innerText = translations[currentLang].ticket;
+            document.getElementById("ticketNumber").innerText = `${translations[currentLang].ticket}: ${ticket}`;
+            document.getElementById("ticketService").innerText = `${translations[currentLang].service}: ${serviceName}`;
+            document.getElementById("ticketWaitTime").innerText = `${translations[currentLang].wait}: ${waitTime} min`;
+            document.getElementById("ticketDateTime").innerText = `${translations[currentLang].dateTime}: ${new Date().toLocaleString()}`;
+            // Новое: показываем оператора
+            let operatorInfo = "";
+            if (lastTicket && (lastTicket.operator_name || lastTicket.operator_number)) {
+                operatorInfo = "Operator: ";
+                if (lastTicket.operator_name) operatorInfo += lastTicket.operator_name;
+                if (lastTicket.operator_number) operatorInfo += ` (${lastTicket.operator_number})`;
+            }
+            // Если блока нет, добавляем его
+            let operatorElem = document.getElementById("ticketOperator");
+            if (!operatorElem) {
+                operatorElem = document.createElement("p");
+                operatorElem.id = "ticketOperator";
+                document.getElementById("ticketService").after(operatorElem);
+            }
+            operatorElem.innerText = operatorInfo;
+            if (lastTicket && lastTicket.qr_data)
+                document.getElementById("ticketQR").src = `data:image/png;base64,${lastTicket.qr_data}`;
+            else
+                document.getElementById("ticketQR").src = "";
+            document.querySelector(".return-btn").innerText = translations[currentLang].return;
+            document.querySelector(".status-btn").innerText = translations[currentLang].status;
+            showNotification(translations[currentLang].printing);
+        }
+
+        function printTicket(ticket, serviceName, waitTime, ticketId, qrData) {
+            // Получаем данные об операторе
+            let operatorInfo = "";
+            if (lastTicket && (lastTicket.operator_name || lastTicket.operator_number)) {
+                operatorInfo = "Operator: ";
+                if (lastTicket.operator_name) operatorInfo += lastTicket.operator_name;
+                if (lastTicket.operator_number) operatorInfo += ` (${lastTicket.operator_number})`;
+            }
+            const printContent = `
+                <html>
+                <head>
+                    <title>Reg print</title>
+                    <style>
+                        @page { size: 60mm 60mm; margin: 0; }
+                        body { margin: 2mm; font-family: Arial, sans-serif; text-align: center; font-size: 10px; }
+                        img { width: 30mm; height: 30mm; margin: 2mm auto; }
+                        p { margin: 1mm 0; }
+                        .line { border-top: 1px dashed #000; margin: 2mm 0; }
+                    </style>
+                </head>
+                <body>
+                    <p>Talon: ${ticket}</p>
+                    <p>Xizmat: ${serviceName}</p>
+                    <p>${operatorInfo}</p>
+                    <p>Kutish: ${waitTime} min</p>
+                    <div class="line"></div>
+                    <p>${new Date().toLocaleString()}</p>
+                    <img src="data:image/png;base64,${qrData}" alt="QR Code">
+                    <script>
+                        window.onload = function() {
+                            window.print();
+                            setTimeout(function() { window.close(); }, 500);
+                        }
+                    <\/script>
+                </body>
+                </html>
+            `;
+            const printWindow = window.open('', '_blank', 'width=400,height=400');
+            printWindow.document.open();
+            printWindow.document.write(printContent);
+            printWindow.document.close();
+        }
+
+        function viewStatus() {
+            if (lastTicket && lastTicket.status_url) {
+                window.open(lastTicket.status_url, "_blank");
+            } else {
+                showNotification(translations[currentLang].error);
+            }
+        }
+
+        function showNotification(message) {
+            const existing = document.querySelector(".notification");
+            if (existing) existing.remove();
+            const notification = document.createElement("div");
+            notification.className = "notification";
+            notification.innerText = message;
+            document.body.appendChild(notification);
+            setTimeout(() => notification.remove(), 5000);
+        }
+
+        function goBack() {
+            if (categoryStack.length <= 0) {
+                categoryStack = [];
+                loadCategories();
+            } else {
+                categoryStack.pop();
+                if (categoryStack.length > 0)
+                    loadItems(categoryStack[categoryStack.length - 1], 1);
+                else
+                    loadCategories();
+            }
+        }
+
+        function returnToServices() {
+            document.getElementById("ticketContainer").style.display = "none";
+            document.getElementById("content").style.display = "grid";
+            document.getElementById("pagination").style.display = "flex";
+            if (categoryStack.length === 0) {
+                loadCategories();
+            } else {
+                loadItems(categoryStack[categoryStack.length - 1], 1);
+            }
+        }
+
+        function setLanguage(lang) {
+            currentLang = lang;
+            document.querySelectorAll(".lang-btn").forEach(btn => btn.classList.remove("active"));
+            document.querySelector(`button[onclick="setLanguage('${lang}')"]`).classList.add("active");
+            document.getElementById("title").innerText = translations[lang].title;
+            document.getElementById("backButton").innerText = translations[lang].back;
+            document.getElementById("ticketTitle").innerText = translations[lang].ticket;
+            document.querySelector(".return-btn").innerText = translations[lang].return;
+            document.querySelector(".status-btn").innerText = translations[lang].status;
+            if (categoryStack.length > 0) loadItems(categoryStack[categoryStack.length - 1], currentPage);
+            else loadCategories();
+        }
+
+        function toggleTheme() {
+            document.body.classList.toggle("dark");
+            const isDark = document.body.classList.contains("dark");
+            localStorage.setItem("theme", isDark ? "dark" : "light");
+            document.querySelector(".theme-toggle").innerText = isDark ? "☀️" : "🌙";
+        }
+
+        if (localStorage.getItem("theme") === "dark") {
+            document.body.classList.add("dark");
+            document.querySelector(".theme-toggle").innerText = "☀️";
+        }
+
+        loadCategories();
+    </script>
+</body>
+</html>

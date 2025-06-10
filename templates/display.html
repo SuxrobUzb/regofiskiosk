@@ -1,0 +1,242 @@
+<!-- templates/display.html -->
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Navbat</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f4f7fa;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        :root {
+            --bg: #f4f7fa;
+            --text: #2d3748;
+            --card-bg: #ffffff;
+            --primary: #1a73e8;
+            --secondary: #34c759;
+        }
+        body.dark {
+            --bg: #1a202c;
+            --text: #e2e8f0;
+            --card-bg: #2d3748;
+            --primary: #63b3ed;
+            --secondary: #68d391;
+        }
+        body {
+            background: var(--bg);
+            color: var(--text);
+        }
+        .header {
+            display: flex;
+            align-items: center;
+            background: var(--primary);
+            padding: 16px 24px;
+            color: #ffffff;
+        }
+        .header img { width: 80px; margin-right: 20px; border-radius: 8px; transition: transform 0.5s; }
+        .header img:hover { transform: rotate(360deg); }
+        .header h1 { font-size: 24px; font-weight: 600; }
+        .content {
+            flex: 1;
+            display: flex;
+            padding: 20px;
+            gap: 20px;
+        }
+        .video-section {
+            width: 60%;
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s;
+        }
+        .video-section.fullscreen { width: 100%; padding: 0; border-radius: 0; }
+        #video-player { width: 100%; height: 85%; border-radius: 8px; background: #000; }
+        .datetime {
+            text-align: center;
+            font-size: 16px;
+            color: var(--text);
+            padding: 10px;
+            background: #edf2f7;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+        .dark .datetime { background: #4a5568; }
+        .queue-section { width: 40%; transition: all 0.3s; }
+        .queue-section.hidden { width: 0; opacity: 0; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--card-bg);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        th, td { padding: 16px; text-align: center; font-size: 18px; border-bottom: 1px solid #e2e8f0; }
+        .dark th, .dark td { border-bottom: 1px solid #4a5568; }
+        th { background: var(--primary); color: #ffffff; font-weight: 600; }
+        tr:last-child td { border-bottom: none; }
+        tr:hover { background: #f7fafc; }
+        .dark tr:hover { background: #4a5568; }
+        .latest-call {
+            background: #ffedd5;
+            font-weight: bold;
+            animation: blink 1s infinite;
+        }
+        .dark .latest-call { background: #7c3aed; }
+        .controls {
+            position: absolute;
+            top: 16px;
+            right: 24px;
+            display: flex;
+            gap: 10px;
+        }
+        .lang-btn, .theme-toggle {
+            padding: 6px 12px;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 12px;
+            color: #4a5568;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .dark .lang-btn, .dark .theme-toggle { background: #2d3748; border-color: #4a5568; color: #e2e8f0; }
+        .lang-btn:hover, .theme-toggle:hover { background: #eef4fd; }
+        .dark .lang-btn:hover, .dark .theme-toggle:hover { background: #4a5568; }
+        .lang-btn.active { background: var(--primary); color: #ffffff; border-color: var(--primary); }
+        .notification {
+            position: absolute;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--secondary);
+            color: #ffffff;
+            padding: 16px 32px;
+            border-radius: 8px;
+            font-size: 24px;
+            font-weight: 600;
+            animation: blink 1s infinite;
+            z-index: 1000;
+        }
+        @keyframes blink { 50% { opacity: 0.7; } }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.5/socket.io.js"></script>
+</head>
+<body>
+    <div class="controls">
+        <button class="lang-btn active" onclick="setLanguage('uz_lat')">Uz (Lat)</button>
+        <button class="lang-btn" onclick="setLanguage('uz_cyr')">Ўз (Кирилл)</button>
+        <button class="lang-btn" onclick="setLanguage('ru')">Ру</button>
+        <button class="lang-btn" onclick="setLanguage('en')">En</button>
+        <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
+    </div>
+    <div class="header">
+        <img src="/static/logo.png" alt="Logotip">
+        <h1>Samarqand davlat universiteti Kattaqo'rg'on filiali</h1>
+    </div>
+    <div class="content">
+        <div class="video-section" id="videoSection">
+            <video id="video-player" autoplay muted loop>
+                <source src="/static/videos/ad.mp4" type="video/mp4">
+            </video>
+            <div class="datetime" id="datetime"></div>
+        </div>
+        <div class="queue-section" id="queueSection">
+            <table id="queueTable">
+                <tr><th>Operator</th><th>Navbat</th></tr>
+            </table>
+        </div>
+    </div>
+    <audio id="notificationSound" src="/static/sounds/notification.mp3" preload="auto"></audio>
+    <script>
+        const translations = {
+            uz_lat: { operator: "Operator", ticket: "Navbat" },
+            uz_cyr: { operator: "Оператор", ticket: "Навбат" },
+            ru: { operator: "Оператор", ticket: "Талон" },
+            en: { operator: "Operator", ticket: "Ticket" }
+        };
+        let currentLang = "uz_lat";
+        const serverUrl = "http://172.16.1.28:5000";
+        const socket = io(serverUrl);
+
+        function setLanguage(lang) {
+            currentLang = lang;
+            document.querySelectorAll(".lang-btn").forEach(btn => btn.classList.remove("active"));
+            document.querySelector(`button[onclick="setLanguage('${lang}')"]`).classList.add("active");
+            updateQueueTable();
+        }
+
+        function toggleTheme() {
+            document.body.classList.toggle("dark");
+            const isDark = document.body.classList.contains("dark");
+            localStorage.setItem("theme", isDark ? "dark" : "light");
+            document.querySelector(".theme-toggle").innerText = isDark ? "☀️" : "🌙";
+        }
+
+        function updateDateTime() {
+            const now = new Date();
+            document.getElementById("datetime").textContent = now.toLocaleString();
+        }
+        setInterval(updateDateTime, 1000);
+        updateDateTime();
+
+        socket.on("connect", () => console.log("Connected to server"));
+        socket.on("disconnect", () => console.log("Disconnected from server"));
+
+        socket.on("update_queue", function(data) {
+            if (data.ticket && data.operator_id) {
+                const audio = document.getElementById("notificationSound");
+                audio.play().catch(err => console.error("Audio play error:", err));
+                updateQueueTable(data.ticket);
+            }
+        });
+
+        socket.on("remove_ticket", function(data) {
+            updateQueueTable();
+        });
+
+        async function updateQueueTable(latestTicket = null) {
+            try {
+                const response = await fetch(`${serverUrl}/get_queue`);
+                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                const tickets = await response.json();
+                const table = document.getElementById("queueTable");
+                table.innerHTML = `<tr><th>${translations[currentLang].operator}</th><th>${translations[currentLang].ticket}</th></tr>`;
+
+                if (tickets.length === 0) {
+                    document.getElementById("videoSection").classList.add("fullscreen");
+                    document.getElementById("queueSection").classList.add("hidden");
+                } else {
+                    document.getElementById("videoSection").classList.remove("fullscreen");
+                    document.getElementById("queueSection").classList.remove("hidden");
+                    tickets.forEach(ticket => {
+                        const row = document.createElement("tr");
+                        if (ticket.ticket === latestTicket) row.classList.add("latest-call");
+                        row.innerHTML = `<td>${ticket.operator_name || 'N/A'}</td><td>${ticket.ticket}</td>`;
+                        table.appendChild(row);
+                    });
+                }
+            } catch (error) {
+                console.error("Error updating queue:", error);
+            }
+        }
+
+        if (localStorage.getItem("theme") === "dark") {
+            document.body.classList.add("dark");
+            document.querySelector(".theme-toggle").innerText = "☀️";
+        }
+
+        updateQueueTable();
+        setInterval(updateQueueTable, 5000);
+    </script>
+</body>
+</html>

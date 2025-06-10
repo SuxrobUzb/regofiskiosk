@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin login</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f4f7fa;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #2d3748;
+        }
+        :root {
+            --bg: #f4f7fa;
+            --text: #2d3748;
+            --card-bg: #ffffff;
+            --primary: #1a73e8;
+            --secondary: #34c759;
+            --danger: #e53e3e;
+        }
+        body.dark {
+            --bg: #1a202c;
+            --text: #e2e8f0;
+            --card-bg: #2d3748;
+            --primary: #63b3ed;
+            --secondary: #68d391;
+            --danger: #f56565;
+        }
+        body {
+            background: var(--bg);
+            color: var(--text);
+        }
+        .login-container {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 40px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .dark .login-container { border: 1px solid #4a5568; }
+        h1 {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--primary);
+            text-align: center;
+            margin-bottom: 24px;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        input {
+            padding: 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 16px;
+            outline: none;
+            background: #ffffff;
+            color: var(--text);
+        }
+        .dark input { background: #4a5568; border-color: #718096; }
+        input:focus { border-color: var(--primary); }
+        button {
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            color: #ffffff;
+            background: var(--primary);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        button:hover { background: #1666c5; }
+        .error {
+            color: var(--danger);
+            font-size: 14px;
+            text-align: center;
+            margin-bottom: 16px;
+        }
+        .controls {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+        }
+        .lang-btn, .theme-toggle {
+            padding: 6px 12px;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 12px;
+            color: #4a5568;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .dark .lang-btn, .dark .theme-toggle { background: #2d3748; border-color: #4a5568; color: #e2e8f0; }
+        .lang-btn:hover, .theme-toggle:hover { background: #eef4fd; }
+        .dark .lang-btn:hover, .dark .theme-toggle:hover { background: #4a5568; }
+        .lang-btn.active { background: var(--primary); color: #ffffff; border-color: var(--primary); }
+    </style>
+</head>
+<body>
+    <div class="controls">
+        <button class="lang-btn active" onclick="setLanguage('uz_lat')">Uz (Lat)</button>
+        <button class="lang-btn" onclick="setLanguage('uz_cyr')">Ўз (Кирилл)</button>
+        <button class="lang-btn" onclick="setLanguage('ru')">Ру</button>
+        <button class="lang-btn" onclick="setLanguage('en')">En</button>
+        <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
+    </div>
+    <div class="login-container">
+        <h1 id="title">Admin login</h1>
+        {% if error %}
+            <p class="error">{{ error }}</p>
+        {% endif %}
+        <form method="POST" action="{{ url_for('admin_login') }}">
+            <input type="text" name="username" placeholder="Login" required>
+            <input type="password" name="password" placeholder="Parol" required>
+            <button type="submit">Kirish</button>
+        </form>
+    </div>
+    <script>
+        const translations = {
+            uz_lat: { title: "Admin login", login: "Login", password: "Parol", submit: "Kirish" },
+            uz_cyr: { title: "Админ кириш", login: "Логин", password: "Парол", submit: "Кириш" },
+            ru: { title: "Вход для админа", login: "Логин", password: "Пароль", submit: "Войти" },
+            en: { title: "Admin login", login: "Username", password: "Password", submit: "Login" }
+        };
+        let currentLang = "uz_lat";
+
+        function setLanguage(lang) {
+            currentLang = lang;
+            document.querySelectorAll(".lang-btn").forEach(btn => btn.classList.remove("active"));
+            document.querySelector(`button[onclick="setLanguage('${lang}')"]`).classList.add("active");
+            document.getElementById("title").innerText = translations[lang].title;
+            document.querySelector("input[name='username']").placeholder = translations[lang].login;
+            document.querySelector("input[name='password']").placeholder = translations[lang].password;
+            document.querySelector("button[type='submit']").innerText = translations[lang].submit;
+        }
+
+        function toggleTheme() {
+            document.body.classList.toggle("dark");
+            const isDark = document.body.classList.contains("dark");
+            localStorage.setItem("theme", isDark ? "dark" : "light");
+            document.querySelector(".theme-toggle").innerText = isDark ? "☀️" : "🌙";
+        }
+
+        if (localStorage.getItem("theme") === "dark") {
+            document.body.classList.add("dark");
+            document.querySelector(".theme-toggle").innerText = "☀️";
+        }
+
+        setLanguage(currentLang);
+    </script>
+</body>
+</html>
