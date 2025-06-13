@@ -1,0 +1,2496 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title id="documentTitle">Super Admin Panel</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Note: Using Tailwind CSS via CDN is suitable for development/prototyping. For production, consider installing it as a PostCSS plugin or using the Tailwind CLI for better performance and optimized builds. More info: https://tailwindcss.com/docs/installation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.min.js"></script>
+    <style>
+        /* Базовые стили */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            transition: background 0.3s ease, color 0.3s ease;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Цветовые переменные для светлой темы */
+        :root {
+            --bg: #f4f7fa;
+            --text: #2d3748;
+            --card-bg: #ffffff;
+            --primary: #1a73e8; /* Синий */
+            --secondary: #34c759; /* Зеленый */
+            --danger: #e53e3e; /* Красный */
+            --border-color: #e2e8f0;
+            --input-bg: #f9fafb;
+            --input-border: #e2e8f0;
+            --button-hover-primary: #1666c5;
+            --button-hover-danger: #cc2c2c;
+            --table-header-bg: #edf2f7;
+            --table-row-hover: #f0f4f8;
+            --notification-bg: #1a73e8;
+            --notification-danger-bg: #e53e3e;
+            --text-light: #6b7280; /* Более светлый текст для дополнительной информации */
+            --header-bg: #ffffff;
+            --header-shadow: rgba(0,0,0,0.1);
+        }
+
+        /* Цветовые переменные для темной темы */
+        body.dark {
+            --bg: #1a202c;
+            --text: #e2e8f0;
+            --card-bg: #2d3748;
+            --primary: #63b3ed;
+            --secondary: #68d391;
+            --danger: #f56565;
+            --border-color: #4a5568;
+            --input-bg: #4a5568;
+            --input-border: #6a768e;
+            --button-hover-primary: #4299e1;
+            --button-hover-danger: #e04f4f;
+            --table-header-bg: #4a5568;
+            --table-row-hover: #3c4456;
+            --notification-bg: #63b3ed;
+            --notification-danger-bg: #f56565;
+            --text-light: #cbd5e0;
+            --header-bg: #2d3748;
+            --header-shadow: rgba(0,0,0,0.3);
+        }
+
+        /* Header Styles */
+        .header {
+            width: 100%;
+            background: var(--header-bg);
+            box-shadow: 0 2px 8px var(--header-shadow);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-radius: 0 0 12px 12px; /* Скругленные нижние углы */
+            position: sticky; /* Sticky header */
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        h1 {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--primary);
+            margin: 0; 
+            text-align: center;
+            flex-grow: 1; 
+        }
+
+        .section {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 30px;
+            width: 100%;
+            max-width: 1000px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+
+        .section-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .form-group input[type="text"],
+        .form-group input[type="password"],
+        .form-group input[type="email"],
+        .form-group input[type="date"],
+        .form-group input[type="number"],
+        .form-group input[type="url"],
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--input-border);
+            border-radius: 8px;
+            background: var(--input-bg);
+            color: var(--text);
+            font-size: 16px;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        .form-input { /* Utility class for inputs if needed elsewhere */
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--input-border);
+            border-radius: 8px;
+            background: var(--input-bg);
+            color: var(--text);
+            font-size: 16px;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        .form-input:focus {
+             border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.2);
+            outline: none;
+        }
+
+
+        .form-group input[type="text"]:focus,
+        .form-group input[type="password"]:focus,
+        .form-group input[type="email"]:focus,
+        .form-group input[type="date"]:focus,
+        .form-group input[type="number"]:focus,
+        .form-group input[type="url"]:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.2);
+            outline: none;
+        }
+
+        .form-group.checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .form-group.checkbox-group label {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-weight: 400;
+            cursor: pointer;
+        }
+        .form-group.checkbox-group input[type="checkbox"] {
+            width: auto;
+            margin: 0;
+            transform: scale(1.2);
+        }
+
+        .button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .button:hover {
+            background: var(--button-hover-primary);
+            transform: translateY(-2px);
+        }
+
+        .button.danger {
+            background: var(--danger);
+        }
+
+        .button.danger:hover {
+            background: var(--button-hover-danger);
+        }
+        
+        .button.secondary {
+            background: var(--secondary);
+        }
+
+        .button.secondary:hover {
+            background: #2a9448; /* Темнее зеленый при наведении */
+        }
+
+
+        .button:disabled {
+            background: var(--border-color);
+            color: var(--text-light);
+            cursor: not-allowed;
+            opacity: 0.7;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            margin-top: 20px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        .data-table th, .data-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .data-table th {
+            background: var(--table-header-bg);
+            font-weight: 600;
+            color: var(--primary);
+            text-transform: uppercase;
+            font-size: 14px;
+        }
+
+        .data-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .data-table tbody tr:hover {
+            background: var(--table-row-hover);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-buttons .button {
+            padding: 8px 12px;
+            font-size: 14px;
+            border-radius: 6px;
+        }
+
+        /* Tabs styling */
+        .tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+            gap: 10px; /* Уменьшил gap для большего количества вкладок */
+            flex-wrap: wrap;
+            width: 100%;
+            max-width: 1000px; 
+        }
+
+        .tab-button {
+            background: var(--card-bg);
+            color: var(--text);
+            border: 1px solid var(--border-color);
+            padding: 10px 20px; /* Уменьшил padding для большего количества вкладок */
+            border-radius: 8px;
+            font-size: 16px; /* Уменьшил font-size */
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            flex-grow: 1;
+            min-width: 120px; /* Уменьшил min-width */
+            text-align: center;
+        }
+
+        .tab-button.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .tab-button:hover:not(.active) {
+            background: var(--table-row-hover);
+            transform: translateY(-2px);
+        }
+
+        .tab-content {
+            display: none;
+            width: 100%; 
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Language and Theme Switchers */
+        .lang-btn, .theme-toggle, .logout-button {
+            background: var(--card-bg);
+            color: var(--text);
+            border: 1px solid var(--border-color);
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .lang-btn.active, .lang-btn:hover, .theme-toggle:hover, .logout-button:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        .logout-button {
+            background: var(--danger);
+            border-color: var(--danger);
+            color: white;
+        }
+        .logout-button:hover {
+            background: var(--button-hover-danger);
+            border-color: var(--button-hover-danger);
+        }
+
+
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--notification-bg);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            z-index: 1000;
+            opacity: 0;
+            animation: slideIn 0.5s forwards, fadeOut 0.5s forwards 4.5s;
+        }
+        .notification.danger {
+            background-color: var(--notification-danger-bg);
+        }
+
+        @keyframes slideIn {
+            from { bottom: 0; opacity: 0; }
+            to { bottom: 20px; opacity: 1; }
+        }
+
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+
+        /* Analytics Dashboard Specific Styles */
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .analytics-card {
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            text-align: left;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .analytics-card h3 {
+            font-size: 18px;
+            color: var(--primary);
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .analytics-card p {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text);
+        }
+        .analytics-card .sub-text {
+            font-size: 14px;
+            color: var(--text-light);
+            margin-top: 5px;
+        }
+
+        .tickets-list-container {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 10px;
+        }
+
+        /* Service Tree View */
+        .service-tree ul {
+            list-style-type: none;
+            padding-left: 20px;
+        }
+
+        .service-tree li {
+            margin: 5px 0;
+        }
+
+        .service-tree .service-item {
+            display: flex;
+            align-items: center;
+            padding: 8px;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+
+        .service-tree .service-item:hover {
+            background-color: var(--table-row-hover);
+        }
+
+        .service-tree .service-name {
+            flex-grow: 1;
+            font-weight: 500;
+        }
+
+        .service-tree .service-type {
+            font-size: 0.8em;
+            color: var(--text-light);
+            margin-left: 10px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            background-color: var(--border-color);
+        }
+        .service-tree .service-type.category {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .service-tree input[type="checkbox"] {
+            margin-right: 10px;
+            transform: scale(1.2);
+        }
+        
+        .service-tree .checkbox-label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .header-right {
+                margin-top: 10px;
+                width: 100%;
+                justify-content: space-around;
+            }
+            h1 {
+                font-size: 24px;
+                text-align: left;
+                margin-bottom: 10px;
+            }
+            .tabs {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .tab-button {
+                width: 100%;
+                font-size: 16px;
+                padding: 10px 15px;
+            }
+            .section {
+                padding: 15px;
+            }
+            .section-title {
+                font-size: 20px;
+            }
+            .form-group input[type="text"],
+            .form-group input[type="password"],
+            .form-group input[type="email"],
+            .form-group input[type="date"],
+            .form-group input[type="number"],
+            .form-group input[type="url"],
+            .form-group select,
+            .form-group textarea {
+                padding: 10px;
+                font-size: 14px;
+            }
+            .button {
+                padding: 10px 15px;
+                font-size: 14px;
+            }
+            .data-table th, .data-table td {
+                padding: 10px;
+                font-size: 14px;
+            }
+            .analytics-grid {
+                grid-template-columns: 1fr; /* Один столбец на мобильных */
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-left">
+            <h1 id="pageHeaderTitle">Super Admin Panel</h1>
+        </div>
+        <div class="header-right">
+            <button class="lang-btn" onclick="setLanguage('uz_lat')">Uz (Lat)</button>
+            <button class="lang-btn" onclick="setLanguage('uz_cyr')">Ўз (Кир)</button>
+            <button class="lang-btn" onclick="setLanguage('ru')">Ру</button>
+            <button class="lang-btn" onclick="setLanguage('en')">En</button>
+            <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
+            <a href="{{ url_for('logout') }}" class="logout-button" id="logoutBtn">Chiqish</a>
+        </div>
+    </div>
+
+    <div class="tabs">
+        <button class="tab-button" data-tab="branches" id="branchesTab">Филиалы</button>
+        <button class="tab-button active" data-tab="operators" id="operatorsTab">Операторы</button>
+        <button class="tab-button" data-tab="services" id="servicesTab">Услуги</button>
+        <button class="tab-button" data-tab="tariffs" id="tariffsTab">Тарифы</button>
+        <button class="tab-button" data-tab="assignments" id="assignmentsTab">Назначения</button>
+        <button class="tab-button" data-tab="reports" id="reportsTab">Отчеты</button>
+        <button class="tab-button" data-tab="analytics" id="analyticsTab">Аналитика</button>
+    </div>
+
+    <!-- Branches Tab Content -->
+    <div id="branches_tab" class="tab-content section">
+        <h2 class="section-title" id="branchListTitle">Управление Филиалами</h2>
+        <form id="branchForm" class="mb-6 p-6 bg-gray-50 dark:bg-gray-700 rounded-lg shadow">
+            <input type="hidden" id="branchId">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="form-group">
+                    <label for="branchName" id="labelBranchName">Название филиала:</label>
+                    <input type="text" id="branchName" required class="form-input">
+                </div>
+                <div class="form-group">
+                    <label for="branchAddress" id="labelBranchAddress">Адрес:</label>
+                    <input type="text" id="branchAddress" class="form-input">
+                </div>
+                <div class="form-group">
+                    <label for="branchAdminUser" id="labelBranchAdminUser">ID Администратора филиала:</label>
+                    <input type="text" id="branchAdminUser" class="form-input" placeholder="ID пользователя-администратора">
+                </div>
+                <div class="form-group">
+                    <label for="branchContact" id="labelBranchContact">Контактная информация:</label>
+                    <input type="text" id="branchContact" class="form-input">
+                </div>
+            </div>
+            <div class="flex justify-end gap-3 mt-4">
+                <button type="submit" class="button" id="saveBranchBtn">Сохранить филиал</button>
+                <button type="button" class="button danger" id="cancelEditBranchBtn" style="display: none;">Отмена</button>
+            </div>
+        </form>
+
+        <div class="table-container">
+            <table class="data-table" id="branchesTable">
+                <thead>
+                    <tr>
+                        <th id="colBranchName">Название</th>
+                        <th id="colBranchAddress">Адрес</th>
+                        <th id="colBranchAdmin">Админ ID</th>
+                        <th id="colBranchContact">Контакт</th>
+                        <th id="colBranchActions">Действия</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Branch rows will be populated here by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Operators Tab -->
+    <div id="operators_tab" class="tab-content active section">
+        <h2 class="section-title" id="operatorListTitle">Управление операторами</h2>
+        <form id="operatorForm" class="mb-6 p-6 bg-gray-50 dark:bg-gray-700 rounded-lg shadow">
+            <input type="hidden" id="operatorId">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="form-group">
+                    <label for="operatorName" id="labelOperatorName">Имя оператора:</label>
+                    <input type="text" id="operatorName" required class="form-input">
+                </div>
+                <div class="form-group">
+                    <label for="operatorUsername" id="labelOperatorUsername">Логин (ID):</label>
+                    <input type="text" id="operatorUsername" required class="form-input">
+                </div>
+                <div class="form-group">
+                    <label for="operatorPassword" id="labelOperatorPassword">Пароль:</label>
+                    <input type="password" id="operatorPassword" class="form-input">
+                    <small class="text-xs text-gray-500 dark:text-gray-400" id="passwordHint">Оставьте пустым, чтобы не менять</small>
+                </div>
+                <div class="form-group">
+                    <label for="operatorNumber" id="labelOperatorNumber">Номер оператора (окно):</label>
+                    <input type="text" id="operatorNumber" class="form-input">
+                </div>
+                 <div class="form-group">
+                    <label for="operatorTelegramId" id="labelOperatorTelegramId">Telegram ID (для уведомлений):</label>
+                    <input type="text" id="operatorTelegramId" class="form-input">
+                </div>
+                <div class="form-group">
+                    <label for="operatorBranchId" id="labelOperatorBranchId">Филиал:</label>
+                    <select id="operatorBranchId" class="form-input">
+                        <option value="" id="optionNoBranch">-- Не назначен --</option>
+                        <!-- Branches will be populated here -->
+                    </select>
+                </div>
+            </div>
+            <div class="flex justify-end gap-3 mt-4">
+                <button type="submit" class="button" id="saveOperatorBtn">Сохранить оператора</button>
+                <button type="button" class="button danger" id="cancelEditOperatorBtn" style="display: none;">Отмена</button>
+            </div>
+        </form>
+
+        <div class="table-container">
+            <table class="data-table" id="operatorsTable">
+                <thead>
+                    <tr>
+                        <th id="colOperatorName">Имя</th>
+                        <th id="colOperatorUsername">Логин</th>
+                        <th id="colOperatorNumber">Номер (окно)</th>
+                        <th id="colOperatorTelegramId">Telegram ID</th>
+                        <th id="colOperatorBranch">Филиал</th>
+                        <th id="colOperatorActions">Действия</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Operator rows will be populated here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Services Tab -->
+    <div id="services_tab" class="tab-content section">
+        <h2 class="section-title" id="serviceListTitle">Управление услугами и категориями</h2>
+        <form id="serviceForm" class="mb-6 p-6 bg-gray-50 dark:bg-gray-700 rounded-lg shadow">
+            <input type="hidden" id="serviceId">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="form-group">
+                    <label for="serviceNameUzLat" id="labelServiceNameUzLat">Название (Uz Lat):</label>
+                    <input type="text" id="serviceNameUzLat" required class="form-input">
+                </div>
+                <div class="form-group">
+                    <label for="serviceNameUzCyr" id="labelServiceNameUzCyr">Название (Uz Cyr):</label>
+                    <input type="text" id="serviceNameUzCyr" required class="form-input">
+                </div>
+                <div class="form-group">
+                    <label for="serviceNameRu" id="labelServiceNameRu">Название (Ru):</label>
+                    <input type="text" id="serviceNameRu" required class="form-input">
+                </div>
+                <div class="form-group">
+                    <label for="serviceNameEn" id="labelServiceNameEn">Название (En):</label>
+                    <input type="text" id="serviceNameEn" required class="form-input">
+                </div>
+                <div class="form-group">
+                    <label for="serviceType" id="labelServiceType">Тип:</label>
+                    <select id="serviceType" class="form-input">
+                        <option value="category" id="optionCategory">Категория</option>
+                        <option value="service" id="optionService">Услуга</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="serviceParent" id="labelServiceParent">Родительская категория:</label>
+                    <select id="serviceParent" class="form-input">
+                        <option value="" id="optionNoParent">-- Нет --</option>
+                        <!-- Parent categories will be populated here -->
+                    </select>
+                </div>
+                 <div class="form-group">
+                    <label for="serviceCode" id="labelServiceCode">Код услуги (префикс талона):</label>
+                    <input type="text" id="serviceCode" class="form-input" placeholder="A, B, S1 и т.д.">
+                </div>
+                <div class="form-group">
+                    <label for="estimatedTime" id="labelEstimatedTime">Примерное время (мин):</label>
+                    <input type="number" id="estimatedTime" class="form-input" min="1">
+                </div>
+            </div>
+            <div class="flex justify-end gap-3 mt-4">
+                <button type="submit" class="button" id="saveServiceBtn">Сохранить</button>
+                <button type="button" class="button danger" id="cancelEditServiceBtn" style="display: none;">Отмена</button>
+            </div>
+        </form>
+
+        <div class="table-container">
+            <table class="data-table" id="servicesTable">
+                <thead>
+                    <tr>
+                        <th id="colServiceName">Название (Uz Lat)</th>
+                        <th id="colServiceType">Тип</th>
+                        <th id="colServiceParent">Родитель</th>
+                        <th id="colServiceCode">Код</th>
+                        <th id="colEstimatedTime">Время (мин)</th>
+                        <th id="colServiceActions">Действия</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Service rows will be populated here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Tariffs Tab -->
+    <div id="tariffs_tab" class="tab-content section">
+        <h2 class="section-title" id="tariffListTitle">Управление Тарифами</h2>
+        <form id="tariffForm" class="mb-6 p-6 bg-gray-50 dark:bg-gray-700 rounded-lg shadow">
+            <input type="hidden" id="tariffId">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="form-group">
+                    <label for="tariffName" id="labelTariffName">Название тарифа:</label>
+                    <input type="text" id="tariffName" required class="form-input">
+                </div>
+                <div class="form-group">
+                    <label for="tariffPrice" id="labelTariffPrice">Цена (UZS):</label>
+                    <input type="number" id="tariffPrice" required class="form-input" min="0" step="any">
+                </div>
+                <div class="form-group">
+                    <label for="tariffDescription" id="labelTariffDescription">Описание:</label>
+                    <textarea id="tariffDescription" class="form-input" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="tariffDurationDays" id="labelTariffDurationDays">Длительность (дни):</label>
+                    <input type="number" id="tariffDurationDays" class="form-input" min="1">
+                </div>
+            </div>
+            <div class="flex justify-end gap-3 mt-4">
+                <button type="submit" class="button" id="saveTariffBtn">Сохранить тариф</button>
+                <button type="button" class="button danger" id="cancelEditTariffBtn" style="display: none;">Отмена</button>
+            </div>
+        </form>
+
+        <div class="table-container">
+            <table class="data-table" id="tariffsTable">
+                <thead>
+                    <tr>
+                        <th id="colTariffName">Название</th>
+                        <th id="colTariffPrice">Цена (UZS)</th>
+                        <th id="colTariffDuration">Длительность (дни)</th>
+                        <th id="colTariffDescription">Описание</th>
+                        <th id="colTariffActions">Действия</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Tariff rows will be populated here by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+
+    <!-- Assignments Tab -->
+    <div id="assignments_tab" class="tab-content section">
+        <h2 class="section-title" id="assignmentTitle">Назначение услуг операторам</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="form-group">
+                <label for="assignBranchSelect" id="labelAssignBranch">Выберите филиал (для фильтрации операторов):</label>
+                <select id="assignBranchSelect" class="form-input mb-4">
+                    <option value="all" id="optionAllBranches">Все филиалы</option>
+                    <!-- Branches will be populated here -->
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="assignOperatorSelect" id="labelAssignOperator">Выберите оператора:</label>
+                <select id="assignOperatorSelect" class="form-input mb-4">
+                    <option value="" id="optionSelectOperator">-- Сначала выберите филиал --</option>
+                    <!-- Operators will be populated here based on branch selection -->
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+            <label id="labelAssignServices">Выберите услуги/категории для назначения:</label>
+            <div id="serviceTreeForAssignment" class="service-tree p-4 border border-gray-300 dark:border-gray-600 rounded-md max-h-96 overflow-y-auto">
+                <!-- Service tree will be rendered here -->
+            </div>
+        </div>
+        <button class="button mt-4" id="saveAssignmentsBtn">Сохранить назначения</button>
+    </div>
+
+    <!-- Reports Tab -->
+    <div id="reports_tab" class="tab-content section">
+        <h2 class="section-title" id="reportGenerationTitle">Генерация отчетов</h2>
+        <form id="reportForm" class="p-6 bg-gray-50 dark:bg-gray-700 rounded-lg shadow">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div class="form-group">
+                    <label for="reportType" id="labelReportType">Тип отчета:</label>
+                    <select id="reportType" class="form-input">
+                        <option value="operator_performance" id="optionOperatorPerformance">Производительность операторов</option>
+                        <option value="service_demand" id="optionServiceDemand">Спрос на услуги</option>
+                        <option value="waiting_time" id="optionWaitingTime">Время ожидания</option>
+                        <option value="feedback_summary" id="optionFeedbackSummary">Сводка по отзывам</option>
+                        <option value="dispute_summary" id="optionDisputeSummary">Сводка по жалобам</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="reportStartDate" id="labelReportStartDate">Дата начала:</label>
+                    <input type="date" id="reportStartDate" required class="form-input">
+                </div>
+                <div class="form-group">
+                    <label for="reportEndDate" id="labelReportEndDate">Дата окончания:</label>
+                    <input type="date" id="reportEndDate" required class="form-input">
+                </div>
+                 <div class="form-group">
+                    <label for="reportBranch" id="labelReportBranch">Филиал (для некоторых отчетов):</label>
+                    <select id="reportBranch" class="form-input">
+                        <option value="all" id="optionReportAllBranches">Все филиалы</option>
+                        <!-- Branches will be populated here -->
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="reportOperator" id="labelReportOperator">Оператор (для некоторых отчетов):</label>
+                    <select id="reportOperator" class="form-input">
+                        <option value="all" id="optionAllOperators">Все операторы</option>
+                        <!-- Operators will be populated here (filtered by branch if selected) -->
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="reportService" id="labelReportService">Услуга (для некоторых отчетов):</label>
+                    <select id="reportService" class="form-input">
+                        <option value="all" id="optionAllServices">Все услуги</option>
+                        <!-- Services will be populated here -->
+                    </select>
+                </div>
+            </div>
+            <div class="flex justify-start mt-4">
+                <button type="submit" class="button" id="generateReportBtn">Сгенерировать отчет</button>
+            </div>
+        </form>
+        <div id="reportResult" class="mt-6">
+            <!-- Report data will be displayed here -->
+        </div>
+    </div>
+
+    <!-- Analytics Tab -->
+    <div id="analytics_tab" class="tab-content section">
+        <h2 class="section-title" id="analyticsDashboardTitle">Панель аналитики в реальном времени</h2>
+        <p class="sub-text mb-4" id="lastUpdatedTime">Последнее обновление: Загрузка...</p>
+        <div class="analytics-grid">
+            <div class="analytics-card">
+                <h3 id="totalTicketsTodayTitle">Всего талонов сегодня</h3>
+                <p id="totalTicketsToday">0</p>
+            </div>
+            <div class="analytics-card">
+                <h3 id="currentWaitingTitle">Сейчас в очереди</h3>
+                <p id="currentWaiting">0</p>
+            </div>
+            <div class="analytics-card">
+                <h3 id="avgWaitTimeTodayTitle">Среднее время ожидания (сегодня)</h3>
+                <p id="avgWaitTimeToday">0 мин</p>
+            </div>
+            <div class="analytics-card">
+                <h3 id="operatorsOnlineTitle">Операторов онлайн</h3>
+                <p id="operatorsOnline">0</p>
+            </div>
+        </div>
+
+        <h3 class="section-title mt-8" id="currentQueueListTitle">Текущая очередь</h3>
+        <div class="tickets-list-container" id="realTimeQueueList">
+             <!-- Real-time queue will be populated here -->
+        </div>
+    </div>
+
+    <div class="notification" style="display: none;"></div>
+
+    <script>
+        const serverUrl = "{{ server_url }}";
+        const socket = io(serverUrl);
+        let allBranches = [];
+        let allOperators = [];
+        let allServices = []; 
+        let allTariffs = [];
+        let currentTab = 'operators'; 
+        let currentLang = localStorage.getItem("preferredLangAdmin") || 'uz_lat'; 
+
+        const translations = {
+            uz_lat: {
+                superAdminTitle: "Super Admin Paneli",
+                pageHeaderTitle: "Super Admin Paneli",
+                logout: "Chiqish",
+                operatorsTab: "Operatorlar",
+                servicesTab: "Xizmatlar",
+                tariffsTab: "Tariflar",
+                assignmentsTab: "Tayinlashlar",
+                reportsTab: "Hisobotlar",
+                analyticsTab: "Analitika",
+                branchesTab: "Filiallar",
+                branchListTitle: "Filiallarni Boshqarish",
+                labelBranchName: "Filial nomi:",
+                labelBranchAddress: "Manzil:",
+                labelBranchAdminUser: "Filial Administratori IDsi:",
+                labelBranchContact: "Aloqa ma'lumoti:",
+                saveBranchBtn: "Filialni saqlash",
+                colBranchName: "Nomi",
+                colBranchAddress: "Manzil",
+                colBranchAdmin: "Admin ID",
+                colBranchContact: "Aloqa",
+                colBranchActions: "Harakatlar",
+                confirmDeleteBranch: "Haqiqatan ham bu filialni oʻchirmoqchimisiz?",
+                branchSaved: "Filial muvaffaqiyatli saqlandi!",
+                branchDeleted: "Filial muvaffaqiyatli oʻchirildi!",
+                errorSavingBranch: "Filialni saqlashda xato:",
+                errorDeletingBranch: "Filialni oʻchirishda xato:",
+                operatorListTitle: "Operatorlarni boshqarish",
+                labelOperatorName: "Operator ismi:",
+                labelOperatorUsername: "Login (ID):",
+                labelOperatorPassword: "Parol:",
+                passwordHint: "O'zgartirmaslik uchun bo'sh qoldiring",
+                labelOperatorNumber: "Operator raqami (oyna):",
+                labelOperatorTelegramId: "Telegram ID (xabarlar uchun):",
+                labelOperatorBranchId: "Filial:",
+                optionNoBranch: "-- Tayinlanmagan --",
+                saveOperatorBtn: "Operatorni saqlash",
+                cancelBtn: "Bekor qilish",
+                colOperatorName: "Ismi",
+                colOperatorUsername: "Login",
+                colOperatorNumber: "Raqami (oyna)",
+                colOperatorTelegramId: "Telegram ID",
+                colOperatorBranch: "Filial",
+                colOperatorActions: "Harakatlar",
+                editBtn: "Tahrirlash",
+                deleteBtn: "O'chirish",
+                confirmDeleteOperator: "Haqiqatan ham bu operatorni o'chirmoqchimisiz?",
+                operatorSaved: "Operator muvaffaqiyatli saqlandi!",
+                operatorDeleted: "Operator muvaffaqiyatli o'chirildi!",
+                errorSavingOperator: "Operatorni saqlashda xato:",
+                errorDeletingOperator: "Operatorni o'chirishda xato:",
+                serviceListTitle: "Xizmatlar va kategoriyalarni boshqarish",
+                labelServiceNameUzLat: "Nomi (Uz Lat):",
+                labelServiceNameUzCyr: "Nomi (Uz Kir):",
+                labelServiceNameRu: "Nomi (Ru):",
+                labelServiceNameEn: "Nomi (En):",
+                labelServiceType: "Turi:",
+                optionCategory: "Kategoriya",
+                optionService: "Xizmat",
+                labelServiceParent: "Ota kategoriya:",
+                optionNoParent: "-- Yo'q --",
+                labelServiceCode: "Xizmat kodi (talon prefiksi):",
+                labelEstimatedTime: "Taxminiy vaqt (daqiqa):",
+                saveServiceBtn: "Saqlash",
+                colServiceName: "Nomi (Uz Lat)",
+                colServiceType: "Turi",
+                colServiceParent: "Ota",
+                colServiceCode: "Kodi",
+                colEstimatedTime: "Vaqt (daq)",
+                colServiceActions: "Harakatlar",
+                confirmDeleteService: "Haqiqatan ham bu xizmat/kategoriyani o'chirmoqchimisiz?",
+                serviceSaved: "Xizmat/Kategoriya muvaffaqiyatli saqlandi!",
+                serviceDeleted: "Xizmat/Kategoriya muvaffaqiyatli o'chirildi!",
+                errorSavingService: "Xizmat/Kategoriyani saqlashda xato:",
+                errorDeletingService: "Xizmat/Kategoriyani o'chirishda xato:",
+                tariffListTitle: "Tariflarni Boshqarish",
+                labelTariffName: "Tarif nomi:",
+                labelTariffPrice: "Narxi (UZS):",
+                labelTariffDescription: "Tavsifi:",
+                labelTariffDurationDays: "Muddati (kun):",
+                saveTariffBtn: "Tarifni saqlash",
+                colTariffName: "Nomi",
+                colTariffPrice: "Narxi (UZS)",
+                colTariffDuration: "Muddati (kun)",
+                colTariffDescription: "Tavsifi",
+                colTariffActions: "Harakatlar",
+                confirmDeleteTariff: "Haqiqatan ham bu tarifni oʻchirmoqchimisiz?",
+                tariffSaved: "Tarif muvaffaqiyatli saqlandi!",
+                tariffDeleted: "Tarif muvaffaqiyatli oʻchirildi!",
+                errorSavingTariff: "Tarifni saqlashda xato:",
+                errorDeletingTariff: "Tarifni oʻchirishda xato:",
+                assignmentTitle: "Xizmatlarni operatorlarga tayinlash",
+                labelAssignBranch: "Filialni tanlang (operatorlarni filtrlash uchun):",
+                optionAllBranches: "Barcha filiallar",
+                optionSelectOperator: "-- Avval filialni tanlang --",
+                labelAssignOperator: "Operatorni tanlang:",
+                labelAssignServices: "Tayinlash uchun xizmatlar/kategoriyalarni tanlang:",
+                saveAssignmentsBtn: "Tayinlashlarni saqlash",
+                assignmentsSaved: "Tayinlashlar muvaffaqiyatli saqlandi!",
+                errorSavingAssignments: "Tayinlashlarni saqlashda xato:",
+                reportGenerationTitle: "Hisobotlarni yaratish",
+                labelReportType: "Hisobot turi:",
+                optionOperatorPerformance: "Operatorlar samaradorligi",
+                optionServiceDemand: "Xizmatlarga talab",
+                optionWaitingTime: "Kutish vaqti",
+                optionFeedbackSummary: "Fikr-mulohazalar xulosasi",
+                optionDisputeSummary: "Shikoyatlar xulosasi",
+                labelReportStartDate: "Boshlanish sanasi:",
+                labelReportEndDate: "Tugash sanasi:",
+                labelReportBranch: "Filial (ba'zi hisobotlar uchun):",
+                optionReportAllBranches: "Barcha filiallar",
+                labelReportOperator: "Operator (ba'zi hisobotlar uchun):",
+                optionAllOperators: "Barcha operatorlar",
+                labelReportService: "Xizmat (ba'zi hisobotlar uchun):",
+                optionAllServices: "Barcha xizmatlar",
+                generateReportBtn: "Hisobotni yaratish",
+                errorGeneratingReport: "Hisobotni yaratishda xato:",
+                analyticsDashboardTitle: "Real vaqtda analitika paneli",
+                lastUpdatedTime: "Oxirgi yangilanish: Yuklanmoqda...",
+                totalTicketsTodayTitle: "Bugungi jami talonlar",
+                currentWaitingTitle: "Hozir navbatda",
+                avgWaitTimeTodayTitle: "O'rtacha kutish vaqti (bugun)",
+                operatorsOnlineTitle: "Onlayn operatorlar",
+                currentQueueListTitle: "Joriy navbat",
+                ticketNumber: "Talon №",
+                serviceName: "Xizmat nomi",
+                status: "Holat",
+                errorLoadingData: "Ma'lumotlarni yuklashda xato.",
+                noParentCategory: "Ota kategoriya yo'q",
+                category: "Kategoriya",
+                service: "Xizmat",
+                minutesSuffix: "daq",
+            },
+            uz_cyr: {
+                superAdminTitle: "Супер Админ Панели",
+                pageHeaderTitle: "Супер Админ Панели",
+                logout: "Чиқиш",
+                operatorsTab: "Операторлар",
+                servicesTab: "Хизматлар",
+                tariffsTab: "Тарифлар",
+                assignmentsTab: "Тайинлашлар",
+                reportsTab: "Ҳисоботлар",
+                analyticsTab: "Аналитика",
+                branchesTab: "Филиаллар",
+                branchListTitle: "Филиалларни Бошқариш",
+                labelBranchName: "Филиал номи:",
+                labelBranchAddress: "Манзил:",
+                labelBranchAdminUser: "Филиал Администратори IDси:",
+                labelBranchContact: "Алоқа маълумоти:",
+                saveBranchBtn: "Филиални сақлаш",
+                colBranchName: "Номи",
+                colBranchAddress: "Манзил",
+                colBranchAdmin: "Админ ID",
+                colBranchContact: "Алоқа",
+                colBranchActions: "Ҳаракатлар",
+                confirmDeleteBranch: "Ҳақиқатан ҳам бу филиални ўчирмоқчимисиз?",
+                branchSaved: "Филиал муваффақиятли сақланди!",
+                branchDeleted: "Филиал муваффақиятли ўчирилди!",
+                errorSavingBranch: "Филиални сақлашда хато:",
+                errorDeletingBranch: "Филиални ўчиришда хато:",
+                operatorListTitle: "Операторларни бошқариш",
+                labelOperatorName: "Оператор исми:",
+                labelOperatorUsername: "Логин (ID):",
+                labelOperatorPassword: "Парол:",
+                passwordHint: "Ўзгартирмаслик учун бўш қолдиринг",
+                labelOperatorNumber: "Оператор рақами (ойна):",
+                labelOperatorTelegramId: "Телеграм ID (хабарлар учун):",
+                labelOperatorBranchId: "Филиал:",
+                optionNoBranch: "-- Тайинланмаган --",
+                saveOperatorBtn: "Операторни сақлаш",
+                cancelBtn: "Бекор қилиш",
+                colOperatorName: "Исми",
+                colOperatorUsername: "Логин",
+                colOperatorNumber: "Рақами (ойна)",
+                colOperatorTelegramId: "Телеграм ID",
+                colOperatorBranch: "Филиал",
+                colOperatorActions: "Ҳаракатлар",
+                editBtn: "Таҳрирлаш",
+                deleteBtn: "Ўчириш",
+                confirmDeleteOperator: "Ҳақиқатан ҳам бу операторни ўчирмоқчимисиз?",
+                operatorSaved: "Оператор муваффақиятли сақланди!",
+                operatorDeleted: "Оператор муваффақиятли ўчирилди!",
+                errorSavingOperator: "Операторни сақлашда хато:",
+                errorDeletingOperator: "Операторни ўчиришда хато:",
+                serviceListTitle: "Хизматлар ва категорияларни бошқариш",
+                labelServiceNameUzLat: "Номи (Uz Lat):",
+                labelServiceNameUzCyr: "Номи (Uz Kir):",
+                labelServiceNameRu: "Номи (Ru):",
+                labelServiceNameEn: "Номи (En):",
+                labelServiceType: "Тури:",
+                optionCategory: "Категория",
+                optionService: "Хизмат",
+                labelServiceParent: "Ота категория:",
+                optionNoParent: "-- Йўқ --",
+                labelServiceCode: "Хизмат коди (талон префикси):",
+                labelEstimatedTime: "Тахминий вақт (дақиқа):",
+                saveServiceBtn: "Сақлаш",
+                colServiceName: "Номи (Uz Lat)",
+                colServiceType: "Тури",
+                colServiceParent: "Ота",
+                colServiceCode: "Коди",
+                colEstimatedTime: "Вақт (дақ)",
+                colServiceActions: "Ҳаракатлар",
+                confirmDeleteService: "Ҳақиқатан ҳам бу хизмат/категорияни ўчирмоқчимисиз?",
+                serviceSaved: "Хизмат/Категория муваффақиятли сақланди!",
+                serviceDeleted: "Хизмат/Категория муваффақиятли ўчирилди!",
+                errorSavingService: "Хизмат/Категорияни сақлашда хато:",
+                errorDeletingService: "Хизмат/Категорияни ўчиришда хато:",
+                tariffListTitle: "Тарифларни Бошқариш",
+                labelTariffName: "Тариф номи:",
+                labelTariffPrice: "Нархи (UZS):",
+                labelTariffDescription: "Тавсифи:",
+                labelTariffDurationDays: "Муддати (кун):",
+                saveTariffBtn: "Тарифни сақлаш",
+                colTariffName: "Номи",
+                colTariffPrice: "Нархи (UZS)",
+                colTariffDuration: "Муддати (кун)",
+                colTariffDescription: "Тавсифи",
+                colTariffActions: "Ҳаракатлар",
+                confirmDeleteTariff: "Ҳақиқатан ҳам бу тарифни ўчирмоқчимисиз?",
+                tariffSaved: "Тариф муваффақиятли сақланди!",
+                tariffDeleted: "Тариф муваффақиятли ўчирилди!",
+                errorSavingTariff: "Тарифни сақлашда хато:",
+                errorDeletingTariff: "Тарифни ўчиришда хато:",
+                assignmentTitle: "Хизматларни операторларга тайинлаш",
+                labelAssignBranch: "Филиални танланг (операторларни филтрлаш учун):",
+                optionAllBranches: "Барча филиаллар",
+                optionSelectOperator: "-- Аввал филиални танланг --",
+                labelAssignOperator: "Операторни танланг:",
+                labelAssignServices: "Тайинлаш учун хизматлар/категорияларни танланг:",
+                saveAssignmentsBtn: "Тайинлашларни сақлаш",
+                assignmentsSaved: "Тайинлашлар муваффақиятли сақланди!",
+                errorSavingAssignments: "Тайинлашларни сақлашда хато:",
+                reportGenerationTitle: "Ҳисоботларни яратиш",
+                labelReportType: "Ҳисобот тури:",
+                optionOperatorPerformance: "Операторлар самарадорлиги",
+                optionServiceDemand: "Хизматларга талаб",
+                optionWaitingTime: "Кутиш вақти",
+                optionFeedbackSummary: "Фикр-мулоҳазалар хулосаси",
+                optionDisputeSummary: "Шикоятлар хулосаси",
+                labelReportStartDate: "Бошланиш санаси:",
+                labelReportEndDate: "Тугаш санаси:",
+                labelReportBranch: "Филиал (баъзи ҳисоботлар учун):",
+                optionReportAllBranches: "Барча филиаллар",
+                labelReportOperator: "Оператор (баъзи ҳисоботлар учун):",
+                optionAllOperators: "Барча операторлар",
+                labelReportService: "Хизмат (баъзи ҳисоботлар учун):",
+                optionAllServices: "Барча хизматлар",
+                generateReportBtn: "Ҳисоботни яратиш",
+                errorGeneratingReport: "Ҳисоботни яратишда хато:",
+                analyticsDashboardTitle: "Реал вақтда аналитика панели",
+                lastUpdatedTime: "Охирги янгиланиш: Юкланмоқда...",
+                totalTicketsTodayTitle: "Бугунги жами талонлар",
+                currentWaitingTitle: "Ҳозир навбатда",
+                avgWaitTimeTodayTitle: "Ўртача кутиш вақти (бугун)",
+                operatorsOnlineTitle: "Онлайн операторлар",
+                currentQueueListTitle: "Жорий навбат",
+                ticketNumber: "Талон №",
+                serviceName: "Хизмат номи",
+                status: "Ҳолат",
+                errorLoadingData: "Маълумотларни юклашда хато.",
+                noParentCategory: "Ота категория йўқ",
+                category: "Категория",
+                service: "Хизмат",
+                minutesSuffix: "дақ",
+            },
+            ru: {
+                superAdminTitle: "Панель Супер Администратора",
+                pageHeaderTitle: "Панель Супер Администратора",
+                logout: "Выход",
+                operatorsTab: "Операторы",
+                servicesTab: "Услуги",
+                tariffsTab: "Тарифы",
+                assignmentsTab: "Назначения",
+                reportsTab: "Отчеты",
+                analyticsTab: "Аналитика",
+                branchesTab: "Филиалы",
+                branchListTitle: "Управление Филиалами",
+                labelBranchName: "Название филиала:",
+                labelBranchAddress: "Адрес:",
+                labelBranchAdminUser: "ID Администратора филиала:",
+                labelBranchContact: "Контактная информация:",
+                saveBranchBtn: "Сохранить филиал",
+                colBranchName: "Название",
+                colBranchAddress: "Адрес",
+                colBranchAdmin: "Админ ID",
+                colBranchContact: "Контакт",
+                colBranchActions: "Действия",
+                confirmDeleteBranch: "Вы действительно хотите удалить этот филиал?",
+                branchSaved: "Филиал успешно сохранен!",
+                branchDeleted: "Филиал успешно удален!",
+                errorSavingBranch: "Ошибка сохранения филиала:",
+                errorDeletingBranch: "Ошибка удаления филиала:",
+                operatorListTitle: "Управление операторами",
+                labelOperatorName: "Имя оператора:",
+                labelOperatorUsername: "Логин (ID):",
+                labelOperatorPassword: "Пароль:",
+                passwordHint: "Оставьте пустым, чтобы не менять",
+                labelOperatorNumber: "Номер оператора (окно):",
+                labelOperatorTelegramId: "Telegram ID (для уведомлений):",
+                labelOperatorBranchId: "Филиал:",
+                optionNoBranch: "-- Не назначен --",
+                saveOperatorBtn: "Сохранить оператора",
+                cancelBtn: "Отмена",
+                colOperatorName: "Имя",
+                colOperatorUsername: "Логин",
+                colOperatorNumber: "Номер (окно)",
+                colOperatorTelegramId: "Telegram ID",
+                colOperatorBranch: "Филиал",
+                colOperatorActions: "Действия",
+                editBtn: "Редактировать",
+                deleteBtn: "Удалить",
+                confirmDeleteOperator: "Вы действительно хотите удалить этого оператора?",
+                operatorSaved: "Оператор успешно сохранен!",
+                operatorDeleted: "Оператор успешно удален!",
+                errorSavingOperator: "Ошибка сохранения оператора:",
+                errorDeletingOperator: "Ошибка удаления оператора:",
+                serviceListTitle: "Управление услугами и категориями",
+                labelServiceNameUzLat: "Название (Uz Lat):",
+                labelServiceNameUzCyr: "Название (Uz Cyr):",
+                labelServiceNameRu: "Название (Ru):",
+                labelServiceNameEn: "Название (En):",
+                labelServiceType: "Тип:",
+                optionCategory: "Категория",
+                optionService: "Услуга",
+                labelServiceParent: "Родительская категория:",
+                optionNoParent: "-- Нет --",
+                labelServiceCode: "Код услуги (префикс талона):",
+                labelEstimatedTime: "Примерное время (мин):",
+                saveServiceBtn: "Сохранить",
+                colServiceName: "Название (Uz Lat)",
+                colServiceType: "Тип",
+                colServiceParent: "Родитель",
+                colServiceCode: "Код",
+                colEstimatedTime: "Время (мин)",
+                colServiceActions: "Действия",
+                confirmDeleteService: "Вы действительно хотите удалить эту услугу/категорию?",
+                serviceSaved: "Услуга/Категория успешно сохранена!",
+                serviceDeleted: "Услуга/Категория успешно удалена!",
+                errorSavingService: "Ошибка сохранения услуги/категории:",
+                errorDeletingService: "Ошибка удаления услуги/категории:",
+                tariffListTitle: "Управление Тарифами",
+                labelTariffName: "Название тарифа:",
+                labelTariffPrice: "Цена (UZS):",
+                labelTariffDescription: "Описание:",
+                labelTariffDurationDays: "Длительность (дни):",
+                saveTariffBtn: "Сохранить тариф",
+                colTariffName: "Название",
+                colTariffPrice: "Цена (UZS)",
+                colTariffDuration: "Длительность (дни)",
+                colTariffDescription: "Описание",
+                colTariffActions: "Действия",
+                confirmDeleteTariff: "Вы действительно хотите удалить этот тариф?",
+                tariffSaved: "Тариф успешно сохранен!",
+                tariffDeleted: "Тариф успешно удален!",
+                errorSavingTariff: "Ошибка сохранения тарифа:",
+                errorDeletingTariff: "Ошибка удаления тарифа:",
+                assignmentTitle: "Назначение услуг операторам",
+                labelAssignBranch: "Выберите филиал (для фильтрации операторов):",
+                optionAllBranches: "Все филиалы",
+                optionSelectOperator: "-- Сначала выберите филиал --",
+                labelAssignOperator: "Выберите оператора:",
+                labelAssignServices: "Выберите услуги/категории для назначения:",
+                saveAssignmentsBtn: "Сохранить назначения",
+                assignmentsSaved: "Назначения успешно сохранены!",
+                errorSavingAssignments: "Ошибка сохранения назначений:",
+                reportGenerationTitle: "Генерация отчетов",
+                labelReportType: "Тип отчета:",
+                optionOperatorPerformance: "Производительность операторов",
+                optionServiceDemand: "Спрос на услуги",
+                optionWaitingTime: "Время ожидания",
+                optionFeedbackSummary: "Сводка по отзывам",
+                optionDisputeSummary: "Сводка по жалобам",
+                labelReportStartDate: "Дата начала:",
+                labelReportEndDate: "Дата окончания:",
+                labelReportBranch: "Филиал (для некоторых отчетов):",
+                optionReportAllBranches: "Все филиалы",
+                labelReportOperator: "Оператор (для некоторых отчетов):",
+                optionAllOperators: "Все операторы",
+                labelReportService: "Услуга (для некоторых отчетов):",
+                optionAllServices: "Все услуги",
+                generateReportBtn: "Сгенерировать отчет",
+                errorGeneratingReport: "Ошибка генерации отчета:",
+                analyticsDashboardTitle: "Панель аналитики в реальном времени",
+                lastUpdatedTime: "Последнее обновление: Загрузка...",
+                totalTicketsTodayTitle: "Всего талонов сегодня",
+                currentWaitingTitle: "Сейчас в очереди",
+                avgWaitTimeTodayTitle: "Среднее время ожидания (сегодня)",
+                operatorsOnlineTitle: "Операторов онлайн",
+                currentQueueListTitle: "Текущая очередь",
+                ticketNumber: "Талон №",
+                serviceName: "Название услуги",
+                status: "Статус",
+                errorLoadingData: "Ошибка загрузки данных.",
+                noParentCategory: "Нет родительской категории",
+                category: "Категория",
+                service: "Услуга",
+                minutesSuffix: "мин",
+            },
+            en: {
+                superAdminTitle: "Super Admin Panel",
+                pageHeaderTitle: "Super Admin Panel",
+                logout: "Logout",
+                operatorsTab: "Operators",
+                servicesTab: "Services",
+                tariffsTab: "Tariffs",
+                assignmentsTab: "Assignments",
+                reportsTab: "Reports",
+                analyticsTab: "Analytics",
+                branchesTab: "Branches",
+                branchListTitle: "Branch Management",
+                labelBranchName: "Branch Name:",
+                labelBranchAddress: "Address:",
+                labelBranchAdminUser: "Branch Administrator ID:",
+                labelBranchContact: "Contact Information:",
+                saveBranchBtn: "Save Branch",
+                colBranchName: "Name",
+                colBranchAddress: "Address",
+                colBranchAdmin: "Admin ID",
+                colBranchContact: "Contact",
+                colBranchActions: "Actions",
+                confirmDeleteBranch: "Are you sure you want to delete this branch?",
+                branchSaved: "Branch saved successfully!",
+                branchDeleted: "Branch deleted successfully!",
+                errorSavingBranch: "Error saving branch:",
+                errorDeletingBranch: "Error deleting branch:",
+                operatorListTitle: "Operator Management",
+                labelOperatorName: "Operator Name:",
+                labelOperatorUsername: "Login (ID):",
+                labelOperatorPassword: "Password:",
+                passwordHint: "Leave empty to keep unchanged",
+                labelOperatorNumber: "Operator Number (window):",
+                labelOperatorTelegramId: "Telegram ID (for notifications):",
+                labelOperatorBranchId: "Branch:",
+                optionNoBranch: "-- Not Assigned --",
+                saveOperatorBtn: "Save Operator",
+                cancelBtn: "Cancel",
+                colOperatorName: "Name",
+                colOperatorUsername: "Login",
+                colOperatorNumber: "Number (window)",
+                colOperatorTelegramId: "Telegram ID",
+                colOperatorBranch: "Branch",
+                colOperatorActions: "Actions",
+                editBtn: "Edit",
+                deleteBtn: "Delete",
+                confirmDeleteOperator: "Are you sure you want to delete this operator?",
+                operatorSaved: "Operator saved successfully!",
+                operatorDeleted: "Operator deleted successfully!",
+                errorSavingOperator: "Error saving operator:",
+                errorDeletingOperator: "Error deleting operator:",
+                serviceListTitle: "Service & Category Management",
+                labelServiceNameUzLat: "Name (Uz Lat):",
+                labelServiceNameUzCyr: "Name (Uz Cyr):",
+                labelServiceNameRu: "Name (Ru):",
+                labelServiceNameEn: "Name (En):",
+                labelServiceType: "Type:",
+                optionCategory: "Category",
+                optionService: "Service",
+                labelServiceParent: "Parent Category:",
+                optionNoParent: "-- None --",
+                labelServiceCode: "Service Code (ticket prefix):",
+                labelEstimatedTime: "Estimated Time (min):",
+                saveServiceBtn: "Save",
+                colServiceName: "Name (Uz Lat)",
+                colServiceType: "Type",
+                colServiceParent: "Parent",
+                colServiceCode: "Code",
+                colEstimatedTime: "Time (min)",
+                colServiceActions: "Actions",
+                confirmDeleteService: "Are you sure you want to delete this service/category?",
+                serviceSaved: "Service/Category saved successfully!",
+                serviceDeleted: "Service/Category deleted successfully!",
+                errorSavingService: "Error saving service/category:",
+                errorDeletingService: "Error deleting service/category:",
+                tariffListTitle: "Tariff Management",
+                labelTariffName: "Tariff Name:",
+                labelTariffPrice: "Price (UZS):",
+                labelTariffDescription: "Description:",
+                labelTariffDurationDays: "Duration (days):",
+                saveTariffBtn: "Save Tariff",
+                colTariffName: "Name",
+                colTariffPrice: "Price (UZS)",
+                colTariffDuration: "Duration (days)",
+                colTariffDescription: "Description",
+                colTariffActions: "Actions",
+                confirmDeleteTariff: "Are you sure you want to delete this tariff?",
+                tariffSaved: "Tariff saved successfully!",
+                tariffDeleted: "Tariff deleted successfully!",
+                errorSavingTariff: "Error saving tariff:",
+                errorDeletingTariff: "Error deleting tariff:",
+                assignmentTitle: "Assign Services to Operators",
+                labelAssignBranch: "Select Branch (to filter operators):",
+                optionAllBranches: "All Branches",
+                optionSelectOperator: "-- Select Branch First --",
+                labelAssignOperator: "Select Operator:",
+                labelAssignServices: "Select services/categories to assign:",
+                saveAssignmentsBtn: "Save Assignments",
+                assignmentsSaved: "Assignments saved successfully!",
+                errorSavingAssignments: "Error saving assignments:",
+                reportGenerationTitle: "Report Generation",
+                labelReportType: "Report Type:",
+                optionOperatorPerformance: "Operator Performance",
+                optionServiceDemand: "Service Demand",
+                optionWaitingTime: "Waiting Time",
+                optionFeedbackSummary: "Feedback Summary",
+                optionDisputeSummary: "Dispute Summary",
+                labelReportStartDate: "Start Date:",
+                labelReportEndDate: "End Date:",
+                labelReportBranch: "Branch (for some reports):",
+                optionReportAllBranches: "All Branches",
+                labelReportOperator: "Operator (for some reports):",
+                optionAllOperators: "All Operators",
+                labelReportService: "Service (for some reports):",
+                optionAllServices: "All Services",
+                generateReportBtn: "Generate Report",
+                errorGeneratingReport: "Error generating report:",
+                analyticsDashboardTitle: "Real-time Analytics Dashboard",
+                lastUpdatedTime: "Last updated: Loading...",
+                totalTicketsTodayTitle: "Total Tickets Today",
+                currentWaitingTitle: "Currently Waiting",
+                avgWaitTimeTodayTitle: "Avg. Wait Time (Today)",
+                operatorsOnlineTitle: "Operators Online",
+                currentQueueListTitle: "Current Queue",
+                ticketNumber: "Ticket #",
+                serviceName: "Service Name",
+                status: "Status",
+                errorLoadingData: "Error loading data.",
+                noParentCategory: "No parent category",
+                category: "Category",
+                service: "Service",
+                minutesSuffix: "min",
+            }
+        };
+
+        function showNotification(message, type = 'primary') {
+            const notificationDiv = document.querySelector('.notification');
+            notificationDiv.textContent = message;
+            notificationDiv.className = 'notification'; // Reset classes
+            if (type === 'danger') {
+                notificationDiv.classList.add('danger');
+            }
+            // Force reflow to restart animation
+            notificationDiv.style.display = 'none'; 
+            notificationDiv.offsetHeight; // Trigger reflow
+            notificationDiv.style.display = 'block';
+        }
+        
+        async function populateBranchSelect(selectElementId, includeAllOption = false, allOptionTextKey = 'optionAllBranches') {
+            const selectElement = document.getElementById(selectElementId);
+            if (!selectElement) return;
+
+            try {
+                const response = await fetch(`${serverUrl}/admin/branches`);
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                const branches = await response.json();
+                
+                selectElement.innerHTML = ''; // Clear existing options
+                if (includeAllOption) {
+                    const allOption = document.createElement('option');
+                    allOption.value = "all";
+                    allOption.textContent = translations[currentLang][allOptionTextKey] || "All Branches";
+                    selectElement.appendChild(allOption);
+                }
+                const noBranchOption = document.createElement('option');
+                noBranchOption.value = "";
+                noBranchOption.textContent = translations[currentLang].optionNoBranch || "-- Not Assigned --";
+                if (!includeAllOption) selectElement.appendChild(noBranchOption);
+
+
+                branches.forEach(branch => {
+                    const option = document.createElement('option');
+                    option.value = branch.id;
+                    option.textContent = branch.name;
+                    selectElement.appendChild(option);
+                });
+            } catch (error) {
+                console.error(`Error loading branches for select ${selectElementId}:`, error);
+                selectElement.innerHTML = `<option value="">${translations[currentLang].errorLoadingData}</option>`;
+            }
+        }
+
+
+        // --- Branch Management ---
+        async function loadBranches() {
+            try {
+                const response = await fetch(`${serverUrl}/admin/branches`);
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                allBranches = await response.json();
+                const tableBody = document.getElementById('branchesTable').getElementsByTagName('tbody')[0];
+                tableBody.innerHTML = ''; 
+                allBranches.forEach(branch => {
+                    const row = tableBody.insertRow();
+                    row.innerHTML = `
+                        <td>${branch.name}</td>
+                        <td>${branch.address || 'N/A'}</td>
+                        <td>${branch.admin_user_id || 'N/A'}</td>
+                        <td>${branch.contact_info || 'N/A'}</td>
+                        <td class="action-buttons">
+                            <button class="button" onclick="editBranch(${branch.id})">${translations[currentLang].editBtn}</button>
+                            <button class="button danger" onclick="deleteBranch(${branch.id})">${translations[currentLang].deleteBtn}</button>
+                        </td>
+                    `;
+                });
+                // Populate branch selects in other tabs
+                populateBranchSelect('operatorBranchId');
+                populateBranchSelect('assignBranchSelect', true);
+                populateBranchSelect('reportBranch', true, 'optionReportAllBranches');
+
+            } catch (error) {
+                console.error('Error loading branches:', error);
+                showNotification(`${translations[currentLang].errorLoadingData} (Branches)`, 'danger');
+            }
+        }
+
+        function resetBranchForm() {
+            document.getElementById('branchForm').reset();
+            document.getElementById('branchId').value = '';
+            document.getElementById('cancelEditBranchBtn').style.display = 'none';
+            document.getElementById('saveBranchBtn').innerText = translations[currentLang].saveBranchBtn;
+        }
+
+        function editBranch(id) {
+            const branch = allBranches.find(b => b.id === id);
+            if (branch) {
+                document.getElementById('branchId').value = branch.id;
+                document.getElementById('branchName').value = branch.name;
+                document.getElementById('branchAddress').value = branch.address || '';
+                document.getElementById('branchAdminUser').value = branch.admin_user_id || '';
+                document.getElementById('branchContact').value = branch.contact_info || '';
+                
+                document.getElementById('saveBranchBtn').innerText = translations[currentLang].editBtn;
+                document.getElementById('cancelEditBranchBtn').style.display = 'inline-block';
+                window.scrollTo(0, 0);
+            }
+        }
+
+        document.getElementById('branchForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const id = document.getElementById('branchId').value;
+            const data = {
+                name: document.getElementById('branchName').value,
+                address: document.getElementById('branchAddress').value,
+                admin_user_id: document.getElementById('branchAdminUser').value || null,
+                contact_info: document.getElementById('branchContact').value || null,
+            };
+
+            const url = id ? `${serverUrl}/admin/branches/${id}` : `${serverUrl}/admin/branches`;
+            const method = id ? 'PUT' : 'POST';
+
+            try {
+                const response = await fetch(url, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || `HTTP ${response.status}`);
+                }
+                showNotification(translations[currentLang].branchSaved);
+                resetBranchForm();
+                loadBranches(); // Reload to update table and dependent dropdowns
+            } catch (error) {
+                console.error('Error saving branch:', error);
+                showNotification(`${translations[currentLang].errorSavingBranch} ${error.message}`, 'danger');
+            }
+        });
+        
+        document.getElementById('cancelEditBranchBtn').addEventListener('click', resetBranchForm);
+
+        async function deleteBranch(id) {
+            if (confirm(translations[currentLang].confirmDeleteBranch)) {
+                try {
+                    const response = await fetch(`${serverUrl}/admin/branches/${id}`, { method: 'DELETE' });
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.error || `HTTP ${response.status}`);
+                    }
+                    showNotification(translations[currentLang].branchDeleted);
+                    loadBranches(); // Reload to update table and dependent dropdowns
+                } catch (error) {
+                    console.error('Error deleting branch:', error);
+                    showNotification(`${translations[currentLang].errorDeletingBranch} ${error.message}`, 'danger');
+                }
+            }
+        }
+        
+        // --- Operator Management ---
+        async function loadOperators(branchIdFilter = null) {
+            try {
+                let url = `${serverUrl}/admin/operators`;
+                if (branchIdFilter && branchIdFilter !== 'all') {
+                    url += `?branch_id=${branchIdFilter}`;
+                }
+                const response = await fetch(url);
+                if (!response.ok) throw new Error('Network response was not ok');
+                allOperators = await response.json(); // Store all loaded operators for potential filtering
+                
+                const tableBody = document.querySelector('#operatorsTable tbody');
+                tableBody.innerHTML = '';
+                
+                // Populate operator select for reports (if on reports tab)
+                const reportOperatorSelect = document.getElementById('reportOperator');
+                if (reportOperatorSelect && currentTab === 'reports') {
+                     reportOperatorSelect.innerHTML = `<option value="all">${translations[currentLang].optionAllOperators}</option>`;
+                     allOperators.forEach(op => { // Use allOperators which might be filtered by branch
+                        const option = document.createElement('option');
+                        option.value = op.id;
+                        option.textContent = `${op.name} (${op.username})`;
+                        reportOperatorSelect.appendChild(option);
+                    });
+                }
+
+
+                allOperators.forEach(op => {
+                    const row = tableBody.insertRow();
+                    const branchName = op.branch_id ? (allBranches.find(b => b.id === op.branch_id)?.name || 'N/A') : 'N/A';
+                    row.innerHTML = `
+                        <td>${op.name}</td>
+                        <td>${op.username}</td>
+                        <td>${op.operator_number || 'N/A'}</td>
+                        <td>${op.telegram_id || 'N/A'}</td>
+                        <td>${branchName}</td>
+                        <td class="action-buttons">
+                            <button class="button" onclick="editOperator(${op.id})">${translations[currentLang].editBtn}</button>
+                            <button class="button danger" onclick="deleteOperator(${op.id})">${translations[currentLang].deleteBtn}</button>
+                        </td>
+                    `;
+                });
+            } catch (error) {
+                console.error('Error loading operators:', error);
+                showNotification(`${translations[currentLang].errorLoadingData} (Operators)`, 'danger');
+            }
+        }
+
+        function resetOperatorForm() {
+            document.getElementById('operatorForm').reset();
+            document.getElementById('operatorId').value = '';
+            document.getElementById('cancelEditOperatorBtn').style.display = 'none';
+            document.getElementById('operatorPassword').placeholder = ''; 
+            document.getElementById('saveOperatorBtn').innerText = translations[currentLang].saveOperatorBtn;
+        }
+
+        function editOperator(id) {
+            const operator = allOperators.find(op => op.id === id);
+            if (operator) {
+                document.getElementById('operatorId').value = operator.id;
+                document.getElementById('operatorName').value = operator.name;
+                document.getElementById('operatorUsername').value = operator.username;
+                document.getElementById('operatorNumber').value = operator.operator_number || '';
+                document.getElementById('operatorTelegramId').value = operator.telegram_id || '';
+                document.getElementById('operatorBranchId').value = operator.branch_id || '';
+                document.getElementById('operatorPassword').value = ''; 
+                document.getElementById('operatorPassword').placeholder = translations[currentLang].passwordHint;
+                document.getElementById('saveOperatorBtn').innerText = translations[currentLang].editBtn;
+                document.getElementById('cancelEditOperatorBtn').style.display = 'inline-block';
+                window.scrollTo(0, 0); 
+            }
+        }
+
+        document.getElementById('operatorForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const id = document.getElementById('operatorId').value;
+            const data = {
+                name: document.getElementById('operatorName').value,
+                username: document.getElementById('operatorUsername').value,
+                password: document.getElementById('operatorPassword').value,
+                operator_number: document.getElementById('operatorNumber').value || null,
+                telegram_id: document.getElementById('operatorTelegramId').value || null,
+                branch_id: document.getElementById('operatorBranchId').value || null,
+            };
+            if (!data.password) delete data.password; 
+
+            const url = id ? `${serverUrl}/admin/operators/${id}` : `${serverUrl}/admin/operators`;
+            const method = id ? 'PUT' : 'POST';
+
+            try {
+                const response = await fetch(url, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || `HTTP ${response.status}`);
+                }
+                showNotification(translations[currentLang].operatorSaved);
+                resetOperatorForm();
+                loadOperators();
+            } catch (error) {
+                console.error('Error saving operator:', error);
+                showNotification(`${translations[currentLang].errorSavingOperator} ${error.message}`, 'danger');
+            }
+        });
+
+        document.getElementById('cancelEditOperatorBtn').addEventListener('click', resetOperatorForm);
+
+        async function deleteOperator(id) {
+            if (confirm(translations[currentLang].confirmDeleteOperator)) {
+                try {
+                    const response = await fetch(`${serverUrl}/admin/operators/${id}`, { method: 'DELETE' });
+                    if (!response.ok) {
+                         const errorData = await response.json();
+                         throw new Error(errorData.error || `HTTP ${response.status}`);
+                    }
+                    showNotification(translations[currentLang].operatorDeleted);
+                    loadOperators();
+                } catch (error) {
+                    console.error('Error deleting operator:', error);
+                    showNotification(`${translations[currentLang].errorDeletingOperator} ${error.message}`, 'danger');
+                }
+            }
+        }
+
+        // --- Service Management ---
+        async function loadServices() {
+            try {
+                const response = await fetch(`${serverUrl}/admin/services_and_categories`);
+                if (!response.ok) throw new Error('Network response was not ok');
+                allServices = await response.json();
+                
+                const tableBody = document.querySelector('#servicesTable tbody');
+                tableBody.innerHTML = '';
+                const parentSelect = document.getElementById('serviceParent');
+                parentSelect.innerHTML = `<option value="">${translations[currentLang].optionNoParent}</option>`;
+
+                allServices.filter(s => s.type === 'category').forEach(cat => {
+                    const option = document.createElement('option');
+                    option.value = cat.id;
+                    option.textContent = `${cat.name_uz_lat} (${translations[currentLang].category})`;
+                    parentSelect.appendChild(option);
+                });
+
+                allServices.forEach(s => {
+                    const row = tableBody.insertRow();
+                    const parentName = s.parent_id ? (allServices.find(p => p.id === s.parent_id)?.name_uz_lat || 'N/A') : translations[currentLang].noParentCategory;
+                    row.innerHTML = `
+                        <td>${s.name_uz_lat}</td>
+                        <td>${s.type === 'category' ? translations[currentLang].category : translations[currentLang].service}</td>
+                        <td>${parentName}</td>
+                        <td>${s.code || 'N/A'}</td>
+                        <td>${s.estimated_time || 'N/A'}</td>
+                        <td class="action-buttons">
+                            <button class="button" onclick="editService(${s.id})">${translations[currentLang].editBtn}</button>
+                            <button class="button danger" onclick="deleteService(${s.id})">${translations[currentLang].deleteBtn}</button>
+                        </td>
+                    `;
+                });
+                // Populate service select for reports
+                const reportServiceSelect = document.getElementById('reportService');
+                reportServiceSelect.innerHTML = `<option value="all">${translations[currentLang].optionAllServices}</option>`;
+                allServices.filter(s => s.type === 'service').forEach(s => { // Only services for report filter
+                    const option = document.createElement('option');
+                    option.value = s.id;
+                    option.textContent = s.name_uz_lat;
+                    reportServiceSelect.appendChild(option);
+                });
+
+            } catch (error) {
+                console.error('Error loading services:', error);
+                showNotification(`${translations[currentLang].errorLoadingData} (Services)`, 'danger');
+            }
+        }
+
+        function resetServiceForm() {
+            document.getElementById('serviceForm').reset();
+            document.getElementById('serviceId').value = '';
+            document.getElementById('cancelEditServiceBtn').style.display = 'none';
+            document.getElementById('serviceParent').disabled = false; 
+            document.getElementById('serviceCode').disabled = true;    
+            document.getElementById('estimatedTime').disabled = true; 
+            document.getElementById('serviceCode').value = ''; 
+            document.getElementById('estimatedTime').value = ''; 
+            document.getElementById('saveServiceBtn').innerText = translations[currentLang].saveServiceBtn;
+            document.getElementById('serviceType').dispatchEvent(new Event('change')); // Trigger change to set initial disabled state
+        }
+
+        document.getElementById('serviceType').addEventListener('change', function() {
+            const isService = this.value === 'service';
+            document.getElementById('serviceCode').disabled = !isService;
+            document.getElementById('estimatedTime').disabled = !isService;
+            if (!isService) {
+                document.getElementById('serviceCode').value = '';
+                document.getElementById('estimatedTime').value = '';
+            }
+        });
+
+
+        function editService(id) {
+            const service = allServices.find(s => s.id === id);
+            if (service) {
+                document.getElementById('serviceId').value = service.id;
+                document.getElementById('serviceNameUzLat').value = service.name_uz_lat;
+                document.getElementById('serviceNameUzCyr').value = service.name_uz_cyr;
+                document.getElementById('serviceNameRu').value = service.name_ru;
+                document.getElementById('serviceNameEn').value = service.name_en;
+                document.getElementById('serviceType').value = service.type;
+                document.getElementById('serviceParent').value = service.parent_id || '';
+                document.getElementById('serviceCode').value = service.code || '';
+                document.getElementById('estimatedTime').value = service.estimated_time || '';
+
+                const isService = service.type === 'service';
+                document.getElementById('serviceCode').disabled = !isService;
+                document.getElementById('estimatedTime').disabled = !isService;
+                
+                document.getElementById('saveServiceBtn').innerText = translations[currentLang].editBtn;
+                document.getElementById('cancelEditServiceBtn').style.display = 'inline-block';
+                window.scrollTo(0, 0);
+            }
+        }
+
+        document.getElementById('serviceForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const id = document.getElementById('serviceId').value;
+            const serviceType = document.getElementById('serviceType').value;
+            const data = {
+                name_uz_lat: document.getElementById('serviceNameUzLat').value,
+                name_uz_cyr: document.getElementById('serviceNameUzCyr').value,
+                name_ru: document.getElementById('serviceNameRu').value,
+                name_en: document.getElementById('serviceNameEn').value,
+                type: serviceType,
+                parent_id: document.getElementById('serviceParent').value || null,
+                code: serviceType === 'service' ? (document.getElementById('serviceCode').value || null) : null,
+                estimated_time: serviceType === 'service' ? (document.getElementById('estimatedTime').value || null) : null,
+            };
+
+            const url = id ? `${serverUrl}/admin/services_and_categories/${id}` : `${serverUrl}/admin/services_and_categories`;
+            const method = id ? 'PUT' : 'POST';
+
+            try {
+                const response = await fetch(url, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || `HTTP ${response.status}`);
+                }
+                showNotification(translations[currentLang].serviceSaved);
+                resetServiceForm();
+                loadServices(); 
+            } catch (error) {
+                console.error('Error saving service:', error);
+                showNotification(`${translations[currentLang].errorSavingService} ${error.message}`, 'danger');
+            }
+        });
+
+        document.getElementById('cancelEditServiceBtn').addEventListener('click', resetServiceForm);
+
+        async function deleteService(id) {
+            if (confirm(translations[currentLang].confirmDeleteService)) {
+                try {
+                    const response = await fetch(`${serverUrl}/admin/services_and_categories/${id}`, { method: 'DELETE' });
+                     if (!response.ok) {
+                         const errorData = await response.json();
+                         throw new Error(errorData.error || `HTTP ${response.status}`);
+                    }
+                    showNotification(translations[currentLang].serviceDeleted);
+                    loadServices(); 
+                } catch (error) {
+                    console.error('Error deleting service:', error);
+                    showNotification(`${translations[currentLang].errorDeletingService} ${error.message}`, 'danger');
+                }
+            }
+        }
+
+        // --- Tariff Management ---
+        async function loadTariffs() {
+            try {
+                const response = await fetch(`${serverUrl}/admin/tariffs`); // Assuming this endpoint
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                allTariffs = await response.json();
+                const tableBody = document.getElementById('tariffsTable').getElementsByTagName('tbody')[0];
+                tableBody.innerHTML = ''; 
+                allTariffs.forEach(tariff => {
+                    const row = tableBody.insertRow();
+                    row.innerHTML = `
+                        <td>${tariff.name}</td>
+                        <td>${tariff.price}</td>
+                        <td>${tariff.duration_days || 'N/A'}</td>
+                        <td>${tariff.description || 'N/A'}</td>
+                        <td class="action-buttons">
+                            <button class="button" onclick="editTariff(${tariff.id})">${translations[currentLang].editBtn}</button>
+                            <button class="button danger" onclick="deleteTariff(${tariff.id})">${translations[currentLang].deleteBtn}</button>
+                        </td>
+                    `;
+                });
+            } catch (error) {
+                console.error('Error loading tariffs:', error);
+                showNotification(`${translations[currentLang].errorLoadingData} (Tariffs)`, 'danger');
+            }
+        }
+
+        function resetTariffForm() {
+            document.getElementById('tariffForm').reset();
+            document.getElementById('tariffId').value = '';
+            document.getElementById('cancelEditTariffBtn').style.display = 'none';
+            document.getElementById('saveTariffBtn').innerText = translations[currentLang].saveTariffBtn;
+        }
+
+        function editTariff(id) {
+            const tariff = allTariffs.find(t => t.id === id);
+            if (tariff) {
+                document.getElementById('tariffId').value = tariff.id;
+                document.getElementById('tariffName').value = tariff.name;
+                document.getElementById('tariffPrice').value = tariff.price;
+                document.getElementById('tariffDescription').value = tariff.description || '';
+                document.getElementById('tariffDurationDays').value = tariff.duration_days || '';
+                
+                document.getElementById('saveTariffBtn').innerText = translations[currentLang].editBtn;
+                document.getElementById('cancelEditTariffBtn').style.display = 'inline-block';
+                window.scrollTo(0, 0);
+            }
+        }
+
+        document.getElementById('tariffForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const id = document.getElementById('tariffId').value;
+            const data = {
+                name: document.getElementById('tariffName').value,
+                price: parseFloat(document.getElementById('tariffPrice').value),
+                description: document.getElementById('tariffDescription').value || null,
+                duration_days: parseInt(document.getElementById('tariffDurationDays').value) || null,
+            };
+
+            const url = id ? `${serverUrl}/admin/tariffs/${id}` : `${serverUrl}/admin/tariffs`;
+            const method = id ? 'PUT' : 'POST';
+
+            try {
+                const response = await fetch(url, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || `HTTP ${response.status}`);
+                }
+                showNotification(translations[currentLang].tariffSaved);
+                resetTariffForm();
+                loadTariffs();
+            } catch (error) {
+                console.error('Error saving tariff:', error);
+                showNotification(`${translations[currentLang].errorSavingTariff} ${error.message}`, 'danger');
+            }
+        });
+        
+        document.getElementById('cancelEditTariffBtn').addEventListener('click', resetTariffForm);
+
+        async function deleteTariff(id) {
+            if (confirm(translations[currentLang].confirmDeleteTariff)) {
+                try {
+                    const response = await fetch(`${serverUrl}/admin/tariffs/${id}`, { method: 'DELETE' });
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.error || `HTTP ${response.status}`);
+                    }
+                    showNotification(translations[currentLang].tariffDeleted);
+                    loadTariffs();
+                } catch (error) {
+                    console.error('Error deleting tariff:', error);
+                    showNotification(`${translations[currentLang].errorDeletingTariff} ${error.message}`, 'danger');
+                }
+            }
+        }
+
+        // --- Assignments Tab ---
+        async function loadOperatorsForAssignments(branchId = 'all') {
+            try {
+                let url = `${serverUrl}/admin/operators`;
+                if (branchId !== 'all' && branchId) {
+                    url += `?branch_id=${branchId}`;
+                }
+                const response = await fetch(url);
+                if (!response.ok) throw new Error('Network response was not ok');
+                const operators = await response.json();
+                const select = document.getElementById('assignOperatorSelect');
+                select.innerHTML = `<option value="">${branchId === 'all' && !operators.length ? translations[currentLang].optionSelectOperator : translations[currentLang].labelAssignOperator}</option>`;
+                operators.forEach(op => {
+                    const option = document.createElement('option');
+                    option.value = op.id;
+                    option.textContent = `${op.name} (${op.username})`;
+                    select.appendChild(option);
+                });
+                // Add event listener after populating
+                select.onchange = loadAssignedServices;
+                // If an operator was previously selected, try to reselect or clear if not in new list
+                if (select.value) {
+                    loadAssignedServices();
+                } else {
+                     document.querySelectorAll('#serviceTreeForAssignment input[type="checkbox"]').forEach(cb => cb.checked = false);
+                }
+
+            } catch (error) {
+                console.error('Error loading operators for assignments:', error);
+                document.getElementById('assignOperatorSelect').innerHTML = `<option value="">${translations[currentLang].errorLoadingData}</option>`;
+            }
+        }
+        
+        document.getElementById('assignBranchSelect').addEventListener('change', function() {
+            loadOperatorsForAssignments(this.value);
+            // Clear service tree checks when branch changes as operator will change
+            document.querySelectorAll('#serviceTreeForAssignment input[type="checkbox"]').forEach(cb => cb.checked = false);
+        });
+
+
+        async function loadServicesForAssignments() {
+            try {
+                const response = await fetch(`${serverUrl}/admin/services_and_categories`);
+                if (!response.ok) throw new Error('Network response was not ok');
+                const services = await response.json(); // This is allServices, already loaded usually
+                const treeContainer = document.getElementById('serviceTreeForAssignment');
+                treeContainer.innerHTML = ''; 
+                renderServiceTreeForAssignment(services, null, treeContainer);
+            } catch (error) {
+                console.error('Error loading services for assignments:', error);
+            }
+        }
+        
+        function renderServiceTreeForAssignment(items, parentId, containerElement) {
+            const ul = document.createElement('ul');
+            items.filter(item => item.parent_id === parentId).forEach(item => {
+                const li = document.createElement('li');
+                li.className = 'service-item';
+                
+                const checkboxId = `assign-service-${item.id}`;
+                li.innerHTML = `
+                    <label for="${checkboxId}" class="checkbox-label flex-grow">
+                        <input type="checkbox" id="${checkboxId}" value="${item.id}" class="mr-2">
+                        <span class="service-name">${item.name_uz_lat}</span>
+                        <span class="service-type ${item.type}">${item.type === 'category' ? translations[currentLang].category : translations[currentLang].service}</span>
+                    </label>
+                `;
+                ul.appendChild(li);
+
+                const childrenContainer = document.createElement('div');
+                li.appendChild(childrenContainer);
+                renderServiceTreeForAssignment(items, item.id, childrenContainer);
+            });
+            containerElement.appendChild(ul);
+        }
+
+
+        async function loadAssignedServices() {
+            const operatorId = document.getElementById('assignOperatorSelect').value;
+            document.querySelectorAll('#serviceTreeForAssignment input[type="checkbox"]').forEach(cb => cb.checked = false);
+
+            if (!operatorId) return;
+
+            try {
+                const response = await fetch(`${serverUrl}/admin/operator_assignments/${operatorId}`);
+                if (!response.ok) throw new Error('Network response was not ok');
+                const assignedServiceIds = await response.json();
+                assignedServiceIds.forEach(serviceId => {
+                    const checkbox = document.getElementById(`assign-service-${serviceId}`);
+                    if (checkbox) checkbox.checked = true;
+                });
+            } catch (error) {
+                console.error('Error loading assigned services:', error);
+                showNotification(`${translations[currentLang].errorLoadingData} (Assignments)`, 'danger');
+            }
+        }
+
+        document.getElementById('saveAssignmentsBtn').addEventListener('click', async function() {
+            const operatorId = document.getElementById('assignOperatorSelect').value;
+            if (!operatorId) {
+                showNotification(translations[currentLang].labelAssignOperator, 'danger'); 
+                return;
+            }
+
+            const selectedServiceIds = Array.from(document.querySelectorAll('#serviceTreeForAssignment input[type="checkbox"]:checked'))
+                                           .map(cb => parseInt(cb.value));
+            
+            try {
+                const response = await fetch(`${serverUrl}/admin/operator_assignments/${operatorId}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ service_ids: selectedServiceIds })
+                });
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || `HTTP ${response.status}`);
+                }
+                showNotification(translations[currentLang].assignmentsSaved);
+            } catch (error) {
+                console.error('Error saving assignments:', error);
+                showNotification(`${translations[currentLang].errorSavingAssignments} ${error.message}`, 'danger');
+            }
+        });
+
+        // --- Reports Tab ---
+        document.getElementById('reportBranch').addEventListener('change', function() {
+            loadOperators(this.value); // Load operators for the selected branch into the reportOperator select
+        });
+
+        document.getElementById('reportForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const reportType = document.getElementById('reportType').value;
+            const startDate = document.getElementById('reportStartDate').value;
+            const endDate = document.getElementById('reportEndDate').value;
+            const branchId = document.getElementById('reportBranch').value;
+            const operatorId = document.getElementById('reportOperator').value;
+            const serviceId = document.getElementById('reportService').value;
+
+            if (!startDate || !endDate) {
+                showNotification("Пожалуйста, выберите даты начала и окончания.", "danger");
+                return;
+            }
+
+            const params = new URLSearchParams({
+                report_type: reportType,
+                start_date: startDate,
+                end_date: endDate,
+            });
+            if (branchId !== 'all') params.append('branch_id', branchId);
+            if (operatorId !== 'all') params.append('operator_id', operatorId);
+            if (serviceId !== 'all') params.append('service_id', serviceId);
+            
+            try {
+                const response = await fetch(`${serverUrl}/admin/reports?${params.toString()}`);
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || `HTTP ${response.status}`);
+                }
+                const reportData = await response.json();
+                const reportResultDiv = document.getElementById('reportResult');
+                reportResultDiv.innerHTML = `<pre class="bg-gray-100 dark:bg-gray-800 p-4 rounded-md overflow-auto">${JSON.stringify(reportData, null, 2)}</pre>`; 
+            } catch (error) {
+                console.error('Error generating report:', error);
+                showNotification(`${translations[currentLang].errorGeneratingReport} ${error.message}`, 'danger');
+                document.getElementById('reportResult').innerHTML = `<p class="text-red-500">${translations[currentLang].errorGeneratingReport} ${error.message}</p>`;
+            }
+        });
+
+        // --- Analytics Tab ---
+        async function updateAnalyticsDashboard() {
+            try {
+                const response = await fetch(`${serverUrl}/admin/analytics/realtime`);
+                if (!response.ok) throw new Error('Network response was not ok');
+                const data = await response.json();
+
+                document.getElementById('totalTicketsToday').textContent = data.total_tickets_today;
+                document.getElementById('currentWaiting').textContent = data.current_waiting_tickets;
+                document.getElementById('avgWaitTimeToday').textContent = `${data.average_wait_time_today_minutes} ${translations[currentLang].minutesSuffix}`;
+                document.getElementById('operatorsOnline').textContent = data.active_operators_count;
+                
+                const queueListDiv = document.getElementById('realTimeQueueList');
+                queueListDiv.innerHTML = ''; 
+                if (data.current_queue && data.current_queue.length > 0) {
+                    const ul = document.createElement('ul');
+                    ul.className = 'divide-y divide-gray-200 dark:divide-gray-700';
+                    data.current_queue.forEach(ticket => {
+                        const li = document.createElement('li');
+                        li.className = 'py-3 px-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded';
+                        li.innerHTML = `
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <span class="font-semibold text-primary-600 dark:text-primary-400">${translations[currentLang].ticketNumber}: ${ticket.ticket_number}</span>
+                                    <p class="text-sm text-gray-600 dark:text-gray-300">${translations[currentLang].serviceName}: ${ticket.service_name}</p>
+                                </div>
+                                <span class="text-sm font-medium px-2 py-1 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-700 dark:text-blue-200">${translations[currentLang].status}: ${ticket.status}</span>
+                            </div>
+                        `;
+                        ul.appendChild(li);
+                    });
+                    queueListDiv.appendChild(ul);
+                } else {
+                    queueListDiv.innerHTML = `<p class="text-center text-gray-500 dark:text-gray-400">Очередь пуста.</p>`;
+                }
+
+                document.getElementById('lastUpdatedTime').textContent = `${translations[currentLang].lastUpdatedTime.replace('Yuklanmoqda...', '').replace('Загрузка...', '').replace('Loading...', '')} ${new Date().toLocaleTimeString()}`;
+            } catch (error) {
+                console.error('Error updating analytics dashboard:', error);
+                document.getElementById('lastUpdatedTime').textContent = `${translations[currentLang].lastUpdatedTime.replace('Yuklanmoqda...', '').replace('Загрузка...', '').replace('Loading...', '')} ${translations[currentLang].errorLoadingData}`;
+            }
+        }
+
+        function setLanguage(lang) {
+            currentLang = lang;
+            localStorage.setItem("preferredLangAdmin", lang);
+
+            document.querySelectorAll(".lang-btn").forEach(btn => btn.classList.remove("active"));
+            const activeButton = document.querySelector(`button[onclick="setLanguage('${lang}')"]`);
+            if (activeButton) activeButton.classList.add("active");
+
+            const T = translations[lang];
+            document.getElementById('documentTitle').innerText = T.superAdminTitle || "Super Admin Panel";
+            document.getElementById('pageHeaderTitle').innerText = T.pageHeaderTitle || "Super Admin Panel";
+            
+            document.getElementById('logoutBtn').innerText = T.logout;
+            document.getElementById('branchesTab').innerText = T.branchesTab;
+            document.getElementById('operatorsTab').innerText = T.operatorsTab;
+            document.getElementById('servicesTab').innerText = T.servicesTab;
+            document.getElementById('tariffsTab').innerText = T.tariffsTab;
+            document.getElementById('assignmentsTab').innerText = T.assignmentsTab;
+            document.getElementById('reportsTab').innerText = T.reportsTab;
+            document.getElementById('analyticsTab').innerText = T.analyticsTab;
+
+            // Titles for sections
+            if(document.getElementById('branchListTitle')) document.getElementById('branchListTitle').innerText = T.branchListTitle;
+            if(document.getElementById('operatorListTitle')) document.getElementById('operatorListTitle').innerText = T.operatorListTitle;
+            if(document.getElementById('serviceListTitle')) document.getElementById('serviceListTitle').innerText = T.serviceListTitle;
+            if(document.getElementById('tariffListTitle')) document.getElementById('tariffListTitle').innerText = T.tariffListTitle;
+            if(document.getElementById('assignmentTitle')) document.getElementById('assignmentTitle').innerText = T.assignmentTitle;
+            if(document.getElementById('reportGenerationTitle')) document.getElementById('reportGenerationTitle').innerText = T.reportGenerationTitle;
+            if(document.getElementById('analyticsDashboardTitle')) document.getElementById('analyticsDashboardTitle').innerText = T.analyticsDashboardTitle;
+            if(document.getElementById('currentQueueListTitle')) document.getElementById('currentQueueListTitle').innerText = T.currentQueueListTitle;
+            
+            // Form labels and buttons by ID
+            // Branch Form
+            if(document.getElementById('labelBranchName')) document.getElementById('labelBranchName').innerText = T.labelBranchName;
+            if(document.getElementById('labelBranchAddress')) document.getElementById('labelBranchAddress').innerText = T.labelBranchAddress;
+            if(document.getElementById('labelBranchAdminUser')) document.getElementById('labelBranchAdminUser').innerText = T.labelBranchAdminUser;
+            if(document.getElementById('labelBranchContact')) document.getElementById('labelBranchContact').innerText = T.labelBranchContact;
+            if(document.getElementById('saveBranchBtn')) document.getElementById('saveBranchBtn').innerText = T.saveBranchBtn; // Also update on form reset/edit
+            if(document.getElementById('cancelEditBranchBtn')) document.getElementById('cancelEditBranchBtn').innerText = T.cancelBtn;
+
+
+            // Operator Form
+            if(document.getElementById('labelOperatorName')) document.getElementById('labelOperatorName').innerText = T.labelOperatorName;
+            if(document.getElementById('labelOperatorUsername')) document.getElementById('labelOperatorUsername').innerText = T.labelOperatorUsername;
+            if(document.getElementById('labelOperatorPassword')) document.getElementById('labelOperatorPassword').innerText = T.labelOperatorPassword;
+            if(document.getElementById('passwordHint')) document.getElementById('passwordHint').innerText = T.passwordHint;
+            if(document.getElementById('labelOperatorNumber')) document.getElementById('labelOperatorNumber').innerText = T.labelOperatorNumber;
+            if(document.getElementById('labelOperatorTelegramId')) document.getElementById('labelOperatorTelegramId').innerText = T.labelOperatorTelegramId;
+            if(document.getElementById('labelOperatorBranchId')) document.getElementById('labelOperatorBranchId').innerText = T.labelOperatorBranchId;
+            if(document.getElementById('optionNoBranch')) document.getElementById('optionNoBranch').innerText = T.optionNoBranch;
+            if(document.getElementById('saveOperatorBtn')) document.getElementById('saveOperatorBtn').innerText = T.saveOperatorBtn;
+            if(document.getElementById('cancelEditOperatorBtn')) document.getElementById('cancelEditOperatorBtn').innerText = T.cancelBtn;
+
+            // Service Form
+            if(document.getElementById('labelServiceNameUzLat')) document.getElementById('labelServiceNameUzLat').innerText = T.labelServiceNameUzLat;
+            if(document.getElementById('labelServiceNameUzCyr')) document.getElementById('labelServiceNameUzCyr').innerText = T.labelServiceNameUzCyr;
+            if(document.getElementById('labelServiceNameRu')) document.getElementById('labelServiceNameRu').innerText = T.labelServiceNameRu;
+            if(document.getElementById('labelServiceNameEn')) document.getElementById('labelServiceNameEn').innerText = T.labelServiceNameEn;
+            if(document.getElementById('labelServiceType')) document.getElementById('labelServiceType').innerText = T.labelServiceType;
+            if(document.getElementById('optionCategory')) document.getElementById('optionCategory').innerText = T.optionCategory;
+            if(document.getElementById('optionService')) document.getElementById('optionService').innerText = T.optionService;
+            if(document.getElementById('labelServiceParent')) document.getElementById('labelServiceParent').innerText = T.labelServiceParent;
+            if(document.getElementById('optionNoParent')) document.getElementById('optionNoParent').innerText = T.optionNoParent;
+            if(document.getElementById('labelServiceCode')) document.getElementById('labelServiceCode').innerText = T.labelServiceCode;
+            if(document.getElementById('labelEstimatedTime')) document.getElementById('labelEstimatedTime').innerText = T.labelEstimatedTime;
+            if(document.getElementById('saveServiceBtn')) document.getElementById('saveServiceBtn').innerText = T.saveServiceBtn;
+            if(document.getElementById('cancelEditServiceBtn')) document.getElementById('cancelEditServiceBtn').innerText = T.cancelBtn;
+
+            // Tariff Form
+            if(document.getElementById('labelTariffName')) document.getElementById('labelTariffName').innerText = T.labelTariffName;
+            if(document.getElementById('labelTariffPrice')) document.getElementById('labelTariffPrice').innerText = T.labelTariffPrice;
+            if(document.getElementById('labelTariffDescription')) document.getElementById('labelTariffDescription').innerText = T.labelTariffDescription;
+            if(document.getElementById('labelTariffDurationDays')) document.getElementById('labelTariffDurationDays').innerText = T.labelTariffDurationDays;
+            if(document.getElementById('saveTariffBtn')) document.getElementById('saveTariffBtn').innerText = T.saveTariffBtn;
+            if(document.getElementById('cancelEditTariffBtn')) document.getElementById('cancelEditTariffBtn').innerText = T.cancelBtn;
+
+
+            // Assignments Form
+            if(document.getElementById('labelAssignBranch')) document.getElementById('labelAssignBranch').innerText = T.labelAssignBranch;
+            if(document.getElementById('optionAllBranches')) document.getElementById('optionAllBranches').innerText = T.optionAllBranches;
+            if(document.getElementById('optionSelectOperator')) document.getElementById('optionSelectOperator').innerText = T.optionSelectOperator;
+            if(document.getElementById('labelAssignOperator')) document.getElementById('labelAssignOperator').innerText = T.labelAssignOperator;
+            if(document.getElementById('labelAssignServices')) document.getElementById('labelAssignServices').innerText = T.labelAssignServices;
+            if(document.getElementById('saveAssignmentsBtn')) document.getElementById('saveAssignmentsBtn').innerText = T.saveAssignmentsBtn;
+
+            // Reports Form
+            if(document.getElementById('labelReportType')) document.getElementById('labelReportType').innerText = T.labelReportType;
+            if(document.getElementById('optionOperatorPerformance')) document.getElementById('optionOperatorPerformance').innerText = T.optionOperatorPerformance;
+            if(document.getElementById('optionServiceDemand')) document.getElementById('optionServiceDemand').innerText = T.optionServiceDemand;
+            if(document.getElementById('optionWaitingTime')) document.getElementById('optionWaitingTime').innerText = T.optionWaitingTime;
+            if(document.getElementById('optionFeedbackSummary')) document.getElementById('optionFeedbackSummary').innerText = T.optionFeedbackSummary;
+            if(document.getElementById('optionDisputeSummary')) document.getElementById('optionDisputeSummary').innerText = T.optionDisputeSummary;
+            if(document.getElementById('labelReportStartDate')) document.getElementById('labelReportStartDate').innerText = T.labelReportStartDate;
+            if(document.getElementById('labelReportEndDate')) document.getElementById('labelReportEndDate').innerText = T.labelReportEndDate;
+            if(document.getElementById('labelReportBranch')) document.getElementById('labelReportBranch').innerText = T.labelReportBranch;
+            if(document.getElementById('optionReportAllBranches')) document.getElementById('optionReportAllBranches').innerText = T.optionReportAllBranches;
+            if(document.getElementById('labelReportOperator')) document.getElementById('labelReportOperator').innerText = T.labelReportOperator;
+            if(document.getElementById('optionAllOperators')) document.getElementById('optionAllOperators').innerText = T.optionAllOperators;
+            if(document.getElementById('labelReportService')) document.getElementById('labelReportService').innerText = T.labelReportService;
+            if(document.getElementById('optionAllServices')) document.getElementById('optionAllServices').innerText = T.optionAllServices;
+            if(document.getElementById('generateReportBtn')) document.getElementById('generateReportBtn').innerText = T.generateReportBtn;
+            
+            // Table Headers
+            // Branch Table
+            if(document.getElementById('colBranchName')) document.getElementById('colBranchName').innerText = T.colBranchName;
+            if(document.getElementById('colBranchAddress')) document.getElementById('colBranchAddress').innerText = T.colBranchAddress;
+            if(document.getElementById('colBranchAdmin')) document.getElementById('colBranchAdmin').innerText = T.colBranchAdmin;
+            if(document.getElementById('colBranchContact')) document.getElementById('colBranchContact').innerText = T.colBranchContact;
+            if(document.getElementById('colBranchActions')) document.getElementById('colBranchActions').innerText = T.colBranchActions;
+            // Operator Table
+            if(document.getElementById('colOperatorName')) document.getElementById('colOperatorName').innerText = T.colOperatorName;
+            if(document.getElementById('colOperatorUsername')) document.getElementById('colOperatorUsername').innerText = T.colOperatorUsername;
+            if(document.getElementById('colOperatorNumber')) document.getElementById('colOperatorNumber').innerText = T.colOperatorNumber;
+            if(document.getElementById('colOperatorTelegramId')) document.getElementById('colOperatorTelegramId').innerText = T.colOperatorTelegramId;
+            if(document.getElementById('colOperatorBranch')) document.getElementById('colOperatorBranch').innerText = T.colOperatorBranch;
+            if(document.getElementById('colOperatorActions')) document.getElementById('colOperatorActions').innerText = T.colOperatorActions;
+            // Service Table
+            if(document.getElementById('colServiceName')) document.getElementById('colServiceName').innerText = T.colServiceName;
+            if(document.getElementById('colServiceType')) document.getElementById('colServiceType').innerText = T.colServiceType;
+            if(document.getElementById('colServiceParent')) document.getElementById('colServiceParent').innerText = T.colServiceParent;
+            if(document.getElementById('colServiceCode')) document.getElementById('colServiceCode').innerText = T.colServiceCode;
+            if(document.getElementById('colEstimatedTime')) document.getElementById('colEstimatedTime').innerText = T.colEstimatedTime;
+            if(document.getElementById('colServiceActions')) document.getElementById('colServiceActions').innerText = T.colServiceActions;
+            // Tariff Table
+            if(document.getElementById('colTariffName')) document.getElementById('colTariffName').innerText = T.colTariffName;
+            if(document.getElementById('colTariffPrice')) document.getElementById('colTariffPrice').innerText = T.colTariffPrice;
+            if(document.getElementById('colTariffDuration')) document.getElementById('colTariffDuration').innerText = T.colTariffDuration;
+            if(document.getElementById('colTariffDescription')) document.getElementById('colTariffDescription').innerText = T.colTariffDescription;
+            if(document.getElementById('colTariffActions')) document.getElementById('colTariffActions').innerText = T.colTariffActions;
+
+
+            // Analytics Tab
+            if(document.getElementById('totalTicketsTodayTitle')) document.getElementById('totalTicketsTodayTitle').innerText = T.totalTicketsTodayTitle;
+            if(document.getElementById('currentWaitingTitle')) document.getElementById('currentWaitingTitle').innerText = T.currentWaitingTitle;
+            if(document.getElementById('avgWaitTimeTodayTitle')) document.getElementById('avgWaitTimeTodayTitle').innerText = T.avgWaitTimeTodayTitle;
+            if(document.getElementById('operatorsOnlineTitle')) document.getElementById('operatorsOnlineTitle').innerText = T.operatorsOnlineTitle;
+            if(document.getElementById('lastUpdatedTime')) { 
+                const baseText = T.lastUpdatedTime.split(':')[0];
+                const currentTimeElement = document.getElementById('lastUpdatedTime');
+                const currentTimeText = currentTimeElement.innerText.split(':').slice(1).join(':').trim();
+                if (currentTimeText && !currentTimeText.toLowerCase().includes("loading") && !currentTimeText.toLowerCase().includes("загрузка") && !currentTimeText.toLowerCase().includes("yuklanmoqda")) {
+                    currentTimeElement.innerText = `${baseText}: ${currentTimeText}`;
+                } else {
+                    currentTimeElement.innerText = T.lastUpdatedTime;
+                }
+            }
+            openTab(currentTab, true); 
+        }
+        
+        function openTab(tabName, calledFromSetLanguage = false) {
+            currentTab = tabName;
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+
+            const tabContent = document.getElementById(`${tabName}_tab`);
+            const tabButton = document.querySelector(`.tab-button[data-tab="${tabName}"]`);
+
+            if (tabContent) tabContent.classList.add('active');
+            if (tabButton) tabButton.classList.add('active');
+
+            if (tabName === 'branches') {
+                loadBranches(); 
+                if (!calledFromSetLanguage) resetBranchForm();
+            } else if (tabName === 'operators') {
+                loadOperators(); 
+                if (!calledFromSetLanguage) resetOperatorForm();
+            } else if (tabName === 'services') {
+                loadServices();
+                 if (!calledFromSetLanguage) resetServiceForm();
+            } else if (tabName === 'tariffs') {
+                loadTariffs();
+                if (!calledFromSetLanguage) resetTariffForm();
+            } else if (tabName === 'assignments') {
+                // loadBranches was called by loadBranches if it's the first load, or by setLanguage
+                // So, populateBranchSelect for assignments should be up-to-date.
+                // We need to load operators based on the current selection of branch filter.
+                const assignBranchFilter = document.getElementById('assignBranchSelect').value;
+                loadOperatorsForAssignments(assignBranchFilter); 
+                loadServicesForAssignments(); 
+            } else if (tabName === 'reports') {
+                // loadBranches and loadServices are called if it's the first load or by setLanguage
+                // This populates the branch and service dropdowns in the report tab.
+                // Then, loadOperators for reports based on the selected branch.
+                const reportBranchFilter = document.getElementById('reportBranch').value;
+                loadOperators(reportBranchFilter); // This will populate reportOperatorSelect
+            } else if (tabName === 'analytics') {
+                updateAnalyticsDashboard(); 
+            }
+        }
+
+        function toggleTheme() {
+            document.body.classList.toggle("dark");
+            const isDark = document.body.classList.contains("dark");
+            localStorage.setItem("theme", isDark ? "dark" : "light");
+            document.querySelector(".theme-toggle").innerText = isDark ? "☀️" : "🌙";
+        }
+
+        // Инициализация
+        document.addEventListener('DOMContentLoaded', () => {
+            const storedTheme = localStorage.getItem("theme");
+            if (storedTheme === "dark") {
+                document.body.classList.add("dark");
+                document.querySelector(".theme-toggle").innerText = "☀️";
+            } else {
+                 document.querySelector(".theme-toggle").innerText = "🌙";
+            }
+            
+            setLanguage(currentLang); 
+
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.addEventListener('click', () => {
+                    openTab(button.dataset.tab);
+                });
+            });
+
+            // Initial call to set up service type dependent fields
+            document.getElementById('serviceType').dispatchEvent(new Event('change'));
+            resetServiceForm(); 
+            resetOperatorForm(); 
+            resetBranchForm();
+            resetTariffForm();
+
+            // Analytics update interval
+            setInterval(() => {
+                if (currentTab === 'analytics') {
+                    updateAnalyticsDashboard();
+                }
+            }, 10000); // Update every 10 seconds
+        });
+
+
+        // Socket.IO для обновления в реальном времени
+        socket.on('new_ticket', (data) => {
+            showNotification(`Новый талон ${data.ticket_number} для услуги ${data.service_name}`);
+            if (currentTab === 'analytics') updateAnalyticsDashboard();
+        });
+
+        socket.on('ticket_called', (data) => {
+            showNotification(`Талон ${data.ticket_number} вызван оператором ${data.operator_name}`);
+            if (currentTab === 'analytics') updateAnalyticsDashboard();
+        });
+
+        socket.on('ticket_finished', (data) => {
+            showNotification(`Талон ${data.ticket_number} завершен оператором ${data.operator_name}`);
+            if (currentTab === 'analytics') updateAnalyticsDashboard();
+        });
+        
+        socket.on('ticket_redirected', (data) => {
+            showNotification(`Талон ${data.old_ticket_number} перенаправлен. Новый талон: ${data.new_ticket_number}`);
+            if (currentTab === 'analytics') updateAnalyticsDashboard();
+        });
+
+        socket.on('new_feedback', () => {
+            showNotification("Получен новый отзыв!");
+        });
+
+        socket.on('new_dispute', () => {
+            showNotification("Получена новая жалоба!");
+        });
+        socket.on('branch_updated', (data) => {
+            showNotification(`Филиал '${data.branch_name}' обновлен.`);
+            if (currentTab === 'branches') {
+                loadBranches();
+            } else {
+                // If not on branches tab, still update the branch list for dropdowns silently
+                populateBranchSelect('operatorBranchId');
+                populateBranchSelect('assignBranchSelect', true);
+                populateBranchSelect('reportBranch', true, 'optionReportAllBranches');
+            }
+        });
+         socket.on('operator_updated', (data) => {
+            showNotification(`Оператор '${data.operator_name}' обновлен.`);
+            if (currentTab === 'operators') {
+                loadOperators();
+            } else if (currentTab === 'assignments') {
+                const assignBranchFilter = document.getElementById('assignBranchSelect').value;
+                loadOperatorsForAssignments(assignBranchFilter);
+            } else if (currentTab === 'reports') {
+                 const reportBranchFilter = document.getElementById('reportBranch').value;
+                loadOperators(reportBranchFilter);
+            }
+        });
+        socket.on('service_updated', (data) => {
+            showNotification(`Услуга/категория '${data.service_name_uz_lat}' обновлена.`);
+            if (currentTab === 'services') {
+                loadServices();
+            } else if (currentTab === 'assignments') {
+                loadServicesForAssignments();
+            } else if (currentTab === 'reports') {
+                // Reload services for report dropdown
+                loadServices();
+            }
+        });
+         socket.on('tariff_updated', (data) => {
+            showNotification(`Тариф '${data.tariff_name}' обновлен.`);
+            if (currentTab === 'tariffs') {
+                loadTariffs();
+            }
+        });
+
+
+    </script>
+</body>
+</html>

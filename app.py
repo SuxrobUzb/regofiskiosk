@@ -38,7 +38,8 @@ load_dotenv()
 app = Flask(__name__)
 # Secret key for Flask sessions (CRITICAL for security, must be a long random string)
 app.secret_key = os.getenv("FLASK_SECRET_KEY", secrets.token_hex(32))
-
+# Флаг, указывающий, требуется ли настройка супер-администратора
+app.config['SUPER_ADMIN_SETUP_REQUIRED'] = False
 # Session configuration for Flask-Session
 app.config["SESSION_TYPE"] = "filesystem"
 app.config["SESSION_PERMANENT"] = True # Сессии будут постоянными до истечения срока
@@ -66,8 +67,8 @@ QR_CODE_FOLDER = os.getenv("QR_CODE_FOLDER", "qrcodes")
 # Default admin credentials (FOR DEVELOPMENT ONLY, CHANGE IN PRODUCTION IMMEDIATELY!)
 # ВНИМАНИЕ: Для production-среды эти значения должны быть изменены или удалены,
 # а пароль супер-администратора должен устанавливаться при первом запуске!
-ADMIN_USERNAME = os.getenv("ADMIN_USERNAME", "superadmin")
-ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "admin")
+# ADMIN_USERNAME = os.getenv("ADMIN_USERNAME", "superadmin") # Больше не используется для создания
+# ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "admin") # Больше не используется для создания
 # Flask debug mode (set to False for production)
 DEBUG_MODE = os.getenv("DEBUG_MODE", "False").lower() == "true"
 # Flask host and port
@@ -173,11 +174,11 @@ def init_db():
             available_start_time DATETIME, -- Время начала доступности
             available_end_time DATETIME,   -- Время окончания доступности
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            lang TEXT DEFAULT 'uz_lat', -- Добавлено поле для языка пользователя
             UNIQUE(username, branch_id), -- Username unique within a branch
             FOREIGN KEY (branch_id) REFERENCES branches (id) ON DELETE CASCADE
         )
     ''')
-    # Добавление столбцов is_vip и loyalty_points, если они не существуют
     try:
         c.execute("ALTER TABLE users ADD COLUMN is_vip BOOLEAN DEFAULT 0")
         logging.info("Column 'is_vip' added to 'users' table.")
@@ -203,6 +204,11 @@ def init_db():
         logging.info("Column 'available_end_time' added to 'users' table.")
     except sqlite3.OperationalError:
         pass
+    try:
+        c.execute("ALTER TABLE users ADD COLUMN lang TEXT DEFAULT 'uz_lat'")
+        logging.info("Column 'lang' added to 'users' table.")
+    except sqlite3.OperationalError:
+        pass # Column already exists
 
     # Table for Categories (hierarchical service grouping)
     c.execute('''
@@ -350,24 +356,23 @@ def init_db():
     # Индекс для ускорения поиска сессий по session_id
     c.execute("CREATE INDEX IF NOT EXISTS idx_admin_sessions_session_id ON admin_sessions (session_id)")
 
-    # Add Super Admin user if not exists
+    # Check for Super Admin user
     try:
-        # Check if any user with role 'super_admin' exists
         existing_super_admin = conn.execute("SELECT id FROM users WHERE role = 'super_admin' LIMIT 1").fetchone()
         if not existing_super_admin:
-            c.execute("INSERT INTO users (username, password_hash, role, branch_id) VALUES (?, ?, ?, NULL)",
-                      (ADMIN_USERNAME, generate_password_hash(ADMIN_PASSWORD), 'super_admin'))
-            conn.commit()
-            logging.info("Super admin user created.")
+            app.config['SUPER_ADMIN_SETUP_REQUIRED'] = True
+            logging.warning("Super admin user not found. Please navigate to /setup_super_admin to create one.")
         else:
+            app.config['SUPER_ADMIN_SETUP_REQUIRED'] = False
             logging.info("Super admin user already exists.")
-    except sqlite3.IntegrityError:
-        logging.info("Super admin user already exists (due to username unique constraint).")
     except Exception as e:
-        logging.error(f"Error creating super admin: {e}")
+        logging.error(f"Error checking for super admin: {e}")
+        # Potentially set setup_required to true as a fallback if DB check fails
+        app.config['SUPER_ADMIN_SETUP_REQUIRED'] = True
+        logging.warning("Error during super admin check. Assuming setup is required. Navigate to /setup_super_admin.")
 
     conn.commit()
-    conn.close()
+    # conn.close() # Не закрываем здесь, get_db() управляет этим
 
 # --- Authentication Decorators ---
 def login_required(role=None):
@@ -380,6 +385,8 @@ def login_required(role=None):
         def decorated_function(*args, **kwargs):
             if 'admin_session_id' not in session:
                 logging.warning("Access denied: No admin session ID found, redirecting to login.")
+                if app.config.get('SUPER_ADMIN_SETUP_REQUIRED'):
+                    return redirect(url_for('setup_super_admin'))
                 return redirect(url_for('admin_login'))
 
             conn = get_db()
@@ -397,6 +404,8 @@ def login_required(role=None):
                 session.pop('role', None)
                 session.pop('user_id', None)
                 session.pop('branch_id', None)
+                if app.config.get('SUPER_ADMIN_SETUP_REQUIRED'):
+                    return redirect(url_for('setup_super_admin'))
                 return redirect(url_for('admin_login'))
 
             session['user_id'] = user_data['id']
@@ -425,9 +434,72 @@ def login_required(role=None):
 
 # --- Flask Routes ---
 
+@app.route('/setup_super_admin', methods=['GET', 'POST'])
+def setup_super_admin():
+    # Проверяем, действительно ли нужна настройка или супер-админ уже создан
+    with app.app_context():
+        conn = get_db()
+        existing_super_admin = conn.execute("SELECT id FROM users WHERE role = 'super_admin' LIMIT 1").fetchone()
+        if existing_super_admin:
+            app.config['SUPER_ADMIN_SETUP_REQUIRED'] = False # Обновляем флаг, если кто-то создал админа параллельно
+            logging.info("Super admin already exists. Redirecting to login.")
+            return redirect(url_for('admin_login'))
+
+    if not app.config.get('SUPER_ADMIN_SETUP_REQUIRED', True): # Если флаг False, но админа нет (маловероятно)
+        # Эта ветка на случай, если флаг был сброшен, но админ не создался
+        logging.warning("Super admin setup page accessed, but setup flag is false and no admin exists. Re-evaluating.")
+        # Можно добавить повторную проверку и установку флага, если нужно
+        return redirect(url_for('admin_login'))
+
+
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
+        confirm_password = request.form.get('confirm_password')
+
+        if not username or not password or not confirm_password:
+            return render_template('setup_super_admin.html', error="Все поля обязательны."), 400
+        if password != confirm_password:
+            return render_template('setup_super_admin.html', error="Пароли не совпадают."), 400
+        if len(password) < 8: # Простое правило для длины пароля
+            return render_template('setup_super_admin.html', error="Пароль должен быть не менее 8 символов."), 400
+
+        conn = get_db()
+        try:
+            c = conn.cursor()
+            # Еще раз проверим, не создал ли кто-то админа, пока форма была открыта
+            existing_super_admin_check = c.execute("SELECT id FROM users WHERE role = 'super_admin' LIMIT 1").fetchone()
+            if existing_super_admin_check:
+                app.config['SUPER_ADMIN_SETUP_REQUIRED'] = False
+                logging.info("Super admin was created concurrently. Redirecting to login.")
+                return redirect(url_for('admin_login'))
+
+            c.execute("INSERT INTO users (username, password_hash, role, branch_id) VALUES (?, ?, ?, NULL)",
+                      (username, generate_password_hash(password), 'super_admin'))
+            conn.commit()
+            app.config['SUPER_ADMIN_SETUP_REQUIRED'] = False
+            logging.info(f"Super admin user '{username}' created successfully.")
+            # Можно добавить flash сообщение об успехе
+            return redirect(url_for('admin_login')) # Перенаправляем на страницу входа
+        except sqlite3.IntegrityError: # Хотя это не должно произойти из-за проверки выше
+            conn.rollback()
+            logging.error(f"Failed to create super admin '{username}' due to integrity error (should have been caught).")
+            return render_template('setup_super_admin.html', error="Ошибка: Пользователь с таким именем уже существует или другая ошибка целостности."), 409
+        except Exception as e:
+            conn.rollback()
+            logging.error(f"Error creating super admin '{username}': {e}")
+            return render_template('setup_super_admin.html', error=f"Не удалось создать супер-администратора: {e}"), 500
+        # finally: # Managed by teardown_appcontext
+        #     conn.close()
+    
+    # Для GET запроса или если POST неудачен и нужно снова показать форму
+    return render_template('setup_super_admin.html')
+
 @app.route('/')
 def index():
     """Renders the main client-facing service selection page."""
+    if app.config.get('SUPER_ADMIN_SETUP_REQUIRED'):
+        return redirect(url_for('setup_super_admin'))
     return render_template('index.html')
 
 @app.route('/display')
@@ -436,6 +508,8 @@ def display_page():
     Renders the public display board page.
     Requires a branch_id to display specific branch queue.
     """
+    if app.config.get('SUPER_ADMIN_SETUP_REQUIRED'):
+        return redirect(url_for('setup_super_admin'))
     branch_id = request.args.get('branch_id', type=int)
     if not branch_id:
         logging.error("Display page accessed without branch ID.")
@@ -453,25 +527,40 @@ def display_page():
 
 @app.route('/operator')
 @login_required(role='operator')
-def operator_page():
+def operator_page(current_user):
     """Renders the operator dashboard."""
-    return render_template('operator.html')
+    # Флаг SUPER_ADMIN_SETUP_REQUIRED проверяется в login_required
+    return render_template('operator.html', server_url=request.url_root.rstrip('/'))
 
 @app.route('/admin')
 @login_required(role='branch_admin')
-def admin_page():
+def admin_page(current_user):
     """Renders the branch admin dashboard."""
-    return render_template('admin.html')
+    # Флаг SUPER_ADMIN_SETUP_REQUIRED проверяется в login_required
+    return render_template('admin.html', server_url=request.url_root.rstrip('/'))
 
 @app.route('/super_admin')
 @login_required(role='super_admin')
-def super_admin_page():
+def super_admin_page(current_user):
     """Renders the super admin panel for managing branches and global settings."""
-    return render_template('super_admin.html')
+    # Флаг SUPER_ADMIN_SETUP_REQUIRED проверяется в login_required
+    # Если это супер-админ, то страница настройки ему не нужна, он уже настроен
+    return render_template('super_admin.html', server_url=request.url_root.rstrip('/'))
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     """Handles user login for web interface (operators, admins)."""
+    if app.config.get('SUPER_ADMIN_SETUP_REQUIRED'):
+        # Проверяем, не был ли админ создан только что другим запросом
+        with app.app_context(): # Нужно для get_db() вне контекста запроса Flask
+            conn = get_db()
+            existing_super_admin = conn.execute("SELECT id FROM users WHERE role = 'super_admin' LIMIT 1").fetchone()
+            if not existing_super_admin:
+                return redirect(url_for('setup_super_admin'))
+            else: # Админ был создан, сбрасываем флаг
+                app.config['SUPER_ADMIN_SETUP_REQUIRED'] = False
+
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
@@ -522,6 +611,15 @@ def login():
 @app.route('/admin_login', methods=['GET', 'POST'])
 def admin_login():
     """Handles admin specific login (redirects to admin/super_admin dashboard)."""
+    if app.config.get('SUPER_ADMIN_SETUP_REQUIRED'):
+        with app.app_context(): # Нужно для get_db() вне контекста запроса Flask
+            conn = get_db()
+            existing_super_admin = conn.execute("SELECT id FROM users WHERE role = 'super_admin' LIMIT 1").fetchone()
+            if not existing_super_admin:
+                return redirect(url_for('setup_super_admin'))
+            else:
+                app.config['SUPER_ADMIN_SETUP_REQUIRED'] = False
+
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
@@ -569,7 +667,7 @@ def admin_login():
 
 @app.route('/logout')
 @login_required() # Any logged-in user can logout
-def logout():
+def logout(current_user):
     """Logs out the current user by clearing session data."""
     if 'admin_session_id' in session:
         conn = get_db()
@@ -591,6 +689,8 @@ def logout():
 @app.route('/feedback/<string:ticket_id>') # Ticket ID is TEXT (UUID) now
 def feedback_page(ticket_id):
     """Renders the feedback page for a given ticket."""
+    if app.config.get('SUPER_ADMIN_SETUP_REQUIRED'): # Добавлено для последовательности
+        return redirect(url_for('setup_super_admin'))
     conn = get_db()
     ticket = conn.execute("SELECT * FROM tickets WHERE id = ?", (ticket_id,)).fetchone()
     # conn.close()
@@ -602,6 +702,8 @@ def feedback_page(ticket_id):
 @app.route('/dispute/<string:ticket_id>') # Ticket ID is TEXT (UUID) now
 def dispute_page(ticket_id):
     """Renders the dispute page for a given ticket."""
+    if app.config.get('SUPER_ADMIN_SETUP_REQUIRED'): # Добавлено для последовательности
+        return redirect(url_for('setup_super_admin'))
     conn = get_db()
     ticket = conn.execute("SELECT * FROM tickets WHERE id = ?", (ticket_id,)).fetchone()
     # conn.close()
@@ -613,6 +715,8 @@ def dispute_page(ticket_id):
 @app.route('/chat/<string:ticket_id>') # Ticket ID is TEXT (UUID) now
 def chat_page(ticket_id):
     """Renders the chat page for a given ticket."""
+    if app.config.get('SUPER_ADMIN_SETUP_REQUIRED'): # Добавлено для последовательности
+        return redirect(url_for('setup_super_admin'))
     conn = get_db()
     ticket = conn.execute("SELECT * FROM tickets WHERE id = ?", (ticket_id,)).fetchone()
     # conn.close()
@@ -628,6 +732,8 @@ def tg_bot_redirect():
     This route will only work if FLASK_EXTERNAL_URL is set and publicly accessible.
     For local development without ngrok, this link will not work externally.
     """
+    if app.config.get('SUPER_ADMIN_SETUP_REQUIRED'): # Добавлено для последовательности
+        return redirect(url_for('setup_super_admin'))
     ticket_id = request.args.get('ticket_id')
     if ticket_id and TELEGRAM_BOT_USERNAME:
         # Construct the internal URL that the bot will process
@@ -1096,9 +1202,9 @@ def get_users_by_branch(branch_id, current_user):
     return jsonify([dict(row) for row in users])
 
 @app.route('/api/add_user', methods=['POST'])
-@login_required(role='branch_admin')
+@login_required(role='branch_admin') # Super admin can also use this
 def add_user(current_user):
-    """Adds a new user (operator/viewer) for a specific branch."""
+    """Adds a new user (operator/viewer/branch_admin) for a specific branch."""
     data = request.json
     username = data.get('username')
     password = data.get('password')
@@ -3628,4 +3734,4 @@ if __name__ == '__main__':
 
 
     logging.info(f"Flask app starting on {FLASK_RUN_HOST}:{FLASK_RUN_PORT} with debug_mode={DEBUG_MODE}")
-    socketio.run(app, host=FLASK_RUN_HOST, port=FLASK_RUN_PORT, debug=DEBUG_MODE, use_reloader=DEBUG_MODE, allow_unsafe_werkzeug=True if DEBUG_MODE else False)
+    socketio.run(app, host=FLASK_RUN_HOST, port=FLASK_RUN_PORT, debug=DEBUG_MODE, use_reloader=False, log_output=False)
