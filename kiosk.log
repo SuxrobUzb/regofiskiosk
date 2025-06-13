@@ -298,3 +298,308 @@
 2025-06-13 17:09:20,387 - WARNING - Sleep for 5.181302 seconds and try again... (tryings = 54, bot id = 7800821253)
 2025-06-13 17:09:25,693 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
 2025-06-13 17:09:25,694 - WARNING - Sleep for 5.076515 seconds and try again... (tryings = 49, bot id = 7800821253)
+2025-06-13 17:09:30,926 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:09:30,926 - WARNING - Sleep for 5.173026 seconds and try again... (tryings = 55, bot id = 7800821253)
+2025-06-13 17:09:36,219 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:09:36,220 - WARNING - Sleep for 4.774246 seconds and try again... (tryings = 50, bot id = 7800821253)
+2025-06-13 17:09:41,109 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:09:41,109 - WARNING - Sleep for 5.149278 seconds and try again... (tryings = 56, bot id = 7800821253)
+2025-06-13 17:09:46,384 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:09:46,384 - WARNING - Sleep for 5.107838 seconds and try again... (tryings = 51, bot id = 7800821253)
+2025-06-13 17:09:51,613 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:09:51,614 - WARNING - Sleep for 4.874461 seconds and try again... (tryings = 57, bot id = 7800821253)
+2025-06-13 17:09:56,612 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:09:56,612 - WARNING - Sleep for 4.963602 seconds and try again... (tryings = 52, bot id = 7800821253)
+2025-06-13 17:10:01,687 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:10:01,688 - WARNING - Sleep for 5.214441 seconds and try again... (tryings = 58, bot id = 7800821253)
+2025-06-13 17:10:07,031 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:10:07,032 - WARNING - Sleep for 4.957806 seconds and try again... (tryings = 53, bot id = 7800821253)
+2025-06-13 17:10:12,109 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:10:12,114 - WARNING - Sleep for 4.936572 seconds and try again... (tryings = 59, bot id = 7800821253)
+2025-06-13 17:10:17,166 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:10:17,167 - WARNING - Sleep for 5.004908 seconds and try again... (tryings = 54, bot id = 7800821253)
+2025-06-13 17:10:22,295 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:10:22,296 - WARNING - Sleep for 5.162915 seconds and try again... (tryings = 60, bot id = 7800821253)
+2025-06-13 17:10:27,581 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:10:27,581 - WARNING - Sleep for 4.922397 seconds and try again... (tryings = 55, bot id = 7800821253)
+2025-06-13 17:10:32,629 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:10:32,629 - WARNING - Sleep for 5.098324 seconds and try again... (tryings = 61, bot id = 7800821253)
+2025-06-13 17:10:37,843 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:10:37,844 - WARNING - Sleep for 4.960730 seconds and try again... (tryings = 56, bot id = 7800821253)
+2025-06-13 17:10:42,919 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:10:42,920 - WARNING - Sleep for 5.010798 seconds and try again... (tryings = 62, bot id = 7800821253)
+2025-06-13 17:10:48,060 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:10:48,060 - WARNING - Sleep for 4.892171 seconds and try again... (tryings = 57, bot id = 7800821253)
+2025-06-13 17:10:53,074 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:10:53,076 - WARNING - Sleep for 4.884803 seconds and try again... (tryings = 63, bot id = 7800821253)
+2025-06-13 17:10:58,075 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:10:58,075 - WARNING - Sleep for 5.029578 seconds and try again... (tryings = 58, bot id = 7800821253)
+2025-06-13 17:11:03,227 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:11:03,229 - WARNING - Sleep for 5.184745 seconds and try again... (tryings = 64, bot id = 7800821253)
+2025-06-13 17:11:08,543 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:11:08,543 - WARNING - Sleep for 5.149010 seconds and try again... (tryings = 59, bot id = 7800821253)
+2025-06-13 17:11:13,808 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:11:13,809 - WARNING - Sleep for 5.150398 seconds and try again... (tryings = 65, bot id = 7800821253)
+2025-06-13 17:11:19,085 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:11:19,086 - WARNING - Sleep for 5.051328 seconds and try again... (tryings = 60, bot id = 7800821253)
+2025-06-13 17:11:24,263 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:11:24,264 - WARNING - Sleep for 4.776394 seconds and try again... (tryings = 66, bot id = 7800821253)
+2025-06-13 17:11:29,165 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:11:29,168 - WARNING - Sleep for 4.879463 seconds and try again... (tryings = 61, bot id = 7800821253)
+2025-06-13 17:11:34,169 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:11:34,181 - WARNING - Sleep for 4.896768 seconds and try again... (tryings = 67, bot id = 7800821253)
+2025-06-13 17:11:39,217 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:11:39,218 - WARNING - Sleep for 5.171195 seconds and try again... (tryings = 62, bot id = 7800821253)
+2025-06-13 17:11:44,519 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:11:44,534 - WARNING - Sleep for 5.064627 seconds and try again... (tryings = 68, bot id = 7800821253)
+2025-06-13 17:11:49,719 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:11:49,719 - WARNING - Sleep for 5.022761 seconds and try again... (tryings = 63, bot id = 7800821253)
+2025-06-13 17:11:54,862 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:11:54,863 - WARNING - Sleep for 4.846153 seconds and try again... (tryings = 69, bot id = 7800821253)
+2025-06-13 17:11:59,835 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:11:59,835 - WARNING - Sleep for 5.007151 seconds and try again... (tryings = 64, bot id = 7800821253)
+2025-06-13 17:12:04,975 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:12:04,980 - WARNING - Sleep for 4.934044 seconds and try again... (tryings = 70, bot id = 7800821253)
+2025-06-13 17:12:10,035 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:12:10,035 - WARNING - Sleep for 5.043179 seconds and try again... (tryings = 65, bot id = 7800821253)
+2025-06-13 17:12:15,197 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:12:15,198 - WARNING - Sleep for 4.958465 seconds and try again... (tryings = 71, bot id = 7800821253)
+2025-06-13 17:12:20,272 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:12:20,273 - WARNING - Sleep for 4.994417 seconds and try again... (tryings = 66, bot id = 7800821253)
+2025-06-13 17:12:25,393 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:12:25,393 - WARNING - Sleep for 4.872206 seconds and try again... (tryings = 72, bot id = 7800821253)
+2025-06-13 17:12:30,393 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:12:30,394 - WARNING - Sleep for 5.141832 seconds and try again... (tryings = 67, bot id = 7800821253)
+2025-06-13 17:12:35,668 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:12:35,668 - WARNING - Sleep for 4.745084 seconds and try again... (tryings = 73, bot id = 7800821253)
+2025-06-13 17:12:40,551 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:12:40,563 - WARNING - Sleep for 4.930842 seconds and try again... (tryings = 68, bot id = 7800821253)
+2025-06-13 17:12:45,616 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:12:45,617 - WARNING - Sleep for 5.011867 seconds and try again... (tryings = 74, bot id = 7800821253)
+2025-06-13 17:12:50,754 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:12:50,755 - WARNING - Sleep for 5.202689 seconds and try again... (tryings = 69, bot id = 7800821253)
+2025-06-13 17:12:56,081 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:12:56,082 - WARNING - Sleep for 5.059355 seconds and try again... (tryings = 75, bot id = 7800821253)
+2025-06-13 17:13:01,279 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:13:01,279 - WARNING - Sleep for 5.053970 seconds and try again... (tryings = 70, bot id = 7800821253)
+2025-06-13 17:13:06,459 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:13:06,459 - WARNING - Sleep for 4.884524 seconds and try again... (tryings = 76, bot id = 7800821253)
+2025-06-13 17:13:11,475 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:13:11,475 - WARNING - Sleep for 4.971395 seconds and try again... (tryings = 71, bot id = 7800821253)
+2025-06-13 17:13:16,572 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:13:16,651 - WARNING - Sleep for 4.942945 seconds and try again... (tryings = 77, bot id = 7800821253)
+2025-06-13 17:13:21,809 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:13:21,810 - WARNING - Sleep for 5.082451 seconds and try again... (tryings = 72, bot id = 7800821253)
+2025-06-13 17:13:27,012 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:13:27,013 - WARNING - Sleep for 5.179062 seconds and try again... (tryings = 78, bot id = 7800821253)
+2025-06-13 17:13:32,326 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:13:32,326 - WARNING - Sleep for 5.043913 seconds and try again... (tryings = 73, bot id = 7800821253)
+2025-06-13 17:13:37,495 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:13:37,495 - WARNING - Sleep for 5.018682 seconds and try again... (tryings = 79, bot id = 7800821253)
+2025-06-13 17:13:42,649 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:13:42,650 - WARNING - Sleep for 5.106317 seconds and try again... (tryings = 74, bot id = 7800821253)
+2025-06-13 17:13:47,882 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:13:47,883 - WARNING - Sleep for 5.057371 seconds and try again... (tryings = 80, bot id = 7800821253)
+2025-06-13 17:13:53,056 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:13:53,056 - WARNING - Sleep for 4.876206 seconds and try again... (tryings = 75, bot id = 7800821253)
+2025-06-13 17:13:58,047 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:13:58,048 - WARNING - Sleep for 4.958899 seconds and try again... (tryings = 81, bot id = 7800821253)
+2025-06-13 17:14:03,143 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:14:03,144 - WARNING - Sleep for 4.960420 seconds and try again... (tryings = 76, bot id = 7800821253)
+2025-06-13 17:14:08,221 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:14:08,221 - WARNING - Sleep for 5.106863 seconds and try again... (tryings = 82, bot id = 7800821253)
+2025-06-13 17:14:13,441 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:14:13,442 - WARNING - Sleep for 4.977813 seconds and try again... (tryings = 77, bot id = 7800821253)
+2025-06-13 17:14:18,547 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:14:18,551 - WARNING - Sleep for 4.969757 seconds and try again... (tryings = 83, bot id = 7800821253)
+2025-06-13 17:14:23,660 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:14:23,661 - WARNING - Sleep for 4.973712 seconds and try again... (tryings = 78, bot id = 7800821253)
+2025-06-13 17:14:28,755 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:14:28,755 - WARNING - Sleep for 4.838791 seconds and try again... (tryings = 84, bot id = 7800821253)
+2025-06-13 17:14:33,727 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:14:33,728 - WARNING - Sleep for 4.958218 seconds and try again... (tryings = 79, bot id = 7800821253)
+2025-06-13 17:14:38,805 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:14:38,805 - WARNING - Sleep for 4.901015 seconds and try again... (tryings = 85, bot id = 7800821253)
+2025-06-13 17:14:42,390 - WARNING - Failed admin login attempt for username: Suxrob.
+2025-06-13 17:14:43,828 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:14:43,829 - WARNING - Sleep for 5.008005 seconds and try again... (tryings = 80, bot id = 7800821253)
+2025-06-13 17:14:48,959 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:14:48,960 - WARNING - Sleep for 4.893564 seconds and try again... (tryings = 86, bot id = 7800821253)
+2025-06-13 17:14:53,982 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:14:53,982 - WARNING - Sleep for 4.994852 seconds and try again... (tryings = 81, bot id = 7800821253)
+2025-06-13 17:14:59,132 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:14:59,143 - WARNING - Sleep for 5.163634 seconds and try again... (tryings = 87, bot id = 7800821253)
+2025-06-13 17:15:04,426 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:15:04,426 - WARNING - Sleep for 5.005262 seconds and try again... (tryings = 82, bot id = 7800821253)
+2025-06-13 17:15:09,544 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:15:09,544 - WARNING - Sleep for 5.179067 seconds and try again... (tryings = 88, bot id = 7800821253)
+2025-06-13 17:15:14,850 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:15:14,851 - WARNING - Sleep for 5.035083 seconds and try again... (tryings = 83, bot id = 7800821253)
+2025-06-13 17:15:18,044 - WARNING - Failed admin login attempt for username: Suxrob.
+2025-06-13 17:15:20,006 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:15:20,006 - WARNING - Sleep for 4.962360 seconds and try again... (tryings = 89, bot id = 7800821253)
+2025-06-13 17:15:25,096 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:15:25,096 - WARNING - Sleep for 5.076995 seconds and try again... (tryings = 84, bot id = 7800821253)
+2025-06-13 17:15:30,298 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:15:30,298 - WARNING - Sleep for 5.048185 seconds and try again... (tryings = 90, bot id = 7800821253)
+2025-06-13 17:15:35,486 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:15:35,486 - WARNING - Sleep for 4.970151 seconds and try again... (tryings = 85, bot id = 7800821253)
+2025-06-13 17:15:40,577 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:15:40,577 - WARNING - Sleep for 4.974337 seconds and try again... (tryings = 91, bot id = 7800821253)
+2025-06-13 17:15:45,676 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:15:45,677 - WARNING - Sleep for 5.052773 seconds and try again... (tryings = 86, bot id = 7800821253)
+2025-06-13 17:15:50,862 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:15:50,863 - WARNING - Sleep for 4.907568 seconds and try again... (tryings = 92, bot id = 7800821253)
+2025-06-13 17:15:55,888 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:15:55,889 - WARNING - Sleep for 5.169831 seconds and try again... (tryings = 87, bot id = 7800821253)
+2025-06-13 17:16:01,174 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:16:01,174 - WARNING - Sleep for 4.966261 seconds and try again... (tryings = 93, bot id = 7800821253)
+2025-06-13 17:16:06,264 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:16:06,265 - WARNING - Sleep for 5.011993 seconds and try again... (tryings = 88, bot id = 7800821253)
+2025-06-13 17:16:11,400 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:16:11,401 - WARNING - Sleep for 4.810901 seconds and try again... (tryings = 94, bot id = 7800821253)
+2025-06-13 17:16:16,330 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:16:16,330 - WARNING - Sleep for 5.108908 seconds and try again... (tryings = 89, bot id = 7800821253)
+2025-06-13 17:16:21,551 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:16:21,552 - WARNING - Sleep for 5.110981 seconds and try again... (tryings = 95, bot id = 7800821253)
+2025-06-13 17:16:26,787 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:16:26,787 - WARNING - Sleep for 5.212563 seconds and try again... (tryings = 90, bot id = 7800821253)
+2025-06-13 17:16:32,132 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:16:32,133 - WARNING - Sleep for 5.062059 seconds and try again... (tryings = 96, bot id = 7800821253)
+2025-06-13 17:16:37,319 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:16:37,319 - WARNING - Sleep for 5.194182 seconds and try again... (tryings = 91, bot id = 7800821253)
+2025-06-13 17:16:42,639 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:16:42,644 - WARNING - Sleep for 4.966322 seconds and try again... (tryings = 97, bot id = 7800821253)
+2025-06-13 17:16:47,726 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:16:47,726 - WARNING - Sleep for 4.943683 seconds and try again... (tryings = 92, bot id = 7800821253)
+2025-06-13 17:16:52,789 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:16:52,790 - WARNING - Sleep for 4.990465 seconds and try again... (tryings = 98, bot id = 7800821253)
+2025-06-13 17:16:58,132 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:16:58,132 - WARNING - Sleep for 4.903061 seconds and try again... (tryings = 93, bot id = 7800821253)
+2025-06-13 17:17:03,160 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:17:03,162 - WARNING - Sleep for 4.825627 seconds and try again... (tryings = 99, bot id = 7800821253)
+2025-06-13 17:17:08,105 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:17:08,106 - WARNING - Sleep for 5.122703 seconds and try again... (tryings = 94, bot id = 7800821253)
+2025-06-13 17:17:13,345 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:17:13,346 - WARNING - Sleep for 4.889955 seconds and try again... (tryings = 100, bot id = 7800821253)
+2025-06-13 17:17:18,350 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:17:18,351 - WARNING - Sleep for 5.068035 seconds and try again... (tryings = 95, bot id = 7800821253)
+2025-06-13 17:17:23,539 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:17:23,540 - WARNING - Sleep for 5.132571 seconds and try again... (tryings = 101, bot id = 7800821253)
+2025-06-13 17:17:28,789 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:17:28,797 - WARNING - Sleep for 5.077779 seconds and try again... (tryings = 96, bot id = 7800821253)
+2025-06-13 17:17:34,033 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:17:34,033 - WARNING - Sleep for 5.143571 seconds and try again... (tryings = 102, bot id = 7800821253)
+2025-06-13 17:17:39,293 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:17:39,294 - WARNING - Sleep for 4.957787 seconds and try again... (tryings = 97, bot id = 7800821253)
+2025-06-13 17:17:44,376 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:17:44,377 - WARNING - Sleep for 4.884928 seconds and try again... (tryings = 103, bot id = 7800821253)
+2025-06-13 17:17:49,375 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:17:49,375 - WARNING - Sleep for 4.982882 seconds and try again... (tryings = 98, bot id = 7800821253)
+2025-06-13 17:17:54,474 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:17:54,476 - WARNING - Sleep for 5.023719 seconds and try again... (tryings = 104, bot id = 7800821253)
+2025-06-13 17:17:59,623 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:17:59,625 - WARNING - Sleep for 5.022066 seconds and try again... (tryings = 99, bot id = 7800821253)
+2025-06-13 17:18:04,774 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:18:04,775 - WARNING - Sleep for 4.849613 seconds and try again... (tryings = 105, bot id = 7800821253)
+2025-06-13 17:18:09,753 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:18:09,753 - WARNING - Sleep for 5.120150 seconds and try again... (tryings = 100, bot id = 7800821253)
+2025-06-13 17:18:14,999 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:18:14,999 - WARNING - Sleep for 5.036928 seconds and try again... (tryings = 106, bot id = 7800821253)
+2025-06-13 17:18:20,147 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:18:20,147 - WARNING - Sleep for 5.092183 seconds and try again... (tryings = 101, bot id = 7800821253)
+2025-06-13 17:18:25,358 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:18:25,359 - WARNING - Sleep for 4.962757 seconds and try again... (tryings = 107, bot id = 7800821253)
+2025-06-13 17:18:30,462 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:18:30,462 - WARNING - Sleep for 5.043450 seconds and try again... (tryings = 102, bot id = 7800821253)
+2025-06-13 17:18:35,846 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:18:35,846 - WARNING - Sleep for 5.225531 seconds and try again... (tryings = 108, bot id = 7800821253)
+2025-06-13 17:18:41,189 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:18:41,189 - WARNING - Sleep for 4.996081 seconds and try again... (tryings = 103, bot id = 7800821253)
+2025-06-13 17:18:46,311 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:18:46,311 - WARNING - Sleep for 4.863014 seconds and try again... (tryings = 109, bot id = 7800821253)
+2025-06-13 17:18:51,300 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:18:51,300 - WARNING - Sleep for 4.896559 seconds and try again... (tryings = 104, bot id = 7800821253)
+2025-06-13 17:18:56,320 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:18:56,321 - WARNING - Sleep for 5.064565 seconds and try again... (tryings = 110, bot id = 7800821253)
+2025-06-13 17:19:01,499 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:19:01,499 - WARNING - Sleep for 4.822724 seconds and try again... (tryings = 105, bot id = 7800821253)
+2025-06-13 17:19:06,441 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:19:06,441 - WARNING - Sleep for 5.004500 seconds and try again... (tryings = 111, bot id = 7800821253)
+2025-06-13 17:19:11,570 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:19:11,582 - WARNING - Sleep for 4.991001 seconds and try again... (tryings = 106, bot id = 7800821253)
+2025-06-13 17:19:16,700 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:19:16,701 - WARNING - Sleep for 4.847169 seconds and try again... (tryings = 112, bot id = 7800821253)
+2025-06-13 17:19:21,677 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:19:21,679 - WARNING - Sleep for 5.091046 seconds and try again... (tryings = 107, bot id = 7800821253)
+2025-06-13 17:19:26,897 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:19:26,898 - WARNING - Sleep for 4.913881 seconds and try again... (tryings = 113, bot id = 7800821253)
+2025-06-13 17:19:31,925 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:19:31,925 - WARNING - Sleep for 5.022974 seconds and try again... (tryings = 108, bot id = 7800821253)
+2025-06-13 17:19:37,084 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:19:37,106 - WARNING - Sleep for 5.126902 seconds and try again... (tryings = 114, bot id = 7800821253)
+2025-06-13 17:19:42,363 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:19:42,367 - WARNING - Sleep for 5.110283 seconds and try again... (tryings = 109, bot id = 7800821253)
+2025-06-13 17:19:47,599 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:19:47,600 - WARNING - Sleep for 4.961287 seconds and try again... (tryings = 115, bot id = 7800821253)
+2025-06-13 17:19:52,678 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:19:52,678 - WARNING - Sleep for 4.926927 seconds and try again... (tryings = 110, bot id = 7800821253)
+2025-06-13 17:19:57,721 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:19:57,722 - WARNING - Sleep for 4.850027 seconds and try again... (tryings = 116, bot id = 7800821253)
+2025-06-13 17:20:02,692 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:20:02,695 - WARNING - Sleep for 4.950691 seconds and try again... (tryings = 111, bot id = 7800821253)
+2025-06-13 17:20:07,766 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:20:07,766 - WARNING - Sleep for 4.763168 seconds and try again... (tryings = 117, bot id = 7800821253)
+2025-06-13 17:20:12,653 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:20:12,654 - WARNING - Sleep for 5.052720 seconds and try again... (tryings = 112, bot id = 7800821253)
+2025-06-13 17:20:17,842 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:20:17,843 - WARNING - Sleep for 4.968059 seconds and try again... (tryings = 118, bot id = 7800821253)
+2025-06-13 17:20:22,924 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:20:22,924 - WARNING - Sleep for 5.043499 seconds and try again... (tryings = 113, bot id = 7800821253)
+2025-06-13 17:20:28,088 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:20:28,089 - WARNING - Sleep for 4.955485 seconds and try again... (tryings = 119, bot id = 7800821253)
+2025-06-13 17:20:33,162 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:20:33,162 - WARNING - Sleep for 4.931121 seconds and try again... (tryings = 114, bot id = 7800821253)
+2025-06-13 17:20:38,219 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:20:38,220 - WARNING - Sleep for 5.039068 seconds and try again... (tryings = 120, bot id = 7800821253)
+2025-06-13 17:20:43,373 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:20:43,374 - WARNING - Sleep for 4.977039 seconds and try again... (tryings = 115, bot id = 7800821253)
+2025-06-13 17:20:48,479 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:20:48,480 - WARNING - Sleep for 4.964509 seconds and try again... (tryings = 121, bot id = 7800821253)
+2025-06-13 17:20:53,571 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:20:53,572 - WARNING - Sleep for 4.990384 seconds and try again... (tryings = 116, bot id = 7800821253)
+2025-06-13 17:20:58,683 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:20:58,684 - WARNING - Sleep for 5.085760 seconds and try again... (tryings = 122, bot id = 7800821253)
+2025-06-13 17:21:03,891 - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-06-13 17:21:03,891 - WARNING - Sleep for 4.851586 seconds and try again... (tryings = 117, bot id = 7800821253)
+2025-06-13 17:21:26,713 - INFO - Telegram Bot (Aiogram) успешно инициализирован для режима polling.
+2025-06-13 17:21:26,714 - ERROR - Error decoding translations.json: Expecting ',' delimiter: line 14 column 41 (char 894).
+2025-06-13 17:21:27,078 - INFO - Super admin user created.
+2025-06-13 17:21:27,079 - INFO - Running in Werkzeug reloader parent process. Background tasks will NOT be started here.
+2025-06-13 17:21:27,079 - INFO - Flask app starting on 0.0.0.0:5000 with debug_mode=True
+2025-06-13 17:23:04,924 - INFO - Telegram Bot (Aiogram) успешно инициализирован для режима polling.
+2025-06-13 17:23:04,925 - ERROR - Error decoding translations.json: Expecting ',' delimiter: line 14 column 41 (char 894).
+2025-06-13 17:23:04,982 - INFO - Super admin user already exists.
+2025-06-13 17:23:04,983 - INFO - Running in Werkzeug reloader parent process. Background tasks will NOT be started here.
+2025-06-13 17:23:04,983 - INFO - Flask app starting on 0.0.0.0:5000 with debug_mode=True
+2025-06-13 17:23:04,996 - INFO -  * Restarting with stat
+2025-06-13 17:23:12,120 - INFO - Telegram Bot (Aiogram) успешно инициализирован для режима polling.
+2025-06-13 17:23:12,121 - ERROR - Error decoding translations.json: Expecting ',' delimiter: line 14 column 41 (char 894).
+2025-06-13 17:23:12,165 - INFO - Super admin user already exists.
+2025-06-13 17:23:12,166 - INFO - Running in Werkzeug reloader child process. Background tasks will be started.
+2025-06-13 17:23:12,166 - INFO - Preparing to start Telegram bot thread.
+2025-06-13 17:23:12,167 - INFO - Initial old ticket cleanup scheduled in 60 seconds.
+2025-06-13 17:23:12,168 - INFO - Flask app starting on 0.0.0.0:5000 with debug_mode=True
+2025-06-13 17:23:12,172 - INFO - Starting Telegram bot polling...
+2025-06-13 17:23:12,172 - INFO - Start polling
+2025-06-13 17:23:12,186 - WARNING -  * Debugger is active!
+2025-06-13 17:23:12,204 - INFO -  * Debugger PIN: 817-917-368
+2025-06-13 17:23:13,646 - INFO - Run polling for bot @regofficesamdukf_bot id=7800821253 - 'regofficesamdukf'
+2025-06-13 17:23:13,770 - ERROR - Telegram user 6148272773 not found and no branches exist in DB. Cannot assign branch_id.
+2025-06-13 17:23:13,771 - ERROR - Could not find or assign branch_id for Telegram user 6148272773. Update ignored.
+2025-06-13 17:23:16,175 - INFO - Update id=281278977 is handled. Duration 2406 ms by bot id=7800821253
+2025-06-13 17:24:12,178 - INFO - No old tickets to clean up older than 2025-06-06.
+2025-06-13 17:24:12,179 - INFO - Next old ticket cleanup scheduled in 24 hours.
+2025-06-13 17:32:01,645 - ERROR - Telegram user 6148272773 not found and no branches exist in DB. Cannot assign branch_id.
+2025-06-13 17:32:01,646 - ERROR - Could not find or assign branch_id for Telegram user 6148272773. Update ignored.
+2025-06-13 17:32:02,018 - INFO - Update id=281278978 is handled. Duration 375 ms by bot id=7800821253

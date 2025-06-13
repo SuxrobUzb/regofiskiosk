@@ -126,23 +126,44 @@
             <button type="submit">Kirish</button>
         </form>
     </div>
-    <script>
+<script>
         const translations = {
             uz_lat: { title: "Admin login", login: "Login", password: "Parol", submit: "Kirish" },
             uz_cyr: { title: "Админ кириш", login: "Логин", password: "Парол", submit: "Кириш" },
             ru: { title: "Вход для админа", login: "Логин", password: "Пароль", submit: "Войти" },
             en: { title: "Admin login", login: "Username", password: "Password", submit: "Login" }
         };
-        let currentLang = "uz_lat";
+        // Load preferred language from localStorage or default to 'uz_lat'
+        let currentLang = localStorage.getItem("preferredLang") || "uz_lat";
 
         function setLanguage(lang) {
             currentLang = lang;
+            localStorage.setItem("preferredLang", lang); // Save language preference
+
             document.querySelectorAll(".lang-btn").forEach(btn => btn.classList.remove("active"));
-            document.querySelector(`button[onclick="setLanguage('${lang}')"]`).classList.add("active");
-            document.getElementById("title").innerText = translations[lang].title;
-            document.querySelector("input[name='username']").placeholder = translations[lang].login;
-            document.querySelector("input[name='password']").placeholder = translations[lang].password;
-            document.querySelector("button[type='submit']").innerText = translations[lang].submit;
+            const activeButton = document.querySelector(`button[onclick="setLanguage('${lang}')"]`);
+            if (activeButton) {
+                activeButton.classList.add("active");
+            }
+
+            const T = translations[lang];
+            document.title = T.title; // Update browser tab title
+            document.getElementById("title").innerText = T.title; // Update H1 title
+            
+            const usernameInput = document.querySelector("input[name='username']");
+            if (usernameInput) {
+                usernameInput.placeholder = T.login;
+            }
+            
+            const passwordInput = document.querySelector("input[name='password']");
+            if (passwordInput) {
+                passwordInput.placeholder = T.password;
+            }
+            
+            const submitButton = document.querySelector("button[type='submit']");
+            if (submitButton) {
+                submitButton.innerText = T.submit;
+            }
         }
 
         function toggleTheme() {
@@ -152,11 +173,16 @@
             document.querySelector(".theme-toggle").innerText = isDark ? "☀️" : "🌙";
         }
 
+        // Initial theme setup
         if (localStorage.getItem("theme") === "dark") {
             document.body.classList.add("dark");
             document.querySelector(".theme-toggle").innerText = "☀️";
+        } else {
+            document.body.classList.remove("dark"); // Ensure light theme if not dark
+            document.querySelector(".theme-toggle").innerText = "🌙";
         }
 
+        // Initial language setup
         setLanguage(currentLang);
     </script>
 </body>

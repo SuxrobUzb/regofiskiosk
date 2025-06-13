@@ -3513,19 +3513,43 @@ def register_aiogram_handlers(dp: Dispatcher):
 
 # --- Telegram Bot Polling Function ---
 async def run_telegram_bot():
-    """Starts the Telegram bot polling."""
     if dp and bot:
         register_aiogram_handlers(dp)
         logging.info("Starting Telegram bot polling...")
         try:
             await dp.start_polling(bot, allowed_updates=dp.resolve_used_update_types())
+        except asyncio.CancelledError:
+            logging.info("Telegram bot polling was cancelled.")
         except Exception as e:
-            logging.error(f"Telegram bot polling error: {e}", exc_info=True)
+            logging.error(f"Telegram bot polling loop error: {e}", exc_info=True)
         finally:
-            await bot.session.close()
-            logging.info("Telegram bot polling stopped.")
+            logging.info("Telegram bot polling loop finishing. Cleaning up...")
+            if bot and hasattr(bot, 'session') and bot.session and not bot.session.closed:
+                try:
+                    await bot.session.close()
+                    logging.info("Telegram bot session closed successfully.")
+                except Exception as e_close:
+                    logging.error(f"Error closing bot session: {e_close}", exc_info=True)
+            # If using persistent storage that needs explicit closing:
+            # if dp and hasattr(dp, 'storage') and hasattr(dp.storage, 'close'):
+            #     try:
+            #         await dp.storage.close()
+            #         logging.info("Telegram bot storage closed successfully.")
+            #     except Exception as e_storage_close:
+            #         logging.error(f"Error closing bot storage: {e_storage_close}", exc_info=True)
+            logging.info("Telegram bot polling stopped and cleaned up.")
     else:
         logging.warning("Telegram bot (dp or bot) is not initialized. Polling not started.")
+
+def bot_thread_target():
+    try:
+        asyncio.run(run_telegram_bot())
+    except KeyboardInterrupt:
+        logging.info("Bot thread target interrupted by KeyboardInterrupt.")
+    except SystemExit:
+        logging.info("Bot thread target received SystemExit.")
+    except Exception as e:
+        logging.error(f"Exception in bot_thread_target: {e}", exc_info=True)
 
 # --- Background Task for Cleaning Old Tickets ---
 def clean_old_tickets():
@@ -3574,21 +3598,34 @@ if __name__ == '__main__':
     with app.app_context():
         init_db() # Initialize database schema and superadmin
 
-    # Start Telegram bot in a separate thread if token is provided
-    if TELEGRAM_BOT_TOKEN and dp and bot:
-        bot_thread = Thread(target=lambda: asyncio.run(run_telegram_bot()), daemon=True)
-        bot_thread.start()
+    # Start Telegram bot in a separate thread only in the main Werkzeug process or if not in debug mode
+    # This helps prevent the reloader from starting multiple bot instances.
+    should_run_background_tasks = False
+    if os.environ.get("WERKZEUG_RUN_MAIN") == "true": # Executing in the reloader's child process
+        should_run_background_tasks = True
+        logging.info("Running in Werkzeug reloader child process. Background tasks will be started.")
+    elif not DEBUG_MODE: # Not in debug mode (reloader likely off)
+        should_run_background_tasks = True
+        logging.info("Running without Werkzeug reloader or debug mode is off. Background tasks will be started.")
     else:
-        logging.warning("Telegram bot will not run as TELEGRAM_BOT_TOKEN is not set or bot failed to initialize.")
+        logging.info("Running in Werkzeug reloader parent process. Background tasks will NOT be started here.")
 
-    # Start periodic cleanup of old tickets
-    initial_cleanup_delay_seconds = 60 # Start first cleanup 1 minute after app start
-    Timer(initial_cleanup_delay_seconds, clean_old_tickets).start()
-    logging.info(f"Initial old ticket cleanup scheduled in {initial_cleanup_delay_seconds} seconds.")
+    if should_run_background_tasks:
+        if TELEGRAM_BOT_TOKEN and dp and bot:
+            logging.info("Preparing to start Telegram bot thread.")
+            bot_thread = Thread(target=bot_thread_target, daemon=True)
+            bot_thread.start()
+        else:
+            logging.warning("Telegram bot will not run as TELEGRAM_BOT_TOKEN is not set or bot failed to initialize.")
+
+        # Start periodic cleanup of old tickets
+        initial_cleanup_delay_seconds = 60 # Start first cleanup 1 minute after app start
+        Timer(initial_cleanup_delay_seconds, clean_old_tickets).start()
+        logging.info(f"Initial old ticket cleanup scheduled in {initial_cleanup_delay_seconds} seconds.")
+    else:
+        # This block executes if it's the parent process of the reloader
+        pass
 
 
     logging.info(f"Flask app starting on {FLASK_RUN_HOST}:{FLASK_RUN_PORT} with debug_mode={DEBUG_MODE}")
-    # Use SocketIO's run method for development server
-    # For production, use a proper WSGI server like Gunicorn with eventlet or gevent
-    # Example: gunicorn --worker-class eventlet -w 1 module:app
-    socketio.run(app, host=FLASK_RUN_HOST, port=FLASK_RUN_PORT, debug=DEBUG_MODE)
+    socketio.run(app, host=FLASK_RUN_HOST, port=FLASK_RUN_PORT, debug=DEBUG_MODE, use_reloader=DEBUG_MODE, allow_unsafe_werkzeug=True if DEBUG_MODE else False)

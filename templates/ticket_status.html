@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Ticket Status</title>
+    <title id="pageTitle">Ticket Status</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
@@ -23,6 +23,7 @@
             --primary: #1a73e8;
             --secondary: #34c759;
             --danger: #e53e3e;
+            --warning: #f5a623; /* Added for redirected status */
         }
         body.dark {
             --bg: #1a202c;
@@ -31,6 +32,7 @@
             --primary: #63b3ed;
             --secondary: #68d391;
             --danger: #f56565;
+            --warning: #f6ad49; /* Added for redirected status */
         }
         .container {
             background: var(--card-bg);
@@ -43,21 +45,35 @@
         }
         h1 { font-size: 24px; font-weight: 600; color: var(--primary); margin-bottom: 20px; }
         .status-box {
-            background: #edf2f7;
+            background: #edf2f7; /* Default background for status box */
             border-radius: 8px;
             padding: 16px;
             margin-bottom: 20px;
             font-size: 16px;
+            text-align: left; /* Align text to left for better readability */
         }
         .dark .status-box { background: #4a5568; }
         .status-box p { margin: 8px 0; }
+        .status-box strong { color: var(--primary); }
+        .dark .status-box strong { color: var(--primary); } /* Ensure strong color in dark mode */
+
+        /* Status-specific styling */
+        .status-waiting { color: var(--primary); font-weight: bold; }
+        .status-called { color: var(--secondary); font-weight: bold; }
+        .status-finished { color: #718096; font-weight: bold; } /* Grey for finished */
+        .dark .status-finished { color: #a0aec0; }
+        .status-cancelled { color: var(--danger); font-weight: bold; }
+        .status-redirected { color: var(--warning); font-weight: bold; }
+
+
         .buttons { 
             display: flex; 
             flex-wrap: wrap; 
             gap: 12px; 
             justify-content: center; 
+            margin-top: 20px;
         }
-        button {
+        button.action-btn { /* More specific selector */
             padding: 12px 24px;
             border: none;
             border-radius: 8px;
@@ -71,10 +87,16 @@
         }
         .chat-btn { background: var(--primary); }
         .chat-btn:hover { background: #1666c5; }
+        .dark .chat-btn:hover { background: #4299e1; }
+
         .feedback-btn { background: var(--secondary); }
         .feedback-btn:hover { background: #2fb34e; }
+        .dark .feedback-btn:hover { background: #48bb78; }
+
         .dispute-btn { background: var(--danger); }
         .dispute-btn:hover { background: #c53030; }
+        .dark .dispute-btn:hover { background: #e53e3e; }
+
         .controls {
             position: fixed;
             top: 20px;
@@ -85,18 +107,16 @@
         }
         .lang-btn, .theme-toggle {
             padding: 8px 16px;
-            background: #ffffff;
+            background: var(--card-bg); /* Use card-bg for consistency */
             border: 1px solid #e2e8f0;
             border-radius: 8px;
             font-size: 14px;
-            color: #4a5568;
+            color: var(--text); /* Use text color */
             cursor: pointer;
             transition: all 0.2s;
         }
         .dark .lang-btn, .dark .theme-toggle { 
-            background: #2d3748; 
             border-color: #4a5568; 
-            color: #e2e8f0; 
         }
         .lang-btn:hover, .theme-toggle:hover { background: #eef4fd; }
         .dark .lang-btn:hover, .dark .theme-toggle:hover { background: #4a5568; }
@@ -123,7 +143,7 @@
             .container { padding: 16px; }
             h1 { font-size: 20px; }
             .status-box { font-size: 14px; }
-            button { 
+            button.action-btn { 
                 padding: 10px 16px; 
                 font-size: 14px; 
                 flex: 1 1 100%; 
@@ -133,6 +153,7 @@
                 top: 10px; 
                 right: 10px; 
                 flex-wrap: wrap; 
+                justify-content: flex-end;
             }
             .lang-btn, .theme-toggle { 
                 padding: 6px 12px; 
@@ -144,37 +165,40 @@
 <body>
     <div class="controls">
         <button class="lang-btn active" onclick="setLanguage('uz_lat')">Uz (Lat)</button>
-        <button class="lang-btn" onclick="setLanguage('uz_cyr')">Ўз (Кирилл)</button>
+        <button class="lang-btn" onclick="setLanguage('uz_cyr')">Ўз (Кир)</button>
         <button class="lang-btn" onclick="setLanguage('ru')">Ру</button>
         <button class="lang-btn" onclick="setLanguage('en')">En</button>
         <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
     </div>
     <div class="container">
-        <h1 id="title">Talon holati</h1>
+        <h1 id="mainTitle">Talon holati</h1>
         <div class="status-box" id="statusBox">
-            <p id="statusTicket">Loading...</p>
-            <p id="statusService"></p>
-            <p id="statusPosition"></p>
-            <p id="statusWaitTime"></p>
-            <p id="statusOperator"></p>
-            <p id="statusStatus"></p>
+            <p id="statusLoading">{{ translations.uz_lat.loading }}</p>
+            <p id="statusTicketNumber" style="display: none;"></p>
+            <p id="statusService" style="display: none;"></p>
+            <p id="statusOperator" style="display: none;"></p>
+            <p id="statusCurrentStatus" style="display: none;"></p>
+            <p id="statusPosition" style="display: none;"></p>
+            <p id="statusWaitTime" style="display: none;"></p>
+            <p id="statusIssuedAt" style="display: none;"></p>
         </div>
         <div class="buttons">
-            <button class="chat-btn" onclick="openChat()" id="chatBtn">Chat with Operator</button>
-            <button class="feedback-btn" onclick="openFeedback()" id="feedbackBtn">Evaluate Operator</button>
-            <button class="dispute-btn" onclick="openDispute()" id="disputeBtn">File a Dispute</button>
+            <button class="action-btn chat-btn" id="chatBtn" style="display: none;">Operator bilan suhbat</button>
+            <button class="action-btn feedback-btn" id="feedbackBtn" style="display: none;">Operatorni baholash</button>
+            <button class="action-btn dispute-btn" id="disputeBtn" style="display: none;">Shikoyat yuborish</button>
         </div>
     </div>
     <script>
         const translations = {
             uz_lat: {
-                title: "Talon holati",
-                ticket: "Talon",
-                service: "Xizmat",
-                position: "Navbatdagi o‘rningiz",
-                wait_time: "Taxminiy kutish vaqti",
-                operator: "Operator",
-                status: "Holati",
+                main_title: "Talon holati",
+                ticket_label: "Talon",
+                service_label: "Xizmat",
+                operator_label: "Operator",
+                status_label: "Holat",
+                position_label: "Navbatdagi o‘rningiz",
+                wait_time_label: "Taxminiy kutish vaqti",
+                issued_at_label: "Berilgan vaqti",
                 chat: "Operator bilan suhbat",
                 feedback: "Operatorni baholash",
                 dispute: "Shikoyat yuborish",
@@ -182,16 +206,22 @@
                 error: "Xatolik yuz berdi",
                 not_found: "Talon topilmadi",
                 no_operator: "Operator tayinlanmagan",
-                minutes: "daqiqa"
+                minutes: "daqiqa",
+                status_waiting: "Kutilmoqda",
+                status_called: "Chaqirildi",
+                status_finished: "Yakunlandi",
+                status_cancelled: "Bekor qilindi",
+                status_redirected: "Yo‘naltirildi"
             },
             uz_cyr: {
-                title: "Талон ҳолати",
-                ticket: "Талон",
-                service: "Хизмат",
-                position: "Навбатдаги ўрнингиз",
-                wait_time: "Тахминий кутиш вақти",
-                operator: "Оператор",
-                status: "Ҳолати",
+                main_title: "Талон ҳолати",
+                ticket_label: "Талон",
+                service_label: "Хизмат",
+                operator_label: "Оператор",
+                status_label: "Ҳолат",
+                position_label: "Навбатдаги ўрнингиз",
+                wait_time_label: "Тахминий кутиш вақти",
+                issued_at_label: "Берилган вақти",
                 chat: "Оператор билан суҳбат",
                 feedback: "Операторни баҳолаш",
                 dispute: "Шикоят юбориш",
@@ -199,16 +229,22 @@
                 error: "Хатолик юз берди",
                 not_found: "Талон топилмади",
                 no_operator: "Оператор тайинланмаган",
-                minutes: "дақиқа"
+                minutes: "дақиқа",
+                status_waiting: "Кутилмоқда",
+                status_called: "Чақирилди",
+                status_finished: "Якунланди",
+                status_cancelled: "Бекор қилинди",
+                status_redirected: "Йўналтирилди"
             },
             ru: {
-                title: "Статус талона",
-                ticket: "Талон",
-                service: "Услуга",
-                position: "Ваше место в очереди",
-                wait_time: "Примерное время ожидания",
-                operator: "Оператор",
-                status: "Статус",
+                main_title: "Статус талона",
+                ticket_label: "Талон",
+                service_label: "Услуга",
+                operator_label: "Оператор",
+                status_label: "Статус",
+                position_label: "Ваше место в очереди",
+                wait_time_label: "Примерное время ожидания",
+                issued_at_label: "Время выдачи",
                 chat: "Чат с оператором",
                 feedback: "Оценить оператора",
                 dispute: "Подать жалобу",
@@ -216,16 +252,22 @@
                 error: "Произошла ошибка",
                 not_found: "Талон не найден",
                 no_operator: "Оператор не назначен",
-                minutes: "минут"
+                minutes: "минут",
+                status_waiting: "В ожидании",
+                status_called: "Вызван",
+                status_finished: "Завершен",
+                status_cancelled: "Отменен",
+                status_redirected: "Перенаправлен"
             },
             en: {
-                title: "Ticket Status",
-                ticket: "Ticket",
-                service: "Service",
-                position: "Your position in queue",
-                wait_time: "Estimated wait time",
-                operator: "Operator",
-                status: "Status",
+                main_title: "Ticket Status",
+                ticket_label: "Ticket",
+                service_label: "Service",
+                operator_label: "Operator",
+                status_label: "Status",
+                position_label: "Your position in queue",
+                wait_time_label: "Estimated wait time",
+                issued_at_label: "Issued At",
                 chat: "Chat with Operator",
                 feedback: "Evaluate Operator",
                 dispute: "File a Dispute",
@@ -233,97 +275,135 @@
                 error: "An error occurred",
                 not_found: "Ticket not found",
                 no_operator: "No operator assigned",
-                minutes: "minutes"
+                minutes: "minutes",
+                status_waiting: "Waiting",
+                status_called: "Called",
+                status_finished: "Finished",
+                status_cancelled: "Cancelled",
+                status_redirected: "Redirected"
             }
         };
-        let currentLang = 'uz_lat';
+        let currentLang = 'uz_lat'; // Default language
         const serverUrl = '{{ server_url }}';
         const ticketNumber = '{{ ticket_number }}';
+
+        const statusLoadingEl = document.getElementById('statusLoading');
+        const statusTicketNumberEl = document.getElementById('statusTicketNumber');
+        const statusServiceEl = document.getElementById('statusService');
+        const statusOperatorEl = document.getElementById('statusOperator');
+        const statusCurrentStatusEl = document.getElementById('statusCurrentStatus');
+        const statusPositionEl = document.getElementById('statusPosition');
+        const statusWaitTimeEl = document.getElementById('statusWaitTime');
+        const statusIssuedAtEl = document.getElementById('statusIssuedAt');
+
+        const chatBtn = document.getElementById('chatBtn');
+        const feedbackBtn = document.getElementById('feedbackBtn');
+        const disputeBtn = document.getElementById('disputeBtn');
 
         async function fetchStatus() {
             try {
                 const response = await fetch(`${serverUrl}/ticket_status/${ticketNumber}`);
-                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                if (!response.ok) {
+                    if (response.status === 404) {
+                        throw new Error('404');
+                    }
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
                 const data = await response.json();
                 updateStatus(data);
+                statusLoadingEl.style.display = 'none';
+                [statusTicketNumberEl, statusServiceEl, statusOperatorEl, statusCurrentStatusEl, statusPositionEl, statusWaitTimeEl, statusIssuedAtEl].forEach(el => el.style.display = 'block');
+
             } catch (error) {
                 console.error('Error fetching ticket status:', error);
-                document.getElementById('statusBox').innerHTML = `
-                    <p>${translations[currentLang].error}: ${error.message.includes('404') ? translations[currentLang].not_found : error.message}</p>
-                `;
+                statusLoadingEl.style.display = 'block';
+                [statusTicketNumberEl, statusServiceEl, statusOperatorEl, statusCurrentStatusEl, statusPositionEl, statusWaitTimeEl, statusIssuedAtEl].forEach(el => el.style.display = 'none');
+                if (error.message === '404') {
+                    statusLoadingEl.innerHTML = `<strong>${translations[currentLang].error}:</strong> ${translations[currentLang].not_found}`;
+                } else {
+                    statusLoadingEl.innerHTML = `<strong>${translations[currentLang].error}:</strong> ${error.message}`;
+                }
+                // Hide all action buttons on error
+                chatBtn.style.display = 'none';
+                feedbackBtn.style.display = 'none';
+                disputeBtn.style.display = 'none';
             }
         }
 
         function updateStatus(data) {
-            const statusMap = {
-                waiting: { uz_lat: "Kutilmoqda", uz_cyr: "Кутилмоқда", ru: "Ожидание", en: "Waiting" },
-                called: { uz_lat: "Chaqirildi", uz_cyr: "Чақирилди", ru: "Вызван", en: "Called" },
-                finished: { uz_lat: "Yakunlandi", uz_cyr: "Якунланди", ru: "Завершено", en: "Finished" }
-            };
-            document.getElementById('statusTicket').innerText = `${translations[currentLang].ticket}: ${data.ticket_number}`;
-            document.getElementById('statusService').innerText = `${translations[currentLang].service}: ${data.service_name}`;
-            document.getElementById('statusPosition').innerText = data.position > 0 ? `${translations[currentLang].position}: ${data.position}` : '';
-            document.getElementById('statusWaitTime').innerText = data.wait_time > 0 ? `${translations[currentLang].wait_time}: ${data.wait_time} ${translations[currentLang].minutes}` : '';
-            document.getElementById('statusOperator').innerText = data.operator_name ? `${translations[currentLang].operator}: ${data.operator_name}` : `${translations[currentLang].operator}: ${translations[currentLang].no_operator}`;
-            document.getElementById('statusStatus').innerText = `${translations[currentLang].status}: ${statusMap[data.status][currentLang] || data.status}`;
+            const T = translations[currentLang];
             
-            // Enable feedback/dispute only if ticket is finished
-            document.getElementById('feedbackBtn').disabled = data.status !== 'finished';
-            document.getElementById('disputeBtn').disabled = data.status !== 'finished';
-        }
+            statusTicketNumberEl.innerHTML = `<strong>${T.ticket_label}:</strong> #${data.ticket_number}`;
+            statusServiceEl.innerHTML = `<strong>${T.service_label}:</strong> ${data.service_name || 'N/A'}`;
+            
+            if (data.operator_name && data.operator_name !== 'N/A') {
+                statusOperatorEl.innerHTML = `<strong>${T.operator_label}:</strong> ${data.operator_name}`;
+                statusOperatorEl.style.display = 'block';
+            } else {
+                statusOperatorEl.innerHTML = `<strong>${T.operator_label}:</strong> ${T.no_operator}`;
+                 statusOperatorEl.style.display = 'block'; // Still show "no operator"
+            }
 
-        function openChat() {
-            window.location.href = `${serverUrl}/chat/${ticketNumber}`;
-        }
+            const localizedStatusKey = `status_${data.status}`;
+            const localizedStatus = T[localizedStatusKey] || data.status;
+            statusCurrentStatusEl.innerHTML = `<strong>${T.status_label}:</strong> <span class="status-${data.status}">${localizedStatus}</span>`;
 
-        function openFeedback() {
-            // Open feedback form in a new window or redirect
-            const feedbackWindow = window.open('', '_blank');
-            feedbackWindow.document.write(`
-                <html>
-                <head>
-                    <title>${translations[currentLang].feedback}</title>
-                    <style>
-                        body { font-family: 'Inter', sans-serif; padding: 20px; background: var(--bg); color: var(--text); }
-                        :root { --bg: #f4f7fa; --text: #2d3748; --primary: #1a73e8; }
-                        .dark { --bg: #1a202c; --text: #e2e8f0; }
-                        .form { max-width: 400px; margin: auto; }
-                        label { display: block; margin: 10px 0 5px; }
-                        input, textarea { width: 100%; padding: 8px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px; }
-                        button { padding: 10px 20px; background: var(--primary); color: #fff; border: none; border-radius: 4px; cursor: pointer; }
-                        button:hover { background: #1666c5; }
-                    </style>
-                </head>
-                <body class="${localStorage.getItem('theme') === 'dark' ? 'dark' : ''}">
-                    <div class="form">
-                        <h2>${translations[currentLang].feedback}</h2>
-                        <form action="${serverUrl}/submit_feedback" method="POST">
-                            <input type="hidden" name="ticket_id" value="${lastTicket?.ticket_id || ''}">
-                            <label for="rating">${translations[currentLang].status}</label>
-                            <input type="number" name="rating" min="1" max="5" required>
-                            <label for="comment">Izoh</label>
-                            <textarea name="comment" rows="4"></textarea>
-                            <button type="submit">Yuborish</button>
-                        </form>
-                    </div>
-                </body>
-                </html>
-            `);
-        }
+            if (data.position > 0 && (data.status === 'waiting' || data.status === 'pending')) {
+                statusPositionEl.innerHTML = `<strong>${T.position_label}:</strong> ${data.position}`;
+                statusPositionEl.style.display = 'block';
+            } else {
+                statusPositionEl.style.display = 'none';
+            }
 
-        function openDispute() {
-            window.location.href = `${serverUrl}/dispute/${ticketNumber}`;
+            if (data.wait_time !== null && data.wait_time !== 'N/A' && data.wait_time > 0 && (data.status === 'waiting' || data.status === 'pending')) {
+                statusWaitTimeEl.innerHTML = `<strong>${T.wait_time_label}:</strong> ${data.wait_time} ${T.minutes}`;
+                statusWaitTimeEl.style.display = 'block';
+            } else {
+                statusWaitTimeEl.style.display = 'none';
+            }
+            
+            try {
+                statusIssuedAtEl.innerHTML = `<strong>${T.issued_at_label}:</strong> ${new Date(data.created_at).toLocaleString(currentLang.replace('_', '-'))}`;
+            } catch (e) {
+                 statusIssuedAtEl.innerHTML = `<strong>${T.issued_at_label}:</strong> ${data.created_at}`; // Fallback for invalid date
+            }
+
+
+            // Button visibility and actions
+            chatBtn.style.display = 'none';
+            feedbackBtn.style.display = 'none';
+            disputeBtn.style.display = 'none';
+
+            if (data.status === 'waiting' || data.status === 'called') {
+                chatBtn.style.display = 'inline-block';
+                chatBtn.onclick = () => window.location.href = `${serverUrl}/chat/${ticketNumber}`;
+            }
+
+            if (data.status === 'finished' || data.status === 'cancelled') {
+                feedbackBtn.style.display = 'inline-block';
+                feedbackBtn.onclick = () => window.location.href = `${serverUrl}/feedback/${ticketNumber}`;
+                
+                disputeBtn.style.display = 'inline-block';
+                disputeBtn.onclick = () => window.location.href = `${serverUrl}/dispute/${ticketNumber}`;
+            }
         }
 
         function setLanguage(lang) {
             currentLang = lang;
             document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
-            document.querySelector(`button[onclick="setLanguage('${lang}')"]`).classList.add('active');
-            document.getElementById('title').innerText = translations[lang].title;
-            document.getElementById('chatBtn').innerText = translations[lang].chat;
-            document.getElementById('feedbackBtn').innerText = translations[lang].feedback;
-            document.getElementById('disputeBtn').innerText = translations[lang].dispute;
-            fetchStatus(); // Refresh status to update translations
+            const activeBtn = document.querySelector(`button[onclick="setLanguage('${lang}')"]`);
+            if (activeBtn) activeBtn.classList.add('active');
+            
+            const T = translations[lang];
+            document.getElementById('pageTitle').innerText = T.main_title;
+            document.getElementById('mainTitle').innerText = T.main_title;
+            
+            chatBtn.innerText = T.chat;
+            feedbackBtn.innerText = T.feedback;
+            disputeBtn.innerText = T.dispute;
+            statusLoadingEl.innerText = T.loading; // Update loading text
+            
+            fetchStatus(); // Refresh status to apply new language to dynamic parts
         }
 
         function toggleTheme() {
@@ -333,24 +413,27 @@
             document.querySelector('.theme-toggle').innerText = isDark ? '☀️' : '🌙';
         }
 
-        function showNotification(message) {
-            const existing = document.querySelector('.notification');
-            if (existing) existing.remove();
-            const notification = document.createElement('div');
-            notification.className = 'notification';
-            notification.innerText = message;
-            document.body.appendChild(notification);
-            setTimeout(() => notification.remove(), 5000);
-        }
-
         // Load theme
         if (localStorage.getItem('theme') === 'dark') {
             document.body.classList.add('dark');
             document.querySelector('.theme-toggle').innerText = '☀️';
+        } else {
+            document.querySelector('.theme-toggle').innerText = '🌙';
         }
+        
+        // Set initial language based on active button or default
+        const initiallyActiveLangBtn = document.querySelector('.lang-btn.active');
+        if (initiallyActiveLangBtn) {
+            const langAttr = initiallyActiveLangBtn.getAttribute('onclick');
+            const langMatch = langAttr.match(/setLanguage\('([^']+)'\)/);
+            if (langMatch && langMatch[1]) {
+                currentLang = langMatch[1];
+            }
+        }
+        setLanguage(currentLang); // Apply initial language settings and fetch status
 
         // Fetch status initially and every 30 seconds
-        fetchStatus();
+        // fetchStatus() is called by setLanguage initially
         setInterval(fetchStatus, 30000);
     </script>
 </body>

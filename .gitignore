@@ -1,2 +1,3 @@
 app.log
 flask_session/
+kiosk.log
