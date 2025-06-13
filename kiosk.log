@@ -603,3 +603,24 @@
 2025-06-13 17:32:01,645 - ERROR - Telegram user 6148272773 not found and no branches exist in DB. Cannot assign branch_id.
 2025-06-13 17:32:01,646 - ERROR - Could not find or assign branch_id for Telegram user 6148272773. Update ignored.
 2025-06-13 17:32:02,018 - INFO - Update id=281278978 is handled. Duration 375 ms by bot id=7800821253
+2025-06-13 17:34:21,996 - INFO - Telegram Bot (Aiogram) успешно инициализирован для режима polling.
+2025-06-13 17:34:21,998 - INFO - Translations loaded successfully.
+2025-06-13 17:34:22,034 - INFO - Super admin user already exists.
+2025-06-13 17:34:22,035 - INFO - Running in Werkzeug reloader parent process. Background tasks will NOT be started here.
+2025-06-13 17:34:22,035 - INFO - Flask app starting on 0.0.0.0:5000 with debug_mode=True
+2025-06-13 17:34:22,042 - INFO -  * Restarting with stat
+2025-06-13 17:34:27,511 - INFO - Telegram Bot (Aiogram) успешно инициализирован для режима polling.
+2025-06-13 17:34:27,513 - INFO - Translations loaded successfully.
+2025-06-13 17:34:27,551 - INFO - Super admin user already exists.
+2025-06-13 17:34:27,552 - INFO - Running in Werkzeug reloader child process. Background tasks will be started.
+2025-06-13 17:34:27,552 - INFO - Preparing to start Telegram bot thread.
+2025-06-13 17:34:27,554 - INFO - Initial old ticket cleanup scheduled in 60 seconds.
+2025-06-13 17:34:27,554 - INFO - Flask app starting on 0.0.0.0:5000 with debug_mode=True
+2025-06-13 17:34:27,558 - INFO - Starting Telegram bot polling...
+2025-06-13 17:34:27,560 - INFO - Start polling
+2025-06-13 17:34:27,567 - WARNING -  * Debugger is active!
+2025-06-13 17:34:27,573 - INFO -  * Debugger PIN: 817-917-368
+2025-06-13 17:34:27,937 - INFO - Run polling for bot @regofficesamdukf_bot id=7800821253 - 'regofficesamdukf'
+2025-06-13 17:34:28,055 - ERROR - Telegram user 6148272773 not found and no branches exist in DB. Cannot assign branch_id.
+2025-06-13 17:34:28,055 - ERROR - Could not find or assign branch_id for Telegram user 6148272773. Update ignored.
+2025-06-13 17:34:28,423 - INFO - Update id=281278979 is handled. Duration 369 ms by bot id=7800821253
