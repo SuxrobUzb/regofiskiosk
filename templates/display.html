@@ -1,4 +1,3 @@
-<!-- templates/display.html -->
 <!DOCTYPE html>
 <html lang="uz">
 <head>
@@ -10,11 +9,12 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Inter', sans-serif;
-            background: #f4f7fa;
+            background: var(--bg);
             height: 100vh;
             display: flex;
             flex-direction: column;
             overflow: hidden;
+            color: var(--text); /* Добавлено для цвета текста */
         }
         :root {
             --bg: #f4f7fa;
@@ -22,6 +22,7 @@
             --card-bg: #ffffff;
             --primary: #1a73e8;
             --secondary: #34c759;
+            --danger: #e53e3e; /* Добавлено для консистентности */
         }
         body.dark {
             --bg: #1a202c;
@@ -29,6 +30,7 @@
             --card-bg: #2d3748;
             --primary: #63b3ed;
             --secondary: #68d391;
+            --danger: #f56565; /* Добавлено для консистентности */
         }
         body {
             background: var(--bg);
@@ -37,180 +39,249 @@
         .header {
             display: flex;
             align-items: center;
-            background: var(--primary);
-            padding: 16px 24px;
-            color: #ffffff;
+            background: var(--card-bg);
+            padding: 15px 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            position: relative; /* Для позиционирования переключателей */
+            z-index: 10;
         }
-        .header img { width: 80px; margin-right: 20px; border-radius: 8px; transition: transform 0.5s; }
-        .header img:hover { transform: rotate(360deg); }
-        .header h1 { font-size: 24px; font-weight: 600; }
+        .header img {
+            height: 50px;
+            margin-right: 15px;
+        }
+        .header h1 {
+            flex-grow: 1; /* Чтобы заголовок занимал доступное пространство */
+            font-size: 28px;
+            color: var(--primary);
+            text-align: center; /* Центрируем заголовок */
+        }
         .content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: row; /* Разделяем на ряды по умолчанию */
+            width: 100%;
+        }
+        #videoSection {
             flex: 1;
             display: flex;
-            padding: 20px;
-            gap: 20px;
+            justify-content: center;
+            align-items: center;
+            background: #000;
+            overflow: hidden;
+            position: relative;
         }
-        .video-section {
-            width: 60%;
+        #videoSection video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        #videoSection.fullscreen {
+            flex: 1;
+            width: 100%;
+            height: 100%;
+        }
+        #queueSection {
+            flex: 0 0 350px; /* Фиксированная ширина для очереди */
             background: var(--card-bg);
-            border-radius: 12px;
-            padding: 16px;
+            padding: 20px;
+            box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+            overflow-y: auto;
             display: flex;
             flex-direction: column;
-            transition: all 0.3s;
         }
-        .video-section.fullscreen { width: 100%; padding: 0; border-radius: 0; }
-        #video-player { width: 100%; height: 85%; border-radius: 8px; background: #000; }
-        .datetime {
+        #queueSection.hidden {
+            display: none;
+        }
+        #queueSection h2 {
+            color: var(--primary);
+            margin-bottom: 20px;
+            font-size: 24px;
             text-align: center;
-            font-size: 16px;
-            color: var(--text);
-            padding: 10px;
-            background: #edf2f7;
-            border-radius: 8px;
-            margin-top: 10px;
         }
-        .dark .datetime { background: #4a5568; }
-        .queue-section { width: 40%; transition: all 0.3s; }
-        .queue-section.hidden { width: 0; opacity: 0; }
-        table {
+        #queueTable {
             width: 100%;
             border-collapse: collapse;
-            background: var(--card-bg);
-            border-radius: 12px;
-            overflow: hidden;
+            font-size: 18px;
         }
-        th, td { padding: 16px; text-align: center; font-size: 18px; border-bottom: 1px solid #e2e8f0; }
-        .dark th, .dark td { border-bottom: 1px solid #4a5568; }
-        th { background: var(--primary); color: #ffffff; font-weight: 600; }
-        tr:last-child td { border-bottom: none; }
-        tr:hover { background: #f7fafc; }
-        .dark tr:hover { background: #4a5568; }
+        #queueTable th, #queueTable td {
+            padding: 12px 15px;
+            border-bottom: 1px solid var(--border-color);
+            text-align: left;
+        }
+        #queueTable th {
+            background: var(--primary);
+            color: white;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        #queueTable tr:nth-child(even) {
+            background: var(--bg);
+        }
+        #queueTable tr:hover {
+            background: #e9ecef; /* Слегка меняет фон при наведении */
+        }
+        body.dark #queueTable tr:hover {
+            background: #3a475a;
+        }
         .latest-call {
-            background: #ffedd5;
-            font-weight: bold;
-            animation: blink 1s infinite;
+            background-color: var(--secondary) !important;
+            color: white;
+            animation: flash 1s infinite alternate; /* Анимация мигания */
         }
-        .dark .latest-call { background: #7c3aed; }
-        .controls {
+        @keyframes flash {
+            from { opacity: 1; }
+            to { opacity: 0.5; }
+        }
+
+        /* Переключатели языка и темы */
+        .lang-switcher, .theme-switcher {
             position: absolute;
-            top: 16px;
-            right: 24px;
+            top: 15px;
             display: flex;
             gap: 10px;
         }
+        .lang-switcher { right: 80px; } /* Сдвигаем вправо */
+        .theme-switcher { right: 20px; }
         .lang-btn, .theme-toggle {
-            padding: 6px 12px;
-            background: #ffffff;
-            border: 1px solid #e2e8f0;
-            border-radius: 6px;
-            font-size: 12px;
-            color: #4a5568;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .dark .lang-btn, .dark .theme-toggle { background: #2d3748; border-color: #4a5568; color: #e2e8f0; }
-        .lang-btn:hover, .theme-toggle:hover { background: #eef4fd; }
-        .dark .lang-btn:hover, .dark .theme-toggle:hover { background: #4a5568; }
-        .lang-btn.active { background: var(--primary); color: #ffffff; border-color: var(--primary); }
-        .notification {
-            position: absolute;
-            top: 80px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: var(--secondary);
-            color: #ffffff;
-            padding: 16px 32px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 8px 12px;
             border-radius: 8px;
-            font-size: 24px;
-            font-weight: 600;
-            animation: blink 1s infinite;
-            z-index: 1000;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s ease;
         }
-        @keyframes blink { 50% { opacity: 0.7; } }
+        .lang-btn:hover, .theme-toggle:hover {
+            background: #155bb5;
+        }
+        .lang-btn.active {
+            background: var(--secondary);
+        }
+
+        /* Адаптивный дизайн */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 24px;
+            }
+            .content {
+                flex-direction: column; /* На маленьких экранах разделяем на столбцы */
+            }
+            #queueSection {
+                flex: none; /* Отключаем flex для фиксированной ширины */
+                width: 100%; /* Занимает всю ширину */
+                max-height: 50vh; /* Ограничиваем высоту, чтобы видео было видно */
+            }
+            #videoSection {
+                flex: 1;
+                height: 50vh; /* Видео занимает оставшееся пространство */
+            }
+            .lang-switcher, .theme-switcher {
+                position: static; /* Статическое позиционирование в мобильной версии */
+                margin-top: 10px;
+                justify-content: center;
+                width: 100%;
+                order: 3; /* Перемещаем вниз */
+            }
+            .header {
+                flex-wrap: wrap; /* Разрешаем элементам переноситься на новую строку */
+                justify-content: center;
+            }
+            .header img {
+                margin-bottom: 10px;
+            }
+            .header h1 {
+                width: 100%; /* Заголовок занимает всю ширину */
+                margin-bottom: 10px;
+            }
+        }
     </style>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.5/socket.io.js"></script>
 </head>
 <body>
-    <div class="controls">
-        <button class="lang-btn active" onclick="setLanguage('uz_lat')">Uz (Lat)</button>
-        <button class="lang-btn" onclick="setLanguage('uz_cyr')">Ўз (Кирилл)</button>
-        <button class="lang-btn" onclick="setLanguage('ru')">Ру</button>
-        <button class="lang-btn" onclick="setLanguage('en')">En</button>
-        <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
-    </div>
     <div class="header">
-        <img src="/static/logo.png" alt="Logotip">
-        <h1>Samarqand davlat universiteti Kattaqo'rg'on filiali</h1>
-    </div>
-    <div class="content">
-        <div class="video-section" id="videoSection">
-            <video id="video-player" autoplay muted loop>
-                <source src="/static/videos/ad.mp4" type="video/mp4">
-            </video>
-            <div class="datetime" id="datetime"></div>
+        <!-- Добавляем логотип (предполагаем, что у вас есть файл static/logo.png) -->
+        <img src="{{ server_url }}/static/logo.png" alt="Company Logo" onerror="this.style.display='none';">
+        <h1 id="pageTitle">Navbat</h1>
+        <div class="lang-switcher">
+            <button class="lang-btn active" onclick="setLanguage('uz_lat')">UZ</button>
+            <button class="lang-btn" onclick="setLanguage('ru')">RU</button>
+            <button class="lang-btn" onclick="setLanguage('en')">EN</button>
         </div>
-        <div class="queue-section" id="queueSection">
+        <div class="theme-switcher">
+            <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
+        </div>
+    </div>
+
+    <div class="content">
+        <div id="videoSection">
+            <!-- Здесь может быть видео или рекламный контент -->
+            <video controls autoplay loop muted>
+                <source src="{{ server_url }}/static/video.mp4" type="video/mp4" onerror="this.parentElement.innerHTML='<p style=\'color: white; font-size: 20px;\'>Видео недоступно</p>';">
+                Ваш браузер не поддерживает видео.
+            </video>
+        </div>
+
+        <div id="queueSection">
+            <h2 id="queueTitle">Mijozlar Navbati</h2>
             <table id="queueTable">
-                <tr><th>Operator</th><th>Navbat</th></tr>
+                <thead>
+                    <tr>
+                        <th id="thOperator">Operator</th>
+                        <th id="thTicket">Talon</th>
+                        <th id="thOperatorNumber">Operator №</th> <!-- Новый столбец -->
+                        <th id="thService">Xizmat</th> <!-- Новый столбец -->
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Данные очереди будут загружены сюда -->
+                </tbody>
             </table>
         </div>
     </div>
-    <audio id="notificationSound" src="/static/sounds/notification.mp3" preload="auto"></audio>
+
     <script>
+        const serverUrl = '{{ server_url }}';
+        let latestTicket = null; // Для подсветки последнего вызванного талона
+
         const translations = {
-            uz_lat: { operator: "Operator", ticket: "Navbat" },
-            uz_cyr: { operator: "Оператор", ticket: "Навбат" },
-            ru: { operator: "Оператор", ticket: "Талон" },
-            en: { operator: "Operator", ticket: "Ticket" }
-        };
-        let currentLang = "uz_lat";
-        const serverUrl = "http://172.16.1.28:5000";
-        const socket = io(serverUrl);
-
-        function setLanguage(lang) {
-            currentLang = lang;
-            document.querySelectorAll(".lang-btn").forEach(btn => btn.classList.remove("active"));
-            document.querySelector(`button[onclick="setLanguage('${lang}')"]`).classList.add("active");
-            updateQueueTable();
-        }
-
-        function toggleTheme() {
-            document.body.classList.toggle("dark");
-            const isDark = document.body.classList.contains("dark");
-            localStorage.setItem("theme", isDark ? "dark" : "light");
-            document.querySelector(".theme-toggle").innerText = isDark ? "☀️" : "🌙";
-        }
-
-        function updateDateTime() {
-            const now = new Date();
-            document.getElementById("datetime").textContent = now.toLocaleString();
-        }
-        setInterval(updateDateTime, 1000);
-        updateDateTime();
-
-        socket.on("connect", () => console.log("Connected to server"));
-        socket.on("disconnect", () => console.log("Disconnected from server"));
-
-        socket.on("update_queue", function(data) {
-            if (data.ticket && data.operator_id) {
-                const audio = document.getElementById("notificationSound");
-                audio.play().catch(err => console.error("Audio play error:", err));
-                updateQueueTable(data.ticket);
+            uz_lat: {
+                title: "Navbat",
+                queue_title: "Mijozlar Navbati",
+                operator: "Operator",
+                ticket: "Talon",
+                operator_number: "Operator №",
+                service: "Xizmat",
+                error_fetch: "Navbatni yangilashda xato: "
+            },
+            ru: {
+                title: "Очередь",
+                queue_title: "Очередь клиентов",
+                operator: "Оператор",
+                ticket: "Талон",
+                operator_number: "Номер оператора",
+                service: "Услуга",
+                error_fetch: "Ошибка обновления очереди: "
+            },
+            en: {
+                title: "Queue",
+                queue_title: "Client Queue",
+                operator: "Operator",
+                ticket: "Ticket",
+                operator_number: "Operator No.",
+                service: "Service",
+                error_fetch: "Error updating queue: "
             }
-        });
+        };
+        let currentLang = 'uz_lat';
 
-        socket.on("remove_ticket", function(data) {
-            updateQueueTable();
-        });
-
-        async function updateQueueTable(latestTicket = null) {
+        // Функция для обновления таблицы очереди
+        async function updateQueueTable() {
             try {
                 const response = await fetch(`${serverUrl}/get_queue`);
                 if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
                 const tickets = await response.json();
-                const table = document.getElementById("queueTable");
-                table.innerHTML = `<tr><th>${translations[currentLang].operator}</th><th>${translations[currentLang].ticket}</th></tr>`;
+                const tableBody = document.querySelector("#queueTable tbody");
+                tableBody.innerHTML = ''; // Очищаем таблицу
 
                 if (tickets.length === 0) {
                     document.getElementById("videoSection").classList.add("fullscreen");
@@ -221,22 +292,66 @@
                     tickets.forEach(ticket => {
                         const row = document.createElement("tr");
                         if (ticket.ticket === latestTicket) row.classList.add("latest-call");
-                        row.innerHTML = `<td>${ticket.operator_name || 'N/A'}</td><td>${ticket.ticket}</td>`;
-                        table.appendChild(row);
+                        row.innerHTML = `
+                            <td>${ticket.operator_name || 'N/A'}</td>
+                            <td>${ticket.ticket}</td>
+                            <td>${ticket.operator_number || 'N/A'}</td>
+                            <td>${ticket.service_name || 'N/A'}</td>
+                        `;
+                        tableBody.appendChild(row);
                     });
                 }
             } catch (error) {
                 console.error("Error updating queue:", error);
+                // Можно добавить отображение ошибки на экране, если нужно
             }
         }
 
+        // Функция для смены языка
+        function setLanguage(lang) {
+            currentLang = lang;
+            document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelector(`button[onclick="setLanguage('${lang}')"]`).classList.add('active');
+            
+            document.getElementById('pageTitle').innerText = translations[lang].title;
+            document.getElementById('queueTitle').innerText = translations[lang].queue_title;
+            document.getElementById('thOperator').innerText = translations[lang].operator;
+            document.getElementById('thTicket').innerText = translations[lang].ticket;
+            document.getElementById('thOperatorNumber').innerText = translations[lang].operator_number;
+            document.getElementById('thService').innerText = translations[lang].service;
+            
+            // После смены языка, обновить таблицу
+            updateQueueTable(); 
+        }
+
+        // Функция для переключения темы
+        function toggleTheme() {
+            document.body.classList.toggle('dark');
+            const isDark = document.body.classList.contains('dark');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            document.querySelector('.theme-toggle').innerText = isDark ? '☀️' : '🌙';
+        }
+
+        // Инициализация при загрузке
         if (localStorage.getItem("theme") === "dark") {
             document.body.classList.add("dark");
             document.querySelector(".theme-toggle").innerText = "☀️";
         }
+        
+        // Добавление прослушивателя для события ticket_called, чтобы подсвечивать новые талоны
+        const socket = io(serverUrl); // Подключение к SocketIO
+        socket.on('ticket_called', (data) => {
+            latestTicket = data.ticket; // Обновляем последний вызванный талон
+            updateQueueTable(); // Обновляем таблицу, чтобы применить подсветку
+            // Дополнительно можно воспроизвести звук или показать всплывающее уведомление
+            // const audio = new Audio('path/to/notification_sound.mp3'); // Укажите путь к звуку
+            // audio.play();
+        });
 
-        updateQueueTable();
-        setInterval(updateQueueTable, 5000);
+        // Запуск обновления таблицы и установка языка при загрузке
+        setLanguage("uz_lat"); // Устанавливаем язык по умолчанию
+        updateQueueTable(); // Первое обновление при загрузке
+        setInterval(updateQueueTable, 5000); // Обновлять очередь каждые 5 секунд
     </script>
 </body>
 </html>

@@ -23,6 +23,7 @@
             --card-bg: #ffffff;
             --primary: #1a73e8;
             --danger: #e53e3e;
+            --border-color: #e2e8f0;
         }
         body.dark {
             --bg: #1a202c;
@@ -30,128 +31,148 @@
             --card-bg: #2d3748;
             --primary: #63b3ed;
             --danger: #f56565;
+            --border-color: #4a5568;
         }
         .container {
             background: var(--card-bg);
             border-radius: 12px;
             padding: 24px;
             width: 100%;
-            max-width: 600px;
+            max-width: 500px;
             text-align: center;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
-        h1 { 
-            font-size: 24px; 
-            font-weight: 600; 
-            color: var(--danger); 
-            margin-bottom: 20px; 
-        }
-        p { font-size: 16px; margin-bottom: 20px; }
-        a {
-            display: inline-block;
-            padding: 12px 24px;
-            background: var(--primary);
-            color: #ffffff;
-            text-decoration: none;
-            border-radius: 8px;
-            font-size: 16px;
+        h1 {
+            font-size: 32px;
             font-weight: 600;
-            transition: all 0.2s;
+            color: var(--danger);
+            margin-bottom: 20px;
         }
-        a:hover { background: #1666c5; }
-        .controls {
-            position: fixed;
+        p {
+            font-size: 18px;
+            color: var(--text);
+            margin-bottom: 30px;
+        }
+        .home-link {
+            display: inline-block;
+            background: var(--primary);
+            color: white;
+            padding: 12px 25px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+        .home-link:hover {
+            background: #155bb5;
+        }
+
+        /* Language and Theme switchers */
+        .lang-switcher, .theme-switcher {
+            position: absolute;
             top: 20px;
-            right: 20px;
             display: flex;
             gap: 10px;
-            z-index: 1000;
         }
+        .lang-switcher { left: 20px; }
+        .theme-switcher { right: 20px; }
         .lang-btn, .theme-toggle {
-            padding: 8px 16px;
-            background: #ffffff;
-            border: 1px solid #e2e8f0;
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 8px 12px;
             border-radius: 8px;
-            font-size: 14px;
-            color: #4a5568;
             cursor: pointer;
-            transition: all 0.2s;
+            font-size: 14px;
+            transition: background-color 0.3s ease;
         }
-        .dark .lang-btn, .dark .theme-toggle { 
-            background: #2d3748; 
-            border-color: #4a5568; 
-            color: #e2e8f0; 
+        .lang-btn:hover, .theme-toggle:hover {
+            background: #155bb5;
         }
-        .lang-btn:hover, .theme-toggle:hover { background: #eef4fd; }
-        .dark .lang-btn:hover, .dark .theme-toggle:hover { background: #4a5568; }
-        .lang-btn.active { 
-            background: var(--primary); 
-            color: #ffffff; 
-            border-color: var(--primary); 
+        .lang-btn.active {
+            background: var(--primary); /* Или другой цвет, если хотите */
         }
-        @media (max-width: 480px) {
-            .container { padding: 16px; }
-            h1 { font-size: 20px; }
-            p, a { font-size: 14px; }
-            .controls { 
-                top: 10px; 
-                right: 10px; 
-                flex-wrap: wrap; 
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+                max-width: 90%;
             }
-            .lang-btn, .theme-toggle { 
-                padding: 6px 12px; 
-                font-size: 12px; 
+            h1 {
+                font-size: 28px;
+            }
+            p {
+                font-size: 16px;
+            }
+            .home-link {
+                padding: 10px 20px;
+                font-size: 14px;
+            }
+            .lang-switcher, .theme-switcher {
+                position: static;
+                margin-bottom: 20px;
+                justify-content: center;
+                width: 100%;
             }
         }
     </style>
 </head>
 <body>
-    <div class="controls">
-        <button class="lang-btn active" onclick="setLanguage('uz_lat')">Uz (Lat)</button>
-        <button class="lang-btn" onclick="setLanguage('uz_cyr')">Ўз (Кирилл)</button>
-        <button class="lang-btn" onclick="setLanguage('ru')">Ру</button>
-        <button class="lang-btn" onclick="setLanguage('en')">En</button>
+    <div class="lang-switcher">
+        <button class="lang-btn active" onclick="setLanguage('uz_lat')">UZ</button>
+        <button class="lang-btn" onclick="setLanguage('ru')">RU</button>
+        <button class="lang-btn" onclick="setLanguage('en')">EN</button>
+    </div>
+    <div class="theme-switcher">
         <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
     </div>
+
     <div class="container">
-        <h1 id="title">Xatolik</h1>
-        <p id="message">{{ message }}</p>
-        <a href="{{ server_url }}/" id="homeLink">Asosiy sahifaga qaytish</a>
+        <h1 id="title">Error</h1>
+        <p id="message">Something went wrong!</p>
+        <a href="{{ server_url }}/" class="home-link" id="homeLink">Return to Home</a>
     </div>
+
     <script>
+        const serverUrl = '{{ server_url }}';
+        
+        // Объект с переводами
         const translations = {
             uz_lat: {
-                title: "Xatolik",
-                message: "{{ message }}",
-                home: "Asosiy sahifaga qaytish"
-            },
-            uz_cyr: {
-                title: "Хатолик",
-                message: "{{ message }}",
-                home: "Асосий саҳифага қайтиш"
+                title: "Xato",
+                message: "Noma'lum xato yuz berdi.",
+                home: "Bosh sahifaga qaytish"
             },
             ru: {
                 title: "Ошибка",
-                message: "{{ message }}",
+                message: "Произошла неизвестная ошибка.",
                 home: "Вернуться на главную"
             },
             en: {
                 title: "Error",
-                message: "{{ message }}",
+                message: "An unknown error occurred.",
                 home: "Return to Home"
             }
         };
         let currentLang = 'uz_lat';
 
+        // Функция для смены языка
         function setLanguage(lang) {
             currentLang = lang;
             document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
             document.querySelector(`button[onclick="setLanguage('${lang}')"]`).classList.add('active');
             document.getElementById('title').innerText = translations[lang].title;
-            document.getElementById('message').innerText = translations[lang].message || "{{ message }}";
+            
+            // Если сообщение об ошибке передано через URL, оно имеет приоритет
+            const urlParams = new URLSearchParams(window.location.search);
+            const errorMessageFromUrl = urlParams.get('message');
+            document.getElementById('message').innerText = errorMessageFromUrl || translations[lang].message;
+            
             document.getElementById('homeLink').innerText = translations[lang].home;
         }
 
+        // Функция для переключения темы
         function toggleTheme() {
             document.body.classList.toggle('dark');
             const isDark = document.body.classList.contains('dark');
@@ -159,10 +180,19 @@
             document.querySelector('.theme-toggle').innerText = isDark ? '☀️' : '🌙';
         }
 
+        // Инициализация при загрузке
         if (localStorage.getItem('theme') === 'dark') {
             document.body.classList.add('dark');
             document.querySelector('.theme-toggle').innerText = '☀️';
         }
+        
+        // Устанавливаем язык и загружаем сообщение об ошибке при загрузке страницы
+        setLanguage('uz_lat'); 
+
+        // Примечание: Message template is removed here to avoid conflicts with JS logic.
+        // Flask should pass the message directly in the render_template context or as a URL parameter.
+        // Example: return render_template('error.html', message='Your custom error', server_url=SERVER_URL)
+        // Or redirect to error page: redirect(url_for('error_page', message='Your custom error'))
     </script>
 </body>
 </html>

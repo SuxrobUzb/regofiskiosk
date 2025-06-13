@@ -2,8 +2,11 @@
 <html>
 <head>
     <title>Chat with Operator</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+        /* Базовые стили */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Inter', sans-serif;
@@ -14,15 +17,26 @@
             flex-direction: column;
             align-items: center;
             padding: 20px;
+            transition: background 0.3s ease, color 0.3s ease;
         }
+
+        /* Цветовые переменные для светлой темы */
         :root {
             --bg: #f4f7fa;
             --text: #2d3748;
             --card-bg: #ffffff;
-            --primary: #1a73e8;
-            --secondary: #34c759;
-            --danger: #e53e3e;
+            --primary: #1a73e8; /* Основной цвет */
+            --secondary: #34c759; /* Второстепенный/успешный цвет */
+            --danger: #e53e3e; /* Цвет для ошибок/опасностей */
+            --border-color: #e2e8f0;
+            --chat-bg-client: #e3f2fd; /* Цвет фона сообщений клиента */
+            --chat-bg-operator: #e0f2f1; /* Цвет фона сообщений оператора */
+            --input-bg: #edf2f7;
+            --input-border: #cbd5e0;
+            --button-hover: #1666c5;
         }
+
+        /* Цветовые переменные для темной темы */
         body.dark {
             --bg: #1a202c;
             --text: #e2e8f0;
@@ -30,261 +44,410 @@
             --primary: #63b3ed;
             --secondary: #68d391;
             --danger: #f56565;
+            --border-color: #4a5568;
+            --chat-bg-client: #3c548a;
+            --chat-bg-operator: #4a5568;
+            --input-bg: #2d3748;
+            --input-border: #4a5568;
+            --button-hover: #4299e1;
         }
+
         .container {
             background: var(--card-bg);
             border-radius: 12px;
             padding: 24px;
             width: 100%;
-            max-width: 600px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            max-width: 700px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            position: relative;
+            animation: fadeIn 0.5s ease-out;
+            height: calc(100vh - 40px); /* Учитываем padding body */
         }
-        h1 { font-size: 24px; font-weight: 600; color: var(--primary); margin-bottom: 20px; text-align: center; }
-        .ticket-status {
-            background: #edf2f7;
-            border-radius: 8px;
-            padding: 16px;
-            margin-bottom: 20px;
-            font-size: 16px;
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-        .dark .ticket-status { background: #4a5568; }
-        .ticket-status p { margin: 8px 0; }
+
+        h1 {
+            font-size: clamp(22px, 4vw, 32px);
+            font-weight: 600;
+            color: var(--primary);
+            text-align: center;
+        }
+
         .chat-box {
-            height: 300px;
+            flex-grow: 1;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 15px;
             overflow-y: auto;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            padding: 12px;
-            margin-bottom: 12px;
-            background: #ffffff;
+            background: var(--bg); /* Фон для области чата */
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
         }
-        .dark .chat-box { border-color: #4a5568; background: #2d3748; }
-        .chat-box p { margin: 8px 0; }
-        .chat-input { display: flex; gap: 12px; }
-        input {
-            flex: 1;
-            padding: 12px;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            font-size: 16px;
-            background: #ffffff;
+
+        .message {
+            max-width: 80%;
+            padding: 10px 15px;
+            border-radius: 15px;
+            word-wrap: break-word;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            font-size: 15px;
+            line-height: 1.4;
+        }
+
+        .message.client {
+            background-color: var(--chat-bg-client);
             color: var(--text);
+            align-self: flex-end; /* Сообщения клиента справа */
+            border-bottom-right-radius: 5px;
         }
-        .dark input { background: #4a5568; border-color: #718096; }
-        button {
-            padding: 12px 24px;
+
+        .message.operator {
+            background-color: var(--chat-bg-operator);
+            color: var(--text);
+            align-self: flex-start; /* Сообщения оператора слева */
+            border-bottom-left-radius: 5px;
+        }
+        
+        .message-timestamp {
+            font-size: 10px;
+            color: var(--text-light);
+            margin-top: 5px;
+            text-align: right;
+            display: block;
+        }
+
+        .message.operator .message-timestamp {
+            text-align: left;
+        }
+
+        .chat-input {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .chat-input input[type="text"] {
+            flex-grow: 1;
+            padding: 12px 15px;
+            border: 1px solid var(--input-border);
+            border-radius: 8px;
+            background: var(--input-bg);
+            color: var(--text);
+            font-size: 16px;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .chat-input input[type="text"]:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.2); /* Тема primary */
+        }
+
+        .chat-input button {
+            background: var(--primary);
+            color: white;
             border: none;
             border-radius: 8px;
+            padding: 12px 20px;
             font-size: 16px;
-            font-weight: 600;
-            color: #ffffff;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: background 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
-        .send-btn { background: var(--primary); }
-        .send-btn:hover { background: #1666c5; }
-        .dispute-btn { background: var(--danger); }
-        .dispute-btn:hover { background: #c53030; }
-        .controls {
+
+        .chat-input button:hover {
+            background: var(--button-hover);
+            transform: translateY(-2px);
+        }
+
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--primary);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            z-index: 1000;
+            opacity: 0;
+            animation: slideIn 0.5s forwards, fadeOut 0.5s forwards 4.5s;
+        }
+
+        @keyframes slideIn {
+            from { bottom: 0; opacity: 0; }
+            to { bottom: 20px; opacity: 1; }
+        }
+
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+
+        /* Переключатель языка и темы */
+        .lang-switcher, .theme-switcher {
             position: absolute;
             top: 20px;
-            right: 20px;
             display: flex;
             gap: 10px;
         }
+        .lang-switcher { left: 20px; }
+        .theme-switcher { right: 20px; }
         .lang-btn, .theme-toggle {
-            padding: 8px 16px;
-            background: #ffffff;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            font-size: 14px;
-            color: #4a5568;
+            background: var(--card-bg);
+            color: var(--text);
+            border: 1px solid var(--border-color);
+            padding: 8px 12px;
+            border-radius: 6px;
             cursor: pointer;
-            transition: all 0.2s;
+            font-size: 14px;
+            transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
         }
-        .dark .lang-btn, .dark .theme-toggle { background: #2d3748; border-color: #4a5568; color: #e2e8f0; }
-        .lang-btn:hover, .theme-toggle:hover { background: #eef4fd; }
-        .dark .lang-btn:hover, .dark .theme-toggle:hover { background: #4a5568; }
-        .lang-btn.active { background: var(--primary); color: #ffffff; border-color: var(--primary); }
-        .notification {
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: var(--danger);
-            color: #ffffff;
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-size: 16px;
-            z-index: 1000;
+        .lang-btn.active, .lang-btn:hover, .theme-toggle:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        /* Медиа-запросы для адаптивности */
+        @media (max-width: 768px) {
+            body { padding: 15px; }
+            .container { padding: 20px; height: calc(100vh - 30px); }
+            h1 { margin-bottom: 15px; }
+            .lang-switcher, .theme-switcher {
+                position: static;
+                margin-top: 10px;
+                justify-content: center;
+                width: 100%;
+            }
+            .chat-input { flex-direction: column; }
+            .chat-input button { width: 100%; }
         }
     </style>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.5/socket.io.js"></script>
 </head>
 <body>
-    <div class="controls">
-        <button class="lang-btn active" onclick="setLanguage('uz_lat')">Uz (Lat)</button>
-        <button class="lang-btn" onclick="setLanguage('uz_cyr')">Ўз (Кирилл)</button>
-        <button class="lang-btn" onclick="setLanguage('ru')">Ру</button>
-        <button class="lang-btn" onclick="setLanguage('en')">En</button>
+    <div class="lang-switcher">
+        <button class="lang-btn active" onclick="setLanguage('uz_lat')">O'zbek</button>
+        <button class="lang-btn" onclick="setLanguage('ru')">Русский</button>
+        <button class="lang-btn" onclick="setLanguage('en')">English</button>
+    </div>
+    <div class="theme-switcher">
         <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
     </div>
+
     <div class="container">
-        <h1 id="title">Chat with Operator</h1>
-        <div class="ticket-status" id="ticketStatus">
-            <p id="statusPosition">Loading...</p>
-            <p id="statusWaitTime"></p>
-            <p id="statusOperator"></p>
+        <h1 id="pageTitle">Chat with Operator</h1>
+        <div id="chat_box" class="chat-box">
+            <!-- Сообщения будут здесь -->
         </div>
-        <div class="chat-box" id="chat_box"></div>
         <div class="chat-input">
-            <input type="text" id="message" placeholder="Enter your message">
-            <button class="send-btn" onclick="sendMessage()">Send</button>
+            <input type="text" id="chat_message_input" placeholder="Введите ваше сообщение...">
+            <button id="send_button" onclick="sendMessage()">Отправить</button>
         </div>
-        <button class="dispute-btn" onclick="fileDispute()">File a Dispute</button>
     </div>
+
     <script>
-        const translations = {
-            uz_lat: {
-                title: "Operator bilan suhbat",
-                position: "Navbatdagi o‘rningiz",
-                wait_time: "Taxminiy kutish vaqti",
-                operator: "Operator",
-                none: "Yo‘q",
-                send: "Yuborish",
-                dispute: "Shikoyat yuborish",
-                placeholder: "Xabar yozing",
-                error_invalid_ticket: "Noto‘g‘ri yoki amal qilmaydigan talon!",
-                error_connection: "Serverga ulanishda xato!"
-            },
-            uz_cyr: {
-                title: "Оператор билан суҳбат",
-                position: "Навбатдаги ўрнингиз",
-                wait_time: "Тахминий кутиш вақти",
-                operator: "Оператор",
-                none: "Йўқ",
-                send: "Юбориш",
-                dispute: "Шикоят юбориш",
-                placeholder: "Хабар ёзинг",
-                error_invalid_ticket: "Нотўғри ёки амал қилмайдиган талон!",
-                error_connection: "Серверга уланишда хато!"
-            },
-            ru: {
-                title: "Чат с оператором",
-                position: "Ваше место в очереди",
-                wait_time: "Примерное время ожидания",
-                operator: "Оператор",
-                none: "Нет",
-                send: "Отправить",
-                dispute: "Подать жалобу",
-                placeholder: "Введите сообщение",
-                error_invalid_ticket: "Неверный или недействительный талон!",
-                error_connection: "Ошибка подключения к серверу!"
-            },
-            en: {
-                title: "Chat with Operator",
-                position: "Your position in queue",
-                wait_time: "Estimated wait time",
-                operator: "Operator",
-                none: "None",
-                send: "Send",
-                dispute: "File a Dispute",
-                placeholder: "Enter your message",
-                error_invalid_ticket: "Invalid or expired ticket!",
-                error_connection: "Failed to connect to server!"
-            }
-        };
-        let currentLang = "uz_lat";
         const serverUrl = "{{ server_url }}";
-        const ticketId = "{{ ticket_id }}";
+        const urlParams = new URLSearchParams(window.location.search);
+        const ticketId = "{{ ticket_id }}"; // Получаем ticket_id из Flask-контекста
         const socket = io(serverUrl);
 
-        function setLanguage(lang) {
-            currentLang = lang;
-            document.querySelectorAll(".lang-btn").forEach(btn => btn.classList.remove("active"));
-            document.querySelector(`button[onclick="setLanguage('${lang}')"]`).classList.add("active");
-            document.getElementById("title").innerText = translations[lang].title;
-            document.getElementById("message").placeholder = translations[lang].placeholder;
-            document.querySelector(".send-btn").innerText = translations[lang].send;
-            document.querySelector(".dispute-btn").innerText = translations[lang].dispute;
-            updateTicketStatus(); // Refresh status with new language
-        }
-
-        function toggleTheme() {
-            document.body.classList.toggle("dark");
-            const isDark = document.body.classList.contains("dark");
-            localStorage.setItem("theme", isDark ? "dark" : "light");
-            document.querySelector(".theme-toggle").innerText = isDark ? "☀️" : "🌙";
-        }
-
-        async function updateTicketStatus() {
-            try {
-                const response = await fetch(`${serverUrl}/ticket_status/${ticketId}`);
-                if (!response.ok) throw new Error("Invalid ticket");
-                const data = await response.json();
-                if (data.error) throw new Error(data.error);
-                document.getElementById("statusPosition").innerText = `${translations[currentLang].position}: ${data.position || translations[currentLang].none}`;
-                document.getElementById("statusWaitTime").innerText = `${translations[currentLang].wait_time}: ${data.wait_time || 0} min`;
-                document.getElementById("statusOperator").innerText = `${translations[currentLang].operator}: ${data.operator_name || translations[currentLang].none}`;
-            } catch (error) {
-                showNotification(`${translations[currentLang].error_invalid_ticket}: ${error.message}`);
-                document.getElementById("ticketStatus").innerHTML = `<p>${translations[currentLang].error_invalid_ticket}</p>`;
+        const translations = {
+            uz_lat: {
+                page_title: "Operator bilan chat",
+                input_placeholder: "Xabaringizni kiriting...",
+                send_button: "Yuborish",
+                operator_label: "Operator",
+                you_label: "Siz",
+                error_connection: "Serverga ulanishda xato. Iltimos, keyinroq qayta urinib ko'ring.",
+                error_send_message: "Xabar yuborishda xato:",
+                error_load_history: "Chat tarixini yuklashda xato:",
+                error_no_ticket: "Talon raqami topilmadi. Iltimos, to'g'ri havoladan foydalaning."
+            },
+            ru: {
+                page_title: "Чат с оператором",
+                input_placeholder: "Введите ваше сообщение...",
+                send_button: "Отправить",
+                operator_label: "Оператор",
+                you_label: "Вы",
+                error_connection: "Ошибка подключения к серверу. Пожалуйста, попробуйте позже.",
+                error_send_message: "Ошибка отправки сообщения:",
+                error_load_history: "Ошибка загрузки истории чата:",
+                error_no_ticket: "Номер талона не найден. Пожалуйста, используйте правильную ссылку."
+            },
+            en: {
+                page_title: "Chat with Operator",
+                input_placeholder: "Enter your message...",
+                send_button: "Send",
+                operator_label: "Operator",
+                you_label: "You",
+                error_connection: "Error connecting to server. Please try again later.",
+                error_send_message: "Error sending message:",
+                error_load_history: "Error loading chat history:",
+                error_no_ticket: "Ticket ID not found. Please use the correct link."
             }
-        }
+        };
+        let currentLang = 'uz_lat';
 
-        function sendMessage() {
-            const message = document.getElementById("message").value.trim();
-            if (!message) return;
-            socket.emit("message", { room: ticketId, sender: "client", content: message });
-            document.getElementById("message").value = "";
-            const chatBox = document.getElementById("chat_box");
-            const msg = document.createElement("p");
-            msg.innerHTML = `<strong>${translations[currentLang].client}:</strong> ${message}`;
-            chatBox.appendChild(msg);
-            chatBox.scrollTop = chatBox.scrollHeight;
-        }
-
-        function fileDispute() {
-            if (confirm(translations[currentLang].dispute_confirm)) {
-                window.location.href = `${serverUrl}/dispute/${ticketId}`;
-            }
-        }
-
-        function showNotification(message) {
-            const existing = document.querySelector(".notification");
+        // Функция для показа уведомлений
+        function showNotification(message, type = 'primary') {
+            const existing = document.querySelector('.notification');
             if (existing) existing.remove();
-            const notification = document.createElement("div");
-            notification.className = "notification";
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
             notification.innerText = message;
             document.body.appendChild(notification);
             setTimeout(() => notification.remove(), 5000);
         }
 
-        socket.on("connect", () => {
-            socket.emit("join", { room: ticketId });
-            updateTicketStatus();
+        // Загрузка истории чата
+        async function loadChatHistory() {
+            if (!ticketId) {
+                showNotification(translations[currentLang].error_no_ticket, 'danger');
+                return;
+            }
+            try {
+                const response = await fetch(`${serverUrl}/get_chat_history/${ticketId}`);
+                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                const messages = await response.json();
+                const chatBox = document.getElementById('chat_box');
+                chatBox.innerHTML = ''; // Очищаем перед загрузкой
+
+                messages.forEach(data => {
+                    appendMessage(data.sender_type, data.content, data.timestamp);
+                });
+                chatBox.scrollTop = chatBox.scrollHeight;
+            } catch (error) {
+                console.error("Error loading chat history:", error);
+                showNotification(`${translations[currentLang].error_load_history} ${error.message}`, 'danger');
+            }
+        }
+
+        // Добавление сообщения в чат-бокс
+        function appendMessage(senderType, content, timestamp) {
+            const chatBox = document.getElementById('chat_box');
+            const msgDiv = document.createElement('div');
+            const senderLabel = senderType === 'user' ? translations[currentLang].you_label : translations[currentLang].operator_label;
+            
+            // Форматируем дату и время
+            const date = new Date(timestamp);
+            const timeString = date.toLocaleTimeString(currentLang.replace('_lat', '-Latn'), { hour: '2-digit', minute: '2-digit' });
+            const dateString = date.toLocaleDateString(currentLang.replace('_lat', '-Latn'), { day: '2-digit', month: '2-digit', year: 'numeric' });
+
+            msgDiv.className = `message ${senderType}`;
+            msgDiv.innerHTML = `<strong>${senderLabel}:</strong> ${content}<span class="message-timestamp">${dateString} ${timeString}</span>`;
+            chatBox.appendChild(msgDiv);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        // Отправка сообщения
+        async function sendMessage() {
+            const chatMessageInput = document.getElementById('chat_message_input');
+            const content = chatMessageInput.value.trim();
+
+            if (content === "") return;
+
+            if (!ticketId) {
+                showNotification(translations[currentLang].error_no_ticket, 'danger');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${serverUrl}/send_chat_message`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        ticket_id: ticketId,
+                        sender_type: 'user', // Клиент всегда 'user'
+                        content: content
+                    })
+                });
+                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                
+                // Добавляем сообщение сразу после успешной отправки
+                appendMessage('user', content, new Date().toISOString()); 
+                chatMessageInput.value = '';
+            } catch (error) {
+                console.error("Error sending message:", error);
+                showNotification(`${translations[currentLang].error_send_message} ${error.message}`, 'danger');
+            }
+        }
+
+        // Обработчик события 'message' от Socket.IO
+        socket.on("chat_message", (data) => {
+            // Убедимся, что сообщение предназначено для нашего талона
+            if (data.ticket_id === ticketId) {
+                // Если отправитель 'user', мы уже добавили его сообщение локально.
+                // Если отправитель 'operator', добавляем его сообщение.
+                if (data.sender === 'operator') {
+                     appendMessage(data.sender, data.content, new Date().toISOString());
+                }
+            }
         });
 
-        socket.on("message", (data) => {
-            const chatBox = document.getElementById("chat_box");
-            const msg = document.createElement("p");
-            msg.innerHTML = `<strong>${data.sender}:</strong> ${data.content}`;
-            chatBox.appendChild(msg);
-            chatBox.scrollTop = chatBox.scrollHeight;
+        socket.on("connect", () => {
+            if (ticketId) {
+                socket.emit("join", { room: ticketId });
+                console.log(`Присоединился к комнате чата: ${ticketId}`);
+                loadChatHistory(); // Загружаем историю после подключения и присоединения к комнате
+            } else {
+                showNotification(translations[currentLang].error_no_ticket, 'danger');
+            }
         });
 
         socket.on("disconnect", () => {
-            showNotification(translations[currentLang].error_connection);
+            showNotification(translations[currentLang].error_connection, 'danger');
         });
 
-        // Initialize
-        if (localStorage.getItem("theme") === "dark") {
-            document.body.classList.add("dark");
-            document.querySelector(".theme-toggle").innerText = "☀️";
+        // Отправка сообщения по нажатию Enter
+        document.getElementById('chat_message_input').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        // Функция для смены языка
+        function setLanguage(lang) {
+            currentLang = lang;
+            document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelector(`button[onclick="setLanguage('${lang}')"]`).classList.add('active');
+            
+            document.getElementById('pageTitle').innerText = translations[lang].page_title;
+            document.getElementById('chat_message_input').placeholder = translations[lang].input_placeholder;
+            document.getElementById('send_button').innerText = translations[lang].send_button;
+            
+            // Перерисовка сообщений с новым языком (обновление "Вы" / "Оператор" и временных меток)
+            loadChatHistory();
         }
-        setLanguage("uz_lat");
-        updateTicketStatus();
-        setInterval(updateTicketStatus, 10000); // Update status every 10 seconds
+
+        // Функция для переключения темы
+        function toggleTheme() {
+            document.body.classList.toggle('dark');
+            const isDark = document.body.classList.contains('dark');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            document.querySelector('.theme-toggle').innerText = isDark ? '☀️' : '🌙';
+        }
+
+        // Инициализация при загрузке
+        if (localStorage.getItem('theme') === 'dark') {
+            document.body.classList.add('dark');
+            document.querySelector('.theme-toggle').innerText = '☀️';
+        }
+        
+        setLanguage('uz_lat'); // Устанавливаем язык по умолчанию
+        
+        // Initial check for ticketId on page load
+        if (!ticketId) {
+            showNotification(translations[currentLang].error_no_ticket, 'danger');
+        }
     </script>
 </body>
 </html>

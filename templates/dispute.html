@@ -15,6 +15,7 @@
             flex-direction: column;
             align-items: center;
             padding: 20px;
+            justify-content: center; /* Центрирование содержимого */
         }
         :root {
             --bg: #f4f7fa;
@@ -23,6 +24,7 @@
             --primary: #1a73e8;
             --secondary: #34c759;
             --danger: #e53e3e;
+            --border-color: #e2e8f0;
         }
         body.dark {
             --bg: #1a202c;
@@ -31,6 +33,7 @@
             --primary: #63b3ed;
             --secondary: #68d391;
             --danger: #f56565;
+            --border-color: #4a5568;
         }
         .container {
             background: var(--card-bg);
@@ -39,146 +42,249 @@
             width: 100%;
             max-width: 600px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            text-align: center;
         }
-        h1 { 
-            font-size: 24px; 
-            font-weight: 600; 
-            color: var(--primary); 
-            margin-bottom: 20px; 
-            text-align: center; 
+        h1 {
+            font-size: 32px;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 20px;
         }
-        .form-group { margin-bottom: 16px; }
-        label { 
-            display: block; 
-            font-size: 16px; 
-            margin-bottom: 8px; 
-            color: var(--text); 
+        .form-group {
+            margin-bottom: 20px;
         }
-        textarea {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            font-size: 16px;
-            resize: vertical;
-            background: var(--card-bg);
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
             color: var(--text);
         }
-        .dark textarea { 
-            border-color: #4a5568; 
-            background: #2d3748; 
-        }
-        button {
+        .form-group textarea {
             width: 100%;
-            padding: 12px;
-            background: var(--danger);
-            border: none;
+            padding: 12px 15px;
+            border: 1px solid var(--border-color);
             border-radius: 8px;
             font-size: 16px;
-            font-weight: 600;
-            color: #ffffff;
-            cursor: pointer;
-            transition: all 0.2s;
+            background: var(--bg);
+            color: var(--text);
+            resize: vertical;
+            min-height: 150px; /* Увеличена минимальная высота */
+            box-sizing: border-box;
         }
-        button:hover { background: #c53030; }
-        .controls {
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.2);
+        }
+        .submit-btn {
+            background: var(--primary);
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .submit-btn:hover {
+            background: #155bb5;
+            transform: translateY(-2px);
+        }
+
+        .notification {
             position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #333;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        .notification.show {
+            opacity: 1;
+        }
+
+        /* Language and Theme switchers */
+        .lang-switcher, .theme-switcher {
+            position: absolute;
             top: 20px;
-            right: 20px;
             display: flex;
             gap: 10px;
-            z-index: 1000;
         }
+        .lang-switcher { left: 20px; }
+        .theme-switcher { right: 20px; }
         .lang-btn, .theme-toggle {
-            padding: 8px 16px;
-            background: #ffffff;
-            border: 1px solid #e2e8f0;
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 8px 12px;
             border-radius: 8px;
-            font-size: 14px;
-            color: #4a5568;
             cursor: pointer;
-            transition: all 0.2s;
+            font-size: 14px;
+            transition: background-color 0.3s ease;
         }
-        .dark .lang-btn, .dark .theme-toggle { 
-            background: #2d3748; 
-            border-color: #4a5568; 
-            color: #e2e8f0; 
+        .lang-btn:hover, .theme-toggle:hover {
+            background: #155bb5;
         }
-        .lang-btn:hover, .theme-toggle:hover { background: #eef4fd; }
-        .dark .lang-btn:hover, .dark .theme-toggle:hover { background: #4a5568; }
-        .lang-btn.active { 
+        .lang-btn.active {
             background: var(--primary); 
-            color: #ffffff; 
-            border-color: var(--primary); 
         }
-        @media (max-width: 480px) {
-            .container { padding: 16px; }
-            h1 { font-size: 20px; }
-            textarea, button { font-size: 14px; }
-            .controls { 
-                top: 10px; 
-                right: 10px; 
-                flex-wrap: wrap; 
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+                max-width: 90%;
             }
-            .lang-btn, .theme-toggle { 
-                padding: 6px 12px; 
-                font-size: 12px; 
+            h1 {
+                font-size: 28px;
+            }
+            .form-group textarea {
+                min-height: 100px;
+            }
+            .submit-btn {
+                padding: 10px 20px;
+                font-size: 16px;
+            }
+            .lang-switcher, .theme-switcher {
+                position: static;
+                margin-bottom: 20px;
+                justify-content: center;
+                width: 100%;
             }
         }
     </style>
 </head>
 <body>
-    <div class="controls">
-        <button class="lang-btn active" onclick="setLanguage('uz_lat')">Uz (Lat)</button>
-        <button class="lang-btn" onclick="setLanguage('uz_cyr')">Ўз (Кирилл)</button>
-        <button class="lang-btn" onclick="setLanguage('ru')">Ру</button>
-        <button class="lang-btn" onclick="setLanguage('en')">En</button>
+    <div class="lang-switcher">
+        <button class="lang-btn active" onclick="setLanguage('uz_lat')">UZ</button>
+        <button class="lang-btn" onclick="setLanguage('ru')">RU</button>
+        <button class="lang-btn" onclick="setLanguage('en')">EN</button>
+    </div>
+    <div class="theme-switcher">
         <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
     </div>
+
     <div class="container">
-        <h1 id="title">Shikoyat yuborish</h1>
-        <form action="{{ server_url }}/dispute/{{ ticket_number }}" method="POST">
+        <h1 id="title">Подать жалобу</h1>
+        <form id="disputeForm">
+            <input type="hidden" name="ticket_id" id="ticketId">
+            
             <div class="form-group">
-                <label for="comment" id="labelComment">Shikoyat matni</label>
-                <textarea id="comment" name="comment" rows="6" required></textarea>
+                <label for="comment" id="labelComment">Шикоят матни:</label>
+                <textarea id="comment" name="comment" rows="8" required></textarea>
             </div>
-            <button type="submit" id="submitBtn">Yuborish</button>
+            <button type="submit" class="submit-btn" id="submitBtn">Юбориш</button>
         </form>
     </div>
+
+    <div class="notification" id="notification"></div>
+
     <script>
+        const serverUrl = '{{ server_url }}';
+        const urlParams = new URLSearchParams(window.location.search);
+        const ticketId = urlParams.get('ticket_id'); // Получаем ticket_id из URL
+
         const translations = {
             uz_lat: {
                 title: "Shikoyat yuborish",
-                comment: "Shikoyat matni",
-                submit: "Yuborish"
-            },
-            uz_cyr: {
-                title: "Шикоят юбориш",
-                comment: "Шикоят матни",
-                submit: "Юбориш"
+                comment: "Shikoyat matni:",
+                submit: "Yuborish",
+                success: "Shikoyat muvaffaqiyatli yuborildi!",
+                error: "Xato yuz berdi:",
+                error_no_ticket: "Talon ID topilmadi. Shikoyat yuborish uchun to'g'ri havoladan foydalaning.",
+                error_comment_required: "Iltimos, shikoyat matnini kiriting."
             },
             ru: {
                 title: "Подать жалобу",
-                comment: "Текст жалобы",
-                submit: "Отправить"
+                comment: "Текст жалобы:",
+                submit: "Отправить",
+                success: "Жалоба успешно отправлена!",
+                error: "Произошла ошибка:",
+                error_no_ticket: "Ticket ID не найден. Используйте правильную ссылку для подачи жалобы.",
+                error_comment_required: "Пожалуйста, введите текст жалобы."
             },
             en: {
                 title: "File a Dispute",
-                comment: "Dispute Details",
-                submit: "Submit"
+                comment: "Dispute Details:",
+                submit: "Submit",
+                success: "Dispute submitted successfully!",
+                error: "An error occurred:",
+                error_no_ticket: "Ticket ID not found. Please use the correct link to file a dispute.",
+                error_comment_required: "Please enter the dispute details."
             }
         };
         let currentLang = 'uz_lat';
 
+        // Функция отображения уведомлений
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            notification.innerText = message;
+            notification.classList.add('show');
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // Обработка отправки формы
+        document.getElementById('disputeForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            if (!ticketId) {
+                showNotification(translations[currentLang].error_no_ticket);
+                return;
+            }
+
+            const commentText = document.getElementById('comment').value.trim();
+            if (!commentText) {
+                showNotification(translations[currentLang].error_comment_required);
+                return;
+            }
+
+            const data = {
+                ticket_id: ticketId,
+                comment: commentText
+            };
+
+            try {
+                const response = await fetch(`${serverUrl}/submit_dispute`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || `HTTP error! Status: ${response.status}`);
+                }
+                showNotification(translations[currentLang].success);
+                // После успешной отправки, перенаправить пользователя на страницу статуса талона
+                setTimeout(() => {
+                    window.location.href = `${serverUrl}/ticket/${ticketId}`;
+                }, 1500); 
+            } catch (error) {
+                console.error('Error submitting dispute:', error);
+                showNotification(`${translations[currentLang].error} ${error.message}`);
+            }
+        });
+
+        // Функция для смены языка
         function setLanguage(lang) {
             currentLang = lang;
             document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
             document.querySelector(`button[onclick="setLanguage('${lang}')"]`).classList.add('active');
+            
             document.getElementById('title').innerText = translations[lang].title;
             document.getElementById('labelComment').innerText = translations[lang].comment;
             document.getElementById('submitBtn').innerText = translations[lang].submit;
         }
 
+        // Функция для переключения темы
         function toggleTheme() {
             document.body.classList.toggle('dark');
             const isDark = document.body.classList.contains('dark');
@@ -186,9 +292,21 @@
             document.querySelector('.theme-toggle').innerText = isDark ? '☀️' : '🌙';
         }
 
+        // Инициализация при загрузке
         if (localStorage.getItem('theme') === 'dark') {
             document.body.classList.add('dark');
             document.querySelector('.theme-toggle').innerText = '☀️';
+        }
+        
+        // Устанавливаем язык и ticketId в скрытое поле
+        setLanguage('uz_lat');
+        document.getElementById('ticketId').value = ticketId;
+
+        // Если ticketId отсутствует в URL, уведомляем пользователя и перенаправляем
+        if (!ticketId) {
+            showNotification(translations[currentLang].error_no_ticket);
+            // setTimeout(() => window.location.href = `${serverUrl}/`, 3000); // Можно перенаправить на главную
+            // Для целей тестирования, пока не перенаправляем автоматически
         }
     </script>
 </body>

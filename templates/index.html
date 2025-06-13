@@ -2,8 +2,10 @@
 <html>
 <head>
     <title>Xizmat tanlash</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        /* Базовые стили */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Inter', sans-serif;
@@ -14,15 +16,29 @@
             justify-content: center;
             align-items: center;
             color: var(--text);
+            padding: 20px;
+            transition: background 0.3s ease, color 0.3s ease;
         }
+
+        /* Цветовые переменные для светлой темы */
         :root {
             --bg: #f4f7fa;
             --text: #2d3748;
             --card-bg: #ffffff;
-            --primary: #1a73e8;
-            --secondary: #34c759;
-            --danger: #e53e3e;
+            --primary: #1a73e8; /* Основной цвет */
+            --secondary: #34c759; /* Второстепенный/успешный цвет */
+            --danger: #e53e3e; /* Цвет для ошибок/опасностей */
+            --border-color: #e2e8f0;
+            --button-hover: #1666c5;
+            --category-bg: #f0f4f8; /* Цвет фона категории */
+            --category-border: #d1d9e0;
+            --service-bg: #e6f0ff; /* Цвет фона услуги */
+            --service-border: #a8d4ff;
+            --text-light: #6b7280; /* Более светлый текст для дополнительной информации */
+            --grid-item-text: #2d3748; /* Цвет текста в элементах сетки */
         }
+
+        /* Цветовые переменные для темной темы */
         body.dark {
             --bg: #1a202c;
             --text: #e2e8f0;
@@ -30,457 +46,906 @@
             --primary: #63b3ed;
             --secondary: #68d391;
             --danger: #f56565;
+            --border-color: #4a5568;
+            --button-hover: #4299e1;
+            --category-bg: #4a5568; /* Цвет фона категории в темной теме */
+            --category-border: #6a768e;
+            --service-bg: #3c548a; /* Цвет фона услуги в темной теме */
+            --service-border: #7aa7e8;
+            --text-light: #cbd5e0;
+            --grid-item-text: #e2e8f0; /* Цвет текста в элементах сетки */
         }
-        h1 { font-size: 36px; font-weight: 600; color: var(--primary); margin-bottom: 40px; }
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 20px;
-            width: 90%;
-            max-width: 1200px;
+
+        h1 { 
+            font-size: clamp(24px, 5vw, 36px); 
+            font-weight: 700; 
+            color: var(--primary); 
+            margin-bottom: 30px; 
+            text-align: center;
         }
-        .card {
+
+        .container {
             background: var(--card-bg);
-            border: 2px solid #e2e8f0;
             border-radius: 12px;
-            padding: 20px;
+            padding: 25px;
+            width: 100%;
+            max-width: 800px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
             text-align: center;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        .dark .card { border-color: #4a5568; }
-        .category-card {
-            background: #e6f0ff;
-            border: 2px solid var(--primary);
-            font-weight: 600;
-        }
-        .subcategory-card {
-            background: #f0f5ff;
-            border: 2px dashed var(--primary);
-        }
-        .service-card {
-            background: #e6ffed;
-            border: 2px solid var(--secondary);
-        }
-        .dark .category-card { background: #2c5282; }
-        .dark .subcategory-card { background: #3b5998; }
-        .dark .service-card { background: #2f855a; }
-        .card:hover {
-            border-color: var(--primary);
-            background: #eef4fd;
-            transform: scale(1.05);
-        }
-        .dark .card:hover { background: #4a5568; }
-        .card span { font-size: 18px; font-weight: 400; }
-        .controls {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            display: flex;
-            gap: 10px;
-        }
-        .lang-btn, .theme-toggle, .back-btn, .retry-btn, .page-btn, .return-btn, .status-btn {
-            padding: 8px 16px;
-            background: #ffffff;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            font-size: 14px;
-            color: #4a5568;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .dark .lang-btn, .dark .theme-toggle, .dark .retry-btn, .dark .page-btn, .dark .return-btn, .dark .status-btn { 
-            background: #2d3748; 
-            border-color: #4a5568; 
-            color: #e2e8f0; 
-        }
-        .lang-btn:hover, .theme-toggle:hover, .back-btn:hover, .retry-btn:hover, .page-btn:hover, .return-btn:hover, .status-btn:hover { 
-            background: #eef4fd; 
-        }
-        .dark .lang-btn:hover, .dark .theme-toggle:hover, .dark .retry-btn:hover, .dark .page-btn:hover, .dark .return-btn:hover, .dark .status-btn:hover { 
-            background: #4a5568; 
-        }
-        .lang-btn.active { 
-            background: var(--primary); 
-            color: #ffffff; 
-            border-color: var(--primary); 
-        }
-        .notification {
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: var(--secondary);
-            color: #ffffff;
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-size: 20px;
-            z-index: 1000;
-            transition: opacity 0.3s;
-            text-align: center;
-        }
-        .error-message {
-            color: var(--danger);
-            font-size: 18px;
-            text-align: center;
-            margin-top: 20px;
             display: flex;
             flex-direction: column;
-            gap: 10px;
-            align-items: center;
+            gap: 20px;
+            position: relative;
+            animation: fadeIn 0.5s ease-out;
         }
-        #backButton { display: none; margin-bottom: 20px; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); /* Увеличено минимальную ширину для лучшей читаемости */
+            gap: 20px; /* Увеличено расстояние между элементами */
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .grid-item {
+            background: var(--category-bg); /* По умолчанию фон категории */
+            border: 1px solid var(--category-border);
+            border-radius: 12px; /* Более округлые углы */
+            padding: 25px; /* Увеличен паддинг */
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-weight: 600;
+            color: var(--grid-item-text); /* Цвет текста из переменной */
+            text-align: center;
+            min-height: 120px; /* Увеличена минимальная высота */
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1); /* Улучшена тень */
+            /* Для адаптивного текста */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden; /* Скрыть текст, который выходит за границы */
+        }
+        
+        .grid-item.service {
+            background: var(--service-bg); /* Фон для услуг */
+            border: 1px solid var(--service-border);
+            color: var(--primary); /* Цвет текста для услуг */
+            font-weight: 700; /* Более жирный текст для услуг */
+        }
+
+        .grid-item:hover {
+            transform: translateY(-8px); /* Увеличено смещение при наведении */
+            box-shadow: 0 12px 24px rgba(0,0,0,0.15); /* Улучшена тень при наведении */
+        }
+
+        .grid-item:active {
+            transform: translateY(0);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+        }
+
+        .category-text, .service-text {
+            font-size: clamp(16px, 3.5vw, 20px); /* Увеличен размер шрифта */
+            word-break: break-word; /* Для длинных названий */
+            overflow-wrap: break-word; /* Для очень длинных слов */
+            line-height: 1.3; /* Для лучшего размещения многострочного текста */
+            display: -webkit-box;
+            -webkit-line-clamp: 4; /* Максимум 4 строки */
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis; /* Добавить многоточие, если текст не помещается */
+            max-height: calc(1.3em * 4); /* Примерная максимальная высота для 4 строк */
+        }
+        
         .pagination {
             display: flex;
-            gap: 10px;
-            margin-top: 20px;
+            justify-content: center;
+            gap: 15px; /* Увеличено расстояние между кнопками */
+            margin-top: 25px;
         }
-        .ticket-container {
-            display: none;
-            background: var(--card-bg);
-            border: 2px solid #e2e8f0;
+
+        .pagination button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px; /* Более округлые углы */
+            padding: 12px 25px; /* Увеличен паддинг */
+            font-size: 18px; /* Увеличен размер шрифта */
+            cursor: pointer;
+            transition: background 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            min-width: 120px; /* Фиксированная минимальная ширина для кнопок */
+        }
+
+        .pagination button:hover:not(:disabled) {
+            background: var(--button-hover);
+            transform: translateY(-3px);
+        }
+
+        .pagination button:disabled {
+            background: var(--border-color);
+            color: var(--text-light); /* Более светлый текст для отключенных кнопок */
+            cursor: not-allowed;
+            opacity: 0.7; /* Немного меньше прозрачности */
+            box-shadow: none; /* Убираем тень для отключенных кнопок */
+            transform: none;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px; /* Увеличено расстояние */
+            flex-wrap: wrap;
+            margin-bottom: 20px; /* Отступ снизу */
+        }
+
+        .control-button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 25px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: background 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            flex-grow: 1; /* Чтобы кнопки занимали доступное пространство */
+            min-width: 150px; /* Минимальная ширина кнопок */
+        }
+
+        .control-button:hover {
+            background: var(--button-hover);
+            transform: translateY(-3px);
+        }
+
+        .control-button.secondary {
+            background: var(--secondary);
+        }
+        .control-button.secondary:hover {
+            background: #2a9448; /* Темнее зеленый при наведении */
+        }
+
+        /* Секция для отображения информации о выданном талоне */
+        .ticket-info {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 25px; /* Увеличено расстояние */
+            margin-top: 25px;
+            padding: 30px; /* Увеличен паддинг */
+            border: 1px solid var(--border-color);
             border-radius: 12px;
-            padding: 20px;
-            text-align: center;
-            margin-top: 20px;
-            width: 90%;
-            max-width: 400px;
+            background: var(--category-bg); /* Более нейтральный фон */
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
         }
-        .dark .ticket-container { border-color: #4a5568; }
-        .ticket-container h2 { font-size: 24px; font-weight: 600; color: var(--primary); }
-        .ticket-container p { font-size: 18px; margin: 10px 0; }
-        .ticket-container img { max-width: 150px; margin-top: 10px; }
-        .line { border-top: 1px dashed #ccc; margin: 10px 0; }
-        .ticket-buttons { display: flex; gap: 10px; justify-content: center; margin-top: 10px; }
-        iframe#printFrame { display: none; }
+
+        .ticket-info img {
+            width: 200px; /* Увеличен размер QR-кода */
+            height: 200px;
+            border-radius: 8px;
+            border: 2px solid var(--border-color); /* Более заметная рамка */
+            padding: 8px;
+            background: white;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .ticket-info p {
+            font-size: 20px; /* Увеличен размер шрифта */
+            color: var(--text);
+            margin: 0; /* Убраны лишние отступы */
+            line-height: 1.5;
+        }
+
+        .ticket-info p strong {
+            color: var(--primary);
+            font-weight: 700;
+        }
+        .ticket-info #qrInstructions {
+            font-size: 16px; /* Более крупный текст для инструкций */
+        }
+
+
+        .button-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 25px;
+        }
+        .button-group .control-button {
+            min-width: 180px; /* Минимальная ширина для кнопок в группе */
+        }
+
+        /* Переключатель языка и темы */
+        .lang-switcher, .theme-switcher {
+            position: absolute;
+            top: 20px;
+            display: flex;
+            gap: 10px;
+        }
+        .lang-switcher { left: 20px; }
+        .theme-switcher { right: 20px; }
+        .lang-btn, .theme-toggle {
+            background: var(--card-bg);
+            color: var(--text);
+            border: 1px solid var(--border-color);
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .lang-btn.active, .lang-btn:hover, .theme-toggle:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--primary);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            z-index: 1000;
+            opacity: 0;
+            animation: slideIn 0.5s forwards, fadeOut 0.5s forwards 4.5s;
+        }
+        .notification.danger {
+            background-color: var(--danger);
+        }
+
+        @keyframes slideIn {
+            from { bottom: 0; opacity: 0; }
+            to { bottom: 20px; opacity: 1; }
+        }
+
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+
+        /* Стили для печати (применяются только при печати) */
+        @media print {
+            body {
+                margin: 0;
+                padding: 0;
+                background: white;
+                -webkit-print-color-adjust: exact; /* Для печати фоновых цветов */
+                print-color-adjust: exact;
+            }
+            .container, .lang-switcher, .theme-switcher, .controls, #items_grid, #pagination {
+                display: none !important; /* Скрыть все, кроме содержимого для печати */
+            }
+            #ticket_display_section {
+                display: flex !important; /* Показать только секцию талона для печати */
+                width: 70mm; /* Задаем размер для чека */
+                height: 70mm; /* Возможно, потребуется регулировка в зависимости от содержимого */
+                padding: 5mm;
+                box-shadow: none;
+                border: none;
+                background: white;
+                justify-content: flex-start;
+                align-items: center; /* Выравнивание по центру */
+                flex-direction: column;
+                overflow: hidden; /* Обрезать, если не помещается */
+                font-size: 10px; /* Базовый размер шрифта для печати */
+                color: black;
+                text-align: center;
+                gap: 1mm;
+                position: relative; /* Для позиционирования элементов внутри */
+            }
+
+            #ticket_display_section img {
+                width: 25mm; /* Размер QR-кода на чеке */
+                height: 25mm;
+                border: none;
+                padding: 0;
+                margin-bottom: 2mm;
+            }
+
+            #printable_ticket_content {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center; /* Центрируем контент */
+                width: 100%;
+                height: 100%;
+                overflow: hidden;
+            }
+
+            #printable_ticket_content p {
+                font-size: 3.5mm; /* Уменьшаем шрифты для печати */
+                margin: 0.5mm 0;
+                line-height: 1.2;
+                color: black;
+                word-break: break-all;
+                overflow-wrap: break-word;
+            }
+            #printable_ticket_content p strong {
+                font-size: 4mm;
+                color: black;
+            }
+            #printable_ticket_content #ticket_logo {
+                max-width: 20mm;
+                max-height: 10mm;
+                object-fit: contain;
+                margin-bottom: 2mm;
+            }
+            #printable_ticket_content .business-name {
+                font-size: 5mm;
+                font-weight: bold;
+                margin-bottom: 2mm;
+            }
+            #printable_ticket_content .ticket-number-label {
+                font-size: 4mm;
+                margin-bottom: 1mm;
+            }
+            #printable_ticket_content .ticket-number {
+                font-size: 6mm;
+                font-weight: bold;
+                margin-bottom: 2mm;
+            }
+            #printable_ticket_content .service-path {
+                font-size: 3mm;
+                color: #555;
+                margin-bottom: 1mm;
+                word-break: break-all;
+            }
+            #printable_ticket_content .service-name-label {
+                font-size: 3.5mm;
+                font-weight: bold;
+                margin-bottom: 1mm;
+            }
+            #printable_ticket_content .service-name-value {
+                font-size: 4.5mm;
+                font-weight: bold;
+                margin-bottom: 2mm;
+            }
+            #printable_ticket_content .operator-info {
+                font-size: 3.5mm;
+                margin-bottom: 1mm;
+            }
+            #printable_ticket_content .estimated-wait {
+                font-size: 3.5mm;
+                margin-bottom: 2mm;
+            }
+            #printable_ticket_content .print-timestamp {
+                font-size: 3mm;
+                color: #777;
+                margin-top: 2mm;
+            }
+            #printable_ticket_content #qrInstructions {
+                display: none !important; /* Скрыть инструкции QR */
+            }
+            #printable_ticket_content .button-group {
+                display: none !important; /* Скрыть кнопки */
+            }
+        }
+
+        /* Медиа-запросы для адаптивности */
+        @media (max-width: 768px) {
+            body { padding: 15px; }
+            .container { padding: 20px; }
+            h1 { margin-bottom: 25px; }
+            .grid { grid-template-columns: 1fr; } /* Одна колонка на мобильных */
+            .lang-switcher, .theme-switcher {
+                position: static; /* Убираем фиксированное позиционирование */
+                margin-top: 10px;
+                justify-content: center;
+                width: 100%;
+            }
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .control-button {
+                width: 100%;
+            }
+            .ticket-info img {
+                width: 150px;
+                height: 150px;
+            }
+        }
     </style>
 </head>
 <body>
-    <div class="controls">
-        <button class="lang-btn active" onclick="setLanguage('uz_lat')">Uz (Lat)</button>
-        <button class="lang-btn" onclick="setLanguage('uz_cyr')">Ўз (Кирилл)</button>
-        <button class="lang-btn" onclick="setLanguage('ru')">Ру</button>
-        <button class="lang-btn" onclick="setLanguage('en')">En</button>
-        <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
-        <button class="lang-btn" onclick="loadCategories()">Refresh</button>
+    <div class="lang-switcher">
+        <button class="lang-btn active" onclick="setLanguage('uz_lat')">O'zbek</button>
+        <button class="lang-btn" onclick="setLanguage('ru')">Русский</button>
+        <button class="lang-btn" onclick="setLanguage('en')">English</button>
     </div>
-    <h1 id="title">Xizmat tanlash</h1>
-    <button id="backButton" class="back-btn" onclick="goBack()">Orqaga</button>
-    <div class="grid" id="content"></div>
-    <div class="pagination" id="pagination"></div>
-    <div class="ticket-container" id="ticketContainer">
-        <h2 id="ticketTitle">Sizning navbatingiz</h2>
-        <div class="line"></div>
-        <p id="ticketNumber"></p>
-        <p id="ticketService"></p>
-        <p id="ticketOperator"></p>
-        <p id="ticketWaitTime"></p>
-        <div class="line"></div>
-        <p id="ticketDateTime"></p>
-        <img id="ticketQR" src="" alt="QR Code">
-        <div class="ticket-buttons">
-            <button class="status-btn" onclick="viewStatus()">Navbat holatini ko‘rish</button>
-            <button class="return-btn" onclick="returnToServices()">Xizmatlarga qaytish</button>
+    <div class="theme-switcher">
+        <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
+    </div>
+
+    <div class="container">
+        <h1 id="title">Xizmat tanlash</h1>
+
+        <div class="controls">
+            <button id="backButton" class="control-button" style="display: none;" onclick="goBack()">Ortga</button>
+            <button class="control-button secondary return-btn" onclick="returnHome()" style="display: none;">Bosh sahifaga qaytish</button>
+            <button class="control-button secondary status-btn" onclick="checkTicketStatus()" style="display: none;">Mening talabim</button>
+        </div>
+
+        <div id="items_grid" class="grid">
+            <!-- Элементы будут загружаться сюда JavaScript'ом -->
+        </div>
+
+        <div id="pagination" class="pagination">
+            <button id="prevPage" onclick="prevPage()" disabled>Oldingi</button>
+            <button id="nextPage" onclick="nextPage()" disabled>Keyingi</button>
+        </div>
+
+        <!-- Секция для отображения информации о выданном талоне -->
+        <div id="ticket_display_section" class="ticket-info" style="display: none;">
+            <div id="printable_ticket_content" style="display: flex; flex-direction: column; align-items: center;">
+                <img id="ticket_logo" src="https://placehold.co/80x40/cccccc/000000?text=LOGO" alt="Логотип компании" style="display: none;">
+                <p class="business-name"></p>
+                <p class="ticket-number-label" id="ticketTitle"></p>
+                <p class="ticket-number"><strong id="ticketNumberDisplay"></strong></p>
+                <p class="service-path" id="servicePathDisplay"></p>
+                <p class="service-name-label"></p>
+                <p class="service-name-value" id="serviceNameDisplay"></p>
+                <p class="operator-info" id="operatorNameDisplay"></p>
+                <p class="estimated-wait" id="estimatedWaitDisplay"></p>
+                <img id="qrCodeImage" src="" alt="QR Code" style="display: none;">
+                <p class="print-timestamp" id="printTimestampDisplay"></p>
+            </div>
+            <p id="qrInstructions" style="display: none; font-size: 14px; color: var(--text-light);"></p>
+            <div class="button-group">
+                <button id="printTicketButton" class="control-button secondary" onclick="printTicket()" style="display: none;">Chop etish</button>
+            </div>
         </div>
     </div>
-    <iframe id="printFrame"></iframe>
+
     <script>
+        const serverUrl = "{{ server_url }}";
+        let categoryStack = []; // Стек для отслеживания иерархии категорий
+        let currentPage = 1;
+        const itemsPerPage = 9; // Изменено на 9 элементов на странице
+        let currentItems = []; // Текущие элементы для отображения на странице
+        let ticketInfo = null; // Для хранения информации о выданном талоне
+
+        // Интервал для автоматической проверки статуса талона
+        let statusCheckInterval = null; 
+
+        // Переводы
         const translations = {
-            uz_lat: { 
-                title: "Xizmat tanlash", ticket: "Sizning navbatingiz", wait: "Taxminiy kutish vaqti", 
-                error: "Xatolik yuz berdi", no_items: "Hech narsa topilmadi", back: "Orqaga", 
-                retry: "Qayta urinish", prev: "Oldingi", next: "Keyingi", service: "Xizmat", 
-                dateTime: "Sana va vaqt", return: "Xizmatlarga qaytish", status: "Navbat holatini ko‘rish",
-                printing: "Talon chop etilmoqda...", print_error: "Chop etishda xato yuz berdi!"
+            uz_lat: {
+                title: "Xizmat tanlash",
+                back: "Ortga",
+                return: "Bosh sahifaga qaytish",
+                status: "Mening talabim",
+                prev: "Oldingi",
+                next: "Keyingi",
+                ticket: "Sizning taloningiz:",
+                service_display: "Xizmat:",
+                operator_pending: "Operator kutilmoqda...",
+                scan_qr: "Telegram orqali holatni tekshirish uchun QR-kodni skanerlang",
+                print_ticket: "Chop etish",
+                error_fetch: "Ma'lumotlarni yuklashda xato yuz berdi:",
+                error_create_ticket: "Talon yaratishda xato yuz berdi:",
+                error_not_service: "Bu kategoriya. Iltimos, xizmatni tanlang.",
+                ticket_created: "Talon muvaffaqiyatli yaratildi!",
+                not_yet_assigned: "Hali operator tayinlanmagan",
+                business_name: "Tadbirkorlik subyekti nomi", // Пример названия для печати
+                estimated_wait: "Taxminiy kutish vaqti:",
+                minutes: "daqiqa",
+                operator_label: "Operator:",
+                category_label: "Kategoriya:",
+                subcategory_label: "Qismkategoriya:",
+                service_type_label: "Xizmat turi:",
+                estimated_wait_time_text: "Taxminiy kutish vaqti:" 
             },
-            uz_cyr: { 
-                title: "Хизмат танлаш", ticket: "Сизнинг навбатингиз", wait: "Тахминий кутиш вақти", 
-                error: "Хатолик юз берди", no_items: "Ҳеч нарса топилмади", back: "Оръага",
-                retry: "Қайта уриниш", prev: "Олдинги", next: "Кейинги", service: "Хизмат", 
-                dateTime: "Сана ва вақт", return: "Хизматларга қайтиш", status: "Навбат ҳолатини кўриш",
-                printing: "Талон чоп этилмоқда...", print_error: "Чоп этишда хато юз берди!"
+            ru: {
+                title: "Выбор услуги",
+                back: "Назад",
+                return: "Вернуться на главную",
+                status: "Мой талон",
+                prev: "Предыдущая",
+                next: "Следующая",
+                ticket: "Ваш талон:",
+                service_display: "Услуга:",
+                operator_pending: "Оператор ожидается...",
+                scan_qr: "Отсканируйте QR-код, чтобы узнать статус через Telegram",
+                print_ticket: "Печать",
+                error_fetch: "Ошибка загрузки данных:",
+                error_create_ticket: "Ошибка при создании талона:",
+                error_not_service: "Это категория. Пожалуйста, выберите услугу.",
+                ticket_created: "Талон успешно создан!",
+                not_yet_assigned: "Еще не назначен",
+                business_name: "Название Предприятия", // Пример названия для печати
+                estimated_wait: "Примерное ожидание:",
+                minutes: "минут",
+                operator_label: "Оператор:",
+                category_label: "Категория:",
+                subcategory_label: "Подкатегория:",
+                service_type_label: "Вид услуги:",
+                estimated_wait_time_text: "Примерное время ожидания:" 
             },
-            ru: { 
-                title: "Выберите услугу", ticket: "Ваш талон", wait: "Примерное время ожидания", 
-                error: "Произошла ошибка", no_items: "Ничего не найдено", back: "Назад", 
-                retry: "Повторить попытку", prev: "Предыдущая", next: "Следующая", service: "Услуга", 
-                dateTime: "Дата и время", return: "Вернуться к услугам", status: "Посмотреть статус очереди",
-                printing: "Талон печатается...", print_error: "Ошибка при печати!"
-            },
-            en: { 
-                title: "Select a service", ticket: "Your ticket", wait: "Estimated wait time", 
-                error: "An error occurred", no_items: "Nothing found", back: "Back", 
-                retry: "Retry", prev: "Previous", next: "Next", service: "Service", 
-                dateTime: "Date and time", return: "Return to services", status: "View queue status",
-                printing: "Ticket is being printed...", print_error: "Printing error occurred!"
+            en: {
+                title: "Select Service",
+                back: "Back",
+                return: "Return to Home",
+                status: "My Ticket",
+                prev: "Previous",
+                next: "Next",
+                ticket: "Your Ticket:",
+                service_display: "Service:",
+                operator_pending: "Operator pending...",
+                scan_qr: "Scan QR code to check status via Telegram",
+                print_ticket: "Print",
+                error_fetch: "Error fetching data:",
+                error_create_ticket: "Error creating ticket:",
+                error_not_service: "This is a category. Please select a service.",
+                ticket_created: "Ticket created successfully!",
+                not_yet_assigned: "Not yet assigned",
+                business_name: "Business Name", // Example business name for print
+                estimated_wait: "Estimated wait time:",
+                minutes: "minutes",
+                operator_label: "Operator:",
+                category_label: "Category:",
+                subcategory_label: "Subcategory:",
+                service_type_label: "Service Type:",
+                estimated_wait_time_text: "Estimated wait time:" 
             }
         };
-        let currentLang = "uz_lat";
-        const serverUrl = "{{ server_url }}";
-        // Исправлено: если kiosk_id не передан, будет 1
-        const kioskId = {{ kiosk_id if kiosk_id is defined else 1 }};
-        let lastTicket = null;
-        let categoryStack = [];
-        let currentPage = 1;
-        let totalItems = 0;
-        let perPage = 10;
+        let currentLang = 'uz_lat'; // Язык по умолчанию
 
-        async function loadCategories() {
-            try {
-                const response = await fetch(`${serverUrl}/categories`);
-                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-                const categories = await response.json();
-                categoryStack = [];
-                currentPage = 1;
-                document.getElementById("ticketContainer").style.display = "none";
-                document.getElementById("content").style.display = "grid";
-                document.getElementById("pagination").style.display = "flex";
-                renderItems(categories);
-                document.getElementById("backButton").style.display = "none";
-                renderPagination(categories.length);
-            } catch (error) {
-                document.getElementById("content").innerHTML = `
-                    <div class="error-message">
-                        <p>${translations[currentLang].error}: ${translations[currentLang].no_items}</p>
-                        <button class="retry-btn" onclick="loadCategories()">${translations[currentLang].retry}</button>
-                    </div>`;
-                document.getElementById("pagination").innerHTML = "";
-            }
-        }
-
-        async function loadItems(categoryId, page = 1) {
-            try {
-                const response = await fetch(`${serverUrl}/services/${categoryId}?page=${page}`);
-                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-                const data = await response.json();
-                if (page === 1 && !categoryStack.includes(categoryId)) {
-                    categoryStack.push(categoryId);
-                }
-                currentPage = data.page;
-                totalItems = data.total;
-                perPage = data.per_page;
-                document.getElementById("ticketContainer").style.display = "none";
-                document.getElementById("content").style.display = "grid";
-                document.getElementById("pagination").style.display = "flex";
-                renderItems(data.items);
-                document.getElementById("backButton").style.display = categoryStack.length > 0 ? "block" : "none";
-                document.getElementById("backButton").innerText = translations[currentLang].back;
-                renderPagination(totalItems, categoryId);
-            } catch (error) {
-                document.getElementById("content").innerHTML = `
-                    <div class="error-message">
-                        <p>${translations[currentLang].error}: ${error.message}</p>
-                        <button class="retry-btn" onclick="loadItems(${categoryId})">${translations[currentLang].retry}</button>
-                    </div>`;
-                document.getElementById("pagination").innerHTML = "";
-            }
-        }
-
-        function renderItems(items) {
-            const container = document.getElementById("content");
-            container.innerHTML = "";
-            if (!items || items.length === 0) {
-                container.innerHTML = `
-                    <div class="error-message">
-                        <p>${translations[currentLang].no_items}</p>
-                        <button class="retry-btn" onclick="${categoryStack.length > 0 ? `loadItems(${categoryStack[categoryStack.length - 1]})` : 'loadCategories()'}">${translations[currentLang].retry}</button>
-                    </div>`;
-                return;
-            }
-            items.forEach(item => {
-                const card = document.createElement("div");
-                card.className = `card ${item.isCategory ? (item.isSubcategory ? 'subcategory-card' : 'category-card') : 'service-card'}`;
-                card.innerHTML = `<span>${item.name}</span>`;
-                let isProcessing = false;
-                card.onclick = () => {
-                    if (isProcessing) return;
-                    isProcessing = true;
-                    if (item.isCategory) {
-                        loadItems(item.id).finally(() => isProcessing = false);
-                    } else {
-                        getTicket(item.id, item.name).finally(() => isProcessing = false);
-                    }
-                };
-                container.appendChild(card);
-            });
-        }
-
-        function renderPagination(total, categoryId = null) {
-            const container = document.getElementById("pagination");
-            container.innerHTML = "";
-            if (total <= perPage) return;
-
-            const totalPages = Math.ceil(total / perPage);
-            if (currentPage > 1) {
-                const prevBtn = document.createElement("button");
-                prevBtn.className = "page-btn";
-                prevBtn.innerText = translations[currentLang].prev;
-                prevBtn.onclick = () => categoryId ? loadItems(categoryId, currentPage - 1) : loadCategories();
-                container.appendChild(prevBtn);
-            }
-            if (currentPage < totalPages) {
-                const nextBtn = document.createElement("button");
-                nextBtn.className = "page-btn";
-                nextBtn.innerText = translations[currentLang].next;
-                nextBtn.onclick = () => categoryId ? loadItems(categoryId, currentPage + 1) : loadCategories();
-                container.appendChild(nextBtn);
-            }
-        }
-
-        async function getTicket(serviceId, serviceName) {
-            try {
-                const response = await fetch(`${serverUrl}/get_ticket`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ service_id: serviceId, lang: currentLang, kiosk_id: kioskId })
-                });
-                if (!response.ok) {
-                    let msg = translations[currentLang].error;
-                    try {
-                        const errData = await response.json();
-                        msg = errData.error || msg;
-                    } catch {}
-                    throw new Error(msg);
-                }
-                const data = await response.json();
-                lastTicket = data;
-                showTicket(data.ticket, serviceName, data.wait_time, data.ticket_id, data.status_url);
-                printTicket(data.ticket, serviceName, data.wait_time, data.ticket_id, data.qr_data);
-            } catch (error) {
-                showTicket(`${translations[currentLang].error}: ${error.message}`);
-            }
-        }
-
-        function showTicket(ticket, serviceName, waitTime, ticketId, statusUrl) {
-            document.getElementById("content").style.display = "none";
-            document.getElementById("pagination").style.display = "none";
-            document.getElementById("backButton").style.display = "none";
-            document.getElementById("ticketContainer").style.display = "block";
-            document.getElementById("ticketTitle").innerText = translations[currentLang].ticket;
-            document.getElementById("ticketNumber").innerText = `${translations[currentLang].ticket}: ${ticket}`;
-            document.getElementById("ticketService").innerText = `${translations[currentLang].service}: ${serviceName}`;
-            document.getElementById("ticketWaitTime").innerText = `${translations[currentLang].wait}: ${waitTime} min`;
-            document.getElementById("ticketDateTime").innerText = `${translations[currentLang].dateTime}: ${new Date().toLocaleString()}`;
-            // Новое: показываем оператора
-            let operatorInfo = "";
-            if (lastTicket && (lastTicket.operator_name || lastTicket.operator_number)) {
-                operatorInfo = "Operator: ";
-                if (lastTicket.operator_name) operatorInfo += lastTicket.operator_name;
-                if (lastTicket.operator_number) operatorInfo += ` (${lastTicket.operator_number})`;
-            }
-            // Если блока нет, добавляем его
-            let operatorElem = document.getElementById("ticketOperator");
-            if (!operatorElem) {
-                operatorElem = document.createElement("p");
-                operatorElem.id = "ticketOperator";
-                document.getElementById("ticketService").after(operatorElem);
-            }
-            operatorElem.innerText = operatorInfo;
-            if (lastTicket && lastTicket.qr_data)
-                document.getElementById("ticketQR").src = `data:image/png;base64,${lastTicket.qr_data}`;
-            else
-                document.getElementById("ticketQR").src = "";
-            document.querySelector(".return-btn").innerText = translations[currentLang].return;
-            document.querySelector(".status-btn").innerText = translations[currentLang].status;
-            showNotification(translations[currentLang].printing);
-        }
-
-        function printTicket(ticket, serviceName, waitTime, ticketId, qrData) {
-            // Получаем данные об операторе
-            let operatorInfo = "";
-            if (lastTicket && (lastTicket.operator_name || lastTicket.operator_number)) {
-                operatorInfo = "Operator: ";
-                if (lastTicket.operator_name) operatorInfo += lastTicket.operator_name;
-                if (lastTicket.operator_number) operatorInfo += ` (${lastTicket.operator_number})`;
-            }
-            const printContent = `
-                <html>
-                <head>
-                    <title>Reg print</title>
-                    <style>
-                        @page { size: 60mm 60mm; margin: 0; }
-                        body { margin: 2mm; font-family: Arial, sans-serif; text-align: center; font-size: 10px; }
-                        img { width: 30mm; height: 30mm; margin: 2mm auto; }
-                        p { margin: 1mm 0; }
-                        .line { border-top: 1px dashed #000; margin: 2mm 0; }
-                    </style>
-                </head>
-                <body>
-                    <p>Talon: ${ticket}</p>
-                    <p>Xizmat: ${serviceName}</p>
-                    <p>${operatorInfo}</p>
-                    <p>Kutish: ${waitTime} min</p>
-                    <div class="line"></div>
-                    <p>${new Date().toLocaleString()}</p>
-                    <img src="data:image/png;base64,${qrData}" alt="QR Code">
-                    <script>
-                        window.onload = function() {
-                            window.print();
-                            setTimeout(function() { window.close(); }, 500);
-                        }
-                    <\/script>
-                </body>
-                </html>
-            `;
-            const printWindow = window.open('', '_blank', 'width=400,height=400');
-            printWindow.document.open();
-            printWindow.document.write(printContent);
-            printWindow.document.close();
-        }
-
-        function viewStatus() {
-            if (lastTicket && lastTicket.status_url) {
-                window.open(lastTicket.status_url, "_blank");
-            } else {
-                showNotification(translations[currentLang].error);
-            }
-        }
-
-        function showNotification(message) {
-            const existing = document.querySelector(".notification");
+        function showNotification(message, type = 'primary') {
+            const existing = document.querySelector('.notification');
             if (existing) existing.remove();
-            const notification = document.createElement("div");
-            notification.className = "notification";
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
             notification.innerText = message;
             document.body.appendChild(notification);
             setTimeout(() => notification.remove(), 5000);
         }
 
+        // Функция для управления видимостью кнопок управления
+        function updateControlButtonsVisibility() {
+            const backButton = document.getElementById('backButton');
+            const returnButton = document.querySelector('.return-btn');
+            const statusButton = document.querySelector('.status-btn');
+            const paginationDiv = document.getElementById('pagination');
+
+            // Кнопка "Назад" видна только если есть элементы в стеке категорий
+            backButton.style.display = categoryStack.length > 0 ? 'block' : 'none';
+
+            // Кнопка "Мой талон" видна только если есть выданный талон
+            statusButton.style.display = ticketInfo ? 'block' : 'none';
+
+            // Кнопка "Вернуться на главную" видна всегда, кроме главной страницы
+            returnButton.style.display = (categoryStack.length > 0 || ticketInfo) ? 'block' : 'none';
+            
+            // Пагинация видна только если есть элементы в сетке и их больше, чем на одну страницу И нет активного талона
+            paginationDiv.style.display = (currentItems.length > itemsPerPage && !ticketInfo) ? 'flex' : 'none';
+        }
+
+        async function loadCategories() {
+            try {
+                const response = await fetch(`${serverUrl}/get_categories`);
+                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                const data = await response.json();
+                currentItems = data;
+                currentPage = 1;
+                renderItems();
+                // Обновляем видимость кнопок после загрузки категорий
+                categoryStack = []; // Убедимся, что стек пуст при загрузке категорий
+                ticketInfo = null; // Сбрасываем информацию о талоне
+                document.getElementById('ticket_display_section').style.display = 'none';
+                document.getElementById('items_grid').style.display = 'grid';
+                updateControlButtonsVisibility(); 
+                clearInterval(statusCheckInterval); // Останавливаем интервал, если он был
+            } catch (error) {
+                console.error("Error loading categories:", error);
+                showNotification(`${translations[currentLang].error_fetch} ${error.message}`, 'danger');
+            }
+        }
+
+        async function loadItems(parentId) {
+            try {
+                const response = await fetch(`${serverUrl}/get_children/${parentId}`);
+                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                const data = await response.json();
+                
+                // Если переходим из главной или из другой категории, добавляем в стек
+                // Проверяем, чтобы не было дубликатов в стеке при повторном клике на ту же категорию
+                if (categoryStack.length === 0 || categoryStack[categoryStack.length - 1] !== parentId) {
+                    categoryStack.push(parentId); 
+                }
+                currentItems = data;
+                currentPage = 1;
+                renderItems();
+                updateControlButtonsVisibility(); // Обновляем видимость кнопок
+            } catch (error) {
+                console.error(`Error loading items for parent ${parentId}:`, error);
+                showNotification(`${translations[currentLang].error_fetch} ${error.message}`, 'danger');
+            }
+        }
+
+        function renderItems() {
+            const grid = document.getElementById('items_grid');
+            grid.innerHTML = ''; // Очищаем сетку
+            const start = (currentPage - 1) * itemsPerPage;
+            const end = start + itemsPerPage;
+            const itemsToRender = currentItems.slice(start, end);
+
+            itemsToRender.forEach(item => {
+                const div = document.createElement('div');
+                div.className = `grid-item ${item.is_service ? 'service' : 'category'}`;
+                div.innerHTML = `<span class="${item.is_service ? 'service-text' : 'category-text'}">${item.name}</span>`;
+                div.onclick = () => handleItemClick(item);
+                grid.appendChild(div);
+            });
+
+            updatePaginationButtons(); // Обновляем кнопки пагинации без аргументов
+            updateControlButtonsVisibility(); // Обновляем видимость кнопок после рендеринга
+        }
+
+        function updatePaginationButtons() {
+            const prevButton = document.getElementById('prevPage');
+            const nextButton = document.getElementById('nextPage');
+            prevButton.disabled = currentPage === 1;
+            nextButton.disabled = currentPage * itemsPerPage >= currentItems.length;
+
+            prevButton.innerText = translations[currentLang].prev;
+            nextButton.innerText = translations[currentLang].next;
+        }
+
+        function nextPage() {
+            if (currentPage * itemsPerPage < currentItems.length) {
+                currentPage++;
+                renderItems();
+            }
+        }
+
+        function prevPage() {
+            if (currentPage > 1) {
+                currentPage--;
+                renderItems();
+            }
+        }
+
+        async function handleItemClick(item) {
+            if (item.is_service) {
+                // Это услуга, создаем талон
+                await createTicket(item.id, item.name);
+            } else {
+                // Это категория, загружаем ее дочерние элементы
+                await loadItems(item.id);
+            }
+        }
+
+        async function createTicket(serviceId, serviceName) {
+            try {
+                const response = await fetch(`${serverUrl}/create_ticket`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ service_id: serviceId })
+                });
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || `HTTP error! Status: ${response.status}`);
+                }
+                const data = await response.json();
+                ticketInfo = { ...data, service_name: serviceName, service_id: serviceId }; // Сохраняем информацию о талоне, имя услуги и service_id
+                displayTicketInfo(ticketInfo);
+                showNotification(translations[currentLang].ticket_created);
+            } catch (error) {
+                console.error("Error creating ticket:", error);
+                showNotification(`${translations[currentLang].error_create_ticket} ${error.message}`, 'danger');
+            }
+        }
+
+        async function displayTicketInfo(data) {
+            document.getElementById('items_grid').style.display = 'none'; // Скрыть сетку категорий/услуг
+            document.getElementById('pagination').style.display = 'none'; // Скрыть пагинацию
+            document.getElementById('ticket_display_section').style.display = 'flex'; // Показать секцию талона
+
+            document.getElementById('ticketNumberDisplay').innerText = data.ticket_number;
+            document.getElementById('serviceNameDisplay').innerText = data.service_name; // Только имя услуги
+            document.getElementById('operatorNameDisplay').innerText = translations[currentLang].operator_pending; // Будет обновлено checkTicketStatusAuto
+
+            // Получение пути категории для печати
+            // Используем data.service_path, который теперь возвращается в ticket_status API
+            const servicePathDisplay = document.getElementById('servicePathDisplay');
+            // Fetch the full ticket status to get the service_path from the server
+            try {
+                const ticketStatusResponse = await fetch(`${serverUrl}/ticket_status/${data.ticket_number}`);
+                if (!ticketStatusResponse.ok) throw new Error(`HTTP error! Status: ${ticketStatusResponse.status}`);
+                const ticketStatusData = await ticketStatusResponse.json();
+                
+                if (ticketStatusData.service_path && ticketStatusData.service_path.length > 0) {
+                    // Отфильтровываем только категории для отображения пути
+                    const categoriesInPath = ticketStatusData.service_path.filter(item => !item.is_service);
+                    if (categoriesInPath.length > 0) {
+                        servicePathDisplay.innerHTML = categoriesInPath.map(item => `<span>${item.name}</span>`).join(' &gt; ');
+                        servicePathDisplay.style.display = 'block';
+                    } else {
+                        servicePathDisplay.style.display = 'none';
+                    }
+                } else {
+                    servicePathDisplay.style.display = 'none';
+                }
+            } catch (error) {
+                console.error("Error fetching service path for display:", error);
+                servicePathDisplay.style.display = 'none';
+            }
+
+
+            // Отображение логотипа и названия предпринимателя (можете настроить)
+            document.getElementById('ticket_logo').style.display = 'block'; // Показать логотип
+            document.querySelector('.business-name').innerText = translations[currentLang].business_name;
+            
+            // Примерное время ожидания (заглушка, требует серверной логики)
+            const estimatedWaitDisplay = document.getElementById('estimatedWaitDisplay');
+            if (data.estimated_wait_time !== null && data.estimated_wait_time !== 'N/A') {
+                estimatedWaitDisplay.innerText = `${translations[currentLang].estimated_wait_time_text} ${data.estimated_wait_time} ${translations[currentLang].minutes}`;
+            } else {
+                estimatedWaitDisplay.innerText = ""; // Если нет данных, скрываем
+            }
+
+            const qrCodeImage = document.getElementById('qrCodeImage');
+            qrCodeImage.src = data.qr_code_url;
+            qrCodeImage.style.display = 'block';
+            document.getElementById('qrInstructions').style.display = 'block';
+            document.getElementById('printTicketButton').style.display = 'block';
+            
+            // Дата и время печати
+            const now = new Date();
+            const formattedDate = now.toLocaleDateString(currentLang.replace('_lat', '-Latn'), { year: 'numeric', month: '2-digit', day: '2-digit' });
+            const formattedTime = now.toLocaleTimeString(currentLang.replace('_lat', '-Latn'), { hour: '2-digit', minute: '2-digit' });
+            document.getElementById('printTimestampDisplay').innerText = `${formattedDate} ${formattedTime}`;
+
+            updateControlButtonsVisibility(); // Обновляем видимость кнопок
+            clearInterval(statusCheckInterval); // Очищаем старый интервал
+            statusCheckInterval = setInterval(checkTicketStatusAuto, 10000); // Запускаем новый интервал
+        }
+
         function goBack() {
-            if (categoryStack.length <= 0) {
-                categoryStack = [];
-                loadCategories();
-            } else {
-                categoryStack.pop();
-                if (categoryStack.length > 0)
-                    loadItems(categoryStack[categoryStack.length - 1], 1);
-                else
+            if (ticketInfo) {
+                // Если отображается талон, кнопка "Назад" должна скрыть талон и показать категории
+                ticketInfo = null; // Сбрасываем информацию о талоне
+                clearInterval(statusCheckInterval); // Останавливаем интервал
+                document.getElementById('ticket_display_section').style.display = 'none';
+                document.getElementById('items_grid').style.display = 'grid';
+                document.getElementById('pagination').style.display = 'flex';
+                // Определяем, куда вернуться после скрытия талона: на последний уровень категорий или на главную
+                if (categoryStack.length > 0) {
+                    // Используем последний элемент стека для загрузки
+                    loadItems(categoryStack[categoryStack.length - 1]);
+                } else {
+                    loadCategories(); // Если стека нет, то на главную
+                }
+                updateControlButtonsVisibility();
+            } else if (categoryStack.length > 0) {
+                categoryStack.pop(); // Удаляем текущую категорию из стека
+                if (categoryStack.length === 0) {
+                    // Если стек пуст, значит вернулись на верхний уровень
                     loadCategories();
-            }
-        }
-
-        function returnToServices() {
-            document.getElementById("ticketContainer").style.display = "none";
-            document.getElementById("content").style.display = "grid";
-            document.getElementById("pagination").style.display = "flex";
-            if (categoryStack.length === 0) {
-                loadCategories();
+                } else {
+                    // Возвращаемся к родительской категории
+                    loadItems(categoryStack[categoryStack.length - 1]);
+                }
             } else {
-                loadItems(categoryStack[categoryStack.length - 1], 1);
+                // Если стек пуст и нет активного талона, уже на самом верхнем уровне
+                // Кнопка "Назад" не должна быть активной (управляется updateControlButtonsVisibility)
+                showNotification("Вы уже на главной странице.", 'info');
             }
         }
 
+        function returnHome() {
+            categoryStack = []; // Очищаем стек
+            ticketInfo = null; // Сбрасываем информацию о талоне
+            clearInterval(statusCheckInterval); // Останавливаем интервал
+            loadCategories(); // Загружаем категории верхнего уровня
+            document.getElementById('ticket_display_section').style.display = 'none';
+            document.getElementById('items_grid').style.display = 'grid';
+            document.getElementById('pagination').style.display = 'flex';
+            updateControlButtonsVisibility(); // Обновляем видимость кнопок
+        }
+
+        function checkTicketStatus() {
+            if (ticketInfo && ticketInfo.ticket_number) {
+                window.location.href = `${serverUrl}/ticket/${ticketInfo.ticket_number}`;
+            } else {
+                showNotification(translations[currentLang].not_yet_assigned, 'info');
+            }
+        }
+
+        function printTicket() {
+            window.print(); // Автоматически вызывает диалог печати браузера
+            // Можно добавить задержку перед перезагрузкой, чтобы дать браузеру время обработать печать
+            setTimeout(() => {
+                window.location.reload(); // Перезагрузить страницу после печати, чтобы восстановить состояние
+            }, 500); 
+        }
+
+        async function checkTicketStatusAuto() {
+            if (ticketInfo && ticketInfo.ticket_number) {
+                try {
+                    const response = await fetch(`${serverUrl}/ticket_status/${ticketInfo.ticket_number}`);
+                    if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                    const data = await response.json();
+                    
+                    const operatorNameDisplay = document.getElementById('operatorNameDisplay');
+                    const estimatedWaitDisplay = document.getElementById('estimatedWaitDisplay');
+
+                    if (data.operator_name && data.operator_name !== "N/A") {
+                        operatorNameDisplay.innerText = `${translations[currentLang].operator_label} ${data.operator_name}`;
+                        // Если оператор назначен, можно сбросить примерное ожидание или обновить его
+                        estimatedWaitDisplay.innerText = ""; // Например, скрываем после назначения
+                    } else {
+                        operatorNameDisplay.innerText = translations[currentLang].operator_pending;
+                        // Обновляем текст времени ожидания из данных, полученных с сервера
+                        if (data.estimated_wait_time !== null && data.estimated_wait_time !== 'N/A') {
+                             estimatedWaitDisplay.innerText = `${translations[currentLang].estimated_wait_time_text} ${data.estimated_wait_time} ${translations[currentLang].minutes}`;
+                        } else {
+                            estimatedWaitDisplay.innerText = "";
+                        }
+                    }
+
+                    if (data.status === 'called' || data.status === 'finished') {
+                        // Если талон вызван или завершен, останавливаем опрос
+                        clearInterval(statusCheckInterval);
+                        statusCheckInterval = null; // Сбрасываем переменную интервала
+                        // Дополнительно можно показать уведомление или изменить UI
+                    }
+                } catch (error) {
+                    console.error("Error checking ticket status:", error);
+                }
+            } else {
+                clearInterval(statusCheckInterval); // Остановить опрос, если талона нет
+                statusCheckInterval = null;
+            }
+        }
+        
         function setLanguage(lang) {
             currentLang = lang;
             document.querySelectorAll(".lang-btn").forEach(btn => btn.classList.remove("active"));
             document.querySelector(`button[onclick="setLanguage('${lang}')"]`).classList.add("active");
             document.getElementById("title").innerText = translations[lang].title;
             document.getElementById("backButton").innerText = translations[lang].back;
-            document.getElementById("ticketTitle").innerText = translations[lang].ticket;
             document.querySelector(".return-btn").innerText = translations[lang].return;
             document.querySelector(".status-btn").innerText = translations[lang].status;
-            if (categoryStack.length > 0) loadItems(categoryStack[categoryStack.length - 1], currentPage);
-            else loadCategories();
+            
+            document.getElementById('prevPage').innerText = translations[lang].prev;
+            document.getElementById('nextPage').innerText = translations[lang].next;
+
+            // Обновление текста в секции талона, если он отображается
+            if (ticketInfo) {
+                document.querySelector('.business-name').innerText = translations[lang].business_name;
+                document.getElementById('ticketTitle').innerText = translations[lang].ticket;
+                document.querySelector('.service-name-label').innerText = translations[lang].service_display;
+                document.getElementById('serviceNameDisplay').innerText = ticketInfo.service_name; 
+                document.getElementById('qrInstructions').innerText = translations[lang].scan_qr;
+                document.getElementById('printTicketButton').innerText = translations[lang].print_ticket;
+                
+                // Перерисовать информацию о талоне, чтобы обновить путь категории и оператора
+                displayTicketInfo(ticketInfo);
+
+            } else {
+                // Если талон не выдан, просто перерендерить текущие элементы (для применения is_service стилей)
+                renderItems();
+            }
+
+            updateControlButtonsVisibility();
         }
 
         function toggleTheme() {
@@ -490,6 +955,7 @@
             document.querySelector(".theme-toggle").innerText = isDark ? "☀️" : "🌙";
         }
 
+        // Инициализация при загрузке
         if (localStorage.getItem("theme") === "dark") {
             document.body.classList.add("dark");
             document.querySelector(".theme-toggle").innerText = "☀️";

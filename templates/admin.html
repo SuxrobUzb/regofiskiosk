@@ -1,24 +1,49 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Admin paneli</title>
+    <title>Admin Paneli</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Note: Using Tailwind CSS via CDN is suitable for development/prototyping. For production, consider installing it as a PostCSS plugin or using the Tailwind CLI for better performance and optimized builds. More info: https://tailwindcss.com/docs/installation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.min.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+        /* Базовые стили */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Inter', sans-serif;
-            background: #f4f7fa;
-            color: #2d3748;
-            padding: 40px;
+            background: var(--bg);
+            color: var(--text);
+            transition: background 0.3s ease, color 0.3s ease;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
+
+        /* Цветовые переменные для светлой темы */
         :root {
             --bg: #f4f7fa;
             --text: #2d3748;
             --card-bg: #ffffff;
-            --primary: #1a73e8;
-            --secondary: #34c759;
-            --danger: #e53e3e;
+            --primary: #1a73e8; /* Синий */
+            --secondary: #34c759; /* Зеленый */
+            --danger: #e53e3e; /* Красный */
+            --border-color: #e2e8f0;
+            --input-bg: #f9fafb;
+            --input-border: #e2e8f0;
+            --button-hover-primary: #1666c5;
+            --button-hover-danger: #cc2c2c;
+            --table-header-bg: #edf2f7;
+            --table-row-hover: #f0f4f8;
+            --notification-bg: #1a73e8;
+            --notification-danger-bg: #e53e3e;
+            --text-light: #6b7280; /* Более светлый текст для дополнительной информации */
+            --header-bg: #ffffff;
+            --header-shadow: rgba(0,0,0,0.1);
         }
+
+        /* Цветовые переменные для темной темы */
         body.dark {
             --bg: #1a202c;
             --text: #e2e8f0;
@@ -26,599 +51,1561 @@
             --primary: #63b3ed;
             --secondary: #68d391;
             --danger: #f56565;
+            --border-color: #4a5568;
+            --input-bg: #4a5568;
+            --input-border: #6a768e;
+            --button-hover-primary: #4299e1;
+            --button-hover-danger: #e04f4f;
+            --table-header-bg: #4a5568;
+            --table-row-hover: #3c4456;
+            --notification-bg: #63b3ed;
+            --notification-danger-bg: #f56565;
+            --text-light: #cbd5e0;
+            --header-bg: #2d3748;
+            --header-shadow: rgba(0,0,0,0.3);
         }
-        body {
-            background: var(--bg);
+
+        /* Header Styles */
+        .header {
+            width: 100%;
+            background: var(--header-bg);
+            box-shadow: 0 2px 8px var(--header-shadow);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-radius: 0 0 12px 12px; /* Скругленные нижние углы */
+            position: sticky; /* Sticky header */
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        h1 {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--primary);
+            margin: 0; /* Убрал отступы, так как заголовок теперь в хедере */
+            text-align: center;
+            flex-grow: 1; /* Чтобы заголовок занимал центральное место */
+        }
+
+        .section {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 30px;
+            width: 100%;
+            max-width: 1000px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+
+        .section-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
             color: var(--text);
         }
-        h1 { text-align: center; font-size: 32px; font-weight: 600; color: var(--primary); margin-bottom: 40px; }
-        .section { background: var(--card-bg); border-radius: 12px; padding: 24px; margin-bottom: 24px; }
-        h2 { font-size: 20px; font-weight: 600; color: var(--primary); margin-bottom: 16px; }
-        form { display: flex; gap: 12px; margin-bottom: 20px; align-items: center; }
-        label { font-size: 14px; color: var(--text); }
-        input, select {
+
+        .form-group input[type="text"],
+        .form-group input[type="password"],
+        .form-group input[type="email"],
+        .form-group input[type="date"],
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
             padding: 12px;
-            border: 1px solid #e2e8f0;
+            border: 1px solid var(--input-border);
             border-radius: 8px;
-            font-size: 16px;
-            flex: 1;
-            outline: none;
-            background: #ffffff;
+            background: var(--input-bg);
             color: var(--text);
+            font-size: 16px;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
         }
-        .dark input, .dark select { background: #4a5568; border-color: #718096; }
-        input:focus, select:focus { border-color: var(--primary); }
-        button {
-            padding: 12px 24px;
+
+        .form-group input[type="text"]:focus,
+        .form-group input[type="password"]:focus,
+        .form-group input[type="email"]:focus,
+        .form-group input[type="date"]:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.2);
+            outline: none;
+        }
+
+        .form-group.checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .form-group.checkbox-group label {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-weight: 400;
+            cursor: pointer;
+        }
+        .form-group.checkbox-group input[type="checkbox"] {
+            width: auto;
+            margin: 0;
+            transform: scale(1.2);
+        }
+
+        .button {
+            background: var(--primary);
+            color: white;
             border: none;
             border-radius: 8px;
+            padding: 12px 20px;
             font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .button:hover {
+            background: var(--button-hover-primary);
+            transform: translateY(-2px);
+        }
+
+        .button.danger {
+            background: var(--danger);
+        }
+
+        .button.danger:hover {
+            background: var(--button-hover-danger);
+        }
+        
+        .button.secondary {
+            background: var(--secondary);
+        }
+
+        .button.secondary:hover {
+            background: #2a9448; /* Темнее зеленый при наведении */
+        }
+
+
+        .button:disabled {
+            background: var(--border-color);
+            color: var(--text-light);
+            cursor: not-allowed;
+            opacity: 0.7;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            margin-top: 20px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        .data-table th, .data-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .data-table th {
+            background: var(--table-header-bg);
             font-weight: 600;
-            color: #ffffff;
-            cursor: pointer;
-            transition: all 0.2s;
+            color: var(--primary);
+            text-transform: uppercase;
+            font-size: 14px;
         }
-        .add-btn { background: var(--secondary); }
-        .add-btn:hover { background: #2fb34e; }
-        .edit-btn { background: var(--primary); }
-        .edit-btn:hover { background: #1666c5; }
-        .delete-btn { background: var(--danger); }
-        .delete-btn:hover { background: #c53030; }
-        .assign-btn { background: #ed8936; }
-        .assign-btn:hover { background: #dd6b20; }
-        table { width: 100%; border-collapse: collapse; background: var(--card-bg); border-radius: 12px; overflow: hidden; }
-        th, td { padding: 16px; text-align: left; border-bottom: 1px solid #e2e8f0; }
-        .dark th, .dark td { border-bottom: 1px solid #4a5568; }
-        th { background: var(--primary); color: #ffffff; font-weight: 600; }
-        tr:last-child td { border-bottom: none; }
-        tr:hover { background: #f7fafc; }
-        .dark tr:hover { background: #4a5568; }
-        .controls { text-align: center; margin-bottom: 20px; display: flex; gap: 10px; justify-content: center; }
-        .lang-btn, .theme-toggle {
-            padding: 6px 12px;
-            background: #ffffff;
-            border: 1px solid #e2e8f0;
+
+        .data-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .data-table tbody tr:hover {
+            background: var(--table-row-hover);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-buttons .button {
+            padding: 8px 12px;
+            font-size: 14px;
             border-radius: 6px;
-            font-size: 12px;
-            color: #4a5568;
-            cursor: pointer;
-            transition: all 0.2s;
         }
-        .dark .lang-btn, .dark .theme-toggle { background: #2d3748; border-color: #4a5568; color: #e2e8f0; }
-        .lang-btn:hover, .theme-toggle:hover { background: #eef4fd; }
-        .dark .lang-btn:hover, .dark .theme-toggle:hover { background: #4a5568; }
-        .lang-btn.active { background: var(--primary); color: #ffffff; border-color: var(--primary); }
-        .stats { margin-top: 20px; font-size: 16px; }
-        .service-assign { margin-top: 10px; display: flex; gap: 12px; }
+
+        /* Tabs styling */
+        .tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+            gap: 15px;
+            flex-wrap: wrap;
+            width: 100%;
+            max-width: 1000px; /* Добавлено, чтобы табы тоже центрировались */
+        }
+
+        .tab-button {
+            background: var(--card-bg);
+            color: var(--text);
+            border: 1px solid var(--border-color);
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            flex-grow: 1;
+            min-width: 150px;
+            text-align: center;
+        }
+
+        .tab-button.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .tab-button:hover:not(.active) {
+            background: var(--table-row-hover);
+            transform: translateY(-2px);
+        }
+
+        .tab-content {
+            display: none;
+            width: 100%; /* Занимает всю доступную ширину */
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Language and Theme Switchers */
+        .lang-btn, .theme-toggle, .logout-button {
+            background: var(--card-bg);
+            color: var(--text);
+            border: 1px solid var(--border-color);
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .lang-btn.active, .lang-btn:hover, .theme-toggle:hover, .logout-button:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        .logout-button {
+            background: var(--danger);
+            border-color: var(--danger);
+            color: white;
+        }
+        .logout-button:hover {
+            background: var(--button-hover-danger);
+            border-color: var(--button-hover-danger);
+        }
+
+
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--notification-bg);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            z-index: 1000;
+            opacity: 0;
+            animation: slideIn 0.5s forwards, fadeOut 0.5s forwards 4.5s;
+        }
+        .notification.danger {
+            background-color: var(--notification-danger-bg);
+        }
+
+        @keyframes slideIn {
+            from { bottom: 0; opacity: 0; }
+            to { bottom: 20px; opacity: 1; }
+        }
+
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+
+        /* Analytics Dashboard Specific Styles */
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .analytics-card {
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            text-align: left;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .analytics-card h3 {
+            font-size: 18px;
+            color: var(--primary);
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .analytics-card p {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text);
+        }
+        .analytics-card .sub-text {
+            font-size: 14px;
+            color: var(--text-light);
+        }
+
+        .tickets-list-container {
+            max-height: 400px; /* Ограничить высоту для прокрутки */
+            overflow-y: auto;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        /* Service Tree View */
+        .service-tree ul {
+            list-style: none;
+            padding-left: 20px;
+            margin: 0;
+        }
+
+        .service-tree li {
+            margin-bottom: 5px;
+        }
+
+        .service-tree .service-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 5px 0;
+            cursor: pointer;
+        }
+
+        .service-tree .service-item:hover {
+            background-color: var(--table-row-hover);
+            border-radius: 4px;
+        }
+
+        .service-tree .service-name {
+            font-weight: 500;
+            color: var(--text);
+        }
+
+        .service-tree .service-type {
+            font-size: 0.8em;
+            color: white; /* Changed from text-light */
+            background-color: var(--primary);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+        .service-tree .service-type.category {
+            background-color: var(--secondary);
+        }
+        
+        .service-tree input[type="checkbox"] {
+            margin-right: 8px; /* Отступ справа от чекбокса */
+        }
+        
+        .service-tree .checkbox-label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            body { padding: 0; } /* Убираем паддинг на мобильных */
+            .header {
+                padding: 10px 15px;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+                border-radius: 0;
+            }
+            .header-left {
+                width: 100%;
+                justify-content: space-between;
+            }
+            .header-right {
+                width: 100%;
+                justify-content: space-around;
+            }
+            h1 { font-size: 24px; margin-bottom: 0; } /* Меньше на мобильных */
+            .section { padding: 15px; margin-bottom: 20px; border-radius: 0; }
+            .section-title { font-size: 20px; margin-bottom: 15px; }
+            .tabs { flex-direction: column; gap: 10px; padding: 0 15px; } /* Паддинг для табов */
+            .tab-button { width: 100%; }
+            .lang-switcher, .theme-switcher { position: static; justify-content: center; margin-top: 10px; }
+            .analytics-grid { grid-template-columns: 1fr; }
+        }
     </style>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.5/socket.io.js"></script>
 </head>
 <body>
-    <div class="controls">
-        <button class="lang-btn active" onclick="setLanguage('uz_lat')">Uz (Lat)</button>
-        <button class="lang-btn" onclick="setLanguage('uz_cyr')">Ўз (Кирилл)</button>
-        <button class="lang-btn" onclick="setLanguage('ru')">Ру</button>
-        <button class="lang-btn" onclick="setLanguage('en')">En</button>
-        <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
-        <button class="lang-btn" onclick="logout()">Chiqish</button>
-    </div>
-    <h1 id="title">Admin paneli</h1>
-    <div class="section">
-        <h2 id="categories_title">Kategoriyalar</h2>
-        <form method="POST" action="/add_category">
-            <label for="category_name">Kategoriya nomi:</label>
-            <input type="text" id="category_name" name="name" placeholder="Kategoriya nomi">
-            <label for="parent_id">Yuqori kategoriya:</label>
-            <select id="parent_id" name="parent_id">
-                <option value="">Hech qaysi (asosiy kategoriya)</option>
-                {% for cat in categories %}
-                    <option value="{{ cat[0] }}">{{ cat[1] }} (ID: {{ cat[0] }})</option>
-                {% endfor %}
-            </select>
-            <button class="add-btn" type="submit">Qo‘shish</button>
-        </form>
-        <table>
-            <tr><th>ID</th><th>Nomi</th><th>Yuqori kategoriya</th><th>Amallar</th></tr>
-            {% for category in categories %}
-                <tr>
-                    <td>{{ category[0] }}</td>
-                    <td>{{ category[1] }}</td>
-                    <td>{{ category[2] or "Yo‘q" }}</td>
-                    <td>
-                        <button class="edit-btn" onclick="editCategory({{ category[0] }}, '{{ category[1] }}')">Tahrirlash</button>
-                        <button class="delete-btn" onclick="deleteCategory({{ category[0] }})">O‘chirish</button>
-                    </td>
-                </tr>
-            {% endfor %}
-        </table>
-    </div>
-    <div class="section">
-        <h2 id="services_title">Xizmatlar</h2>
-        <form method="POST" action="/add_service" id="addServiceForm">
-            <label for="service_name">Xizmat nomi:</label>
-            <input type="text" id="service_name" name="name" placeholder="Xizmat nomi">
-            <label for="category_id">Kategoriya:</label>
-            <select id="category_id" name="category_id">
-                <option value="">Kategoriyani tanlang</option>
-                {% for cat in categories %}
-                    <option value="{{ cat[0] }}">{{ cat[1] }} (ID: {{ cat[0] }})</option>
-                {% endfor %}
-            </select>
-            <button class="add-btn" type="submit">Qo‘shish</button>
-        </form>
-        <table>
-            <tr><th>ID</th><th>Nomi</th><th>Kategoriya</th><th>Amallar</th></tr>
-            {% for service in services %}
-                <tr>
-                    <td>{{ service[0] }}</td>
-                    <td>{{ service[1] }}</td>
-                    <td>{{ service[2] }}</td>
-                    <td>
-                        <button class="edit-btn" onclick="editService({{ service[0] }}, '{{ service[1] }}')">Tahrirlash</button>
-                        <button class="delete-btn" onclick="deleteService({{ service[0] }})">O‘chirish</button>
-                    </td>
-                </tr>
-            {% endfor %}
-        </table>
-    </div>
-    <div class="section">
-        <h2 id="operators_title">Operatorlar</h2>
-        <form method="POST" action="/add_operator">
-            <label for="operator_name">Operator ismi:</label>
-            <input type="text" id="operator_name" name="name" placeholder="Operator ismi">
-            <label for="operator_password">Parol:</label>
-            <input type="password" id="operator_password" name="password" placeholder="Parol">
-            <label for="operator_number">Operator raqami:</label>
-            <input type="number" id="operator_number" name="operator_number" placeholder="Operator raqami">
-            <button class="add-btn" type="submit">Qo‘shish</button>
-        </form>
-        <table>
-            <tr>
-                <th>ID</th>
-                <th>Ism</th>
-                <th>Holati</th>
-                <th>Operator raqami</th>
-                <th>Xizmatlar</th>
-                <th>Amallar</th>
-            </tr>
-            {% for operator in operators %}
-            <tr>
-                <td>{{ operator[0] }}</td>
-                <td>{{ operator[1] }}</td>
-                <td>{{ operator[2] }}</td>
-                <td>{{ operator[3] or "" }}</td>
-                    <td>
-                        <div class="service-assign">
-                            <select id="service_select_{{ operator[0] }}" onchange="assignService({{ operator[0] }}, this.value)">
-                                <option value="">Xizmat tanlash</option>
-                                {% for service in services %}
-                                    <option value="{{ service[0] }}">{{ service[1] }}</option>
-                                {% endfor %}
-                            </select>
-                            <button class="assign-btn" onclick="unassignService({{ operator[0] }})">Xizmatni olib tashlash</button>
-                        </div>
-                        <ul id="service_list_{{ operator[0] }}">
-                            {% for os in operator_services if os[0] == operator[0] %}
-                                {% for service in services if service[0] == os[1] %}
-                                    <li data-service-id="{{ service[0] }}">{{ service[1] }}</li>
-                                {% endfor %}
-                            {% endfor %}
-                        </ul>
-                    </td>
-                    <td>
-                        <button class="edit-btn" onclick="editOperator({{ operator[0] }}, '{{ operator[1] }}', '{{ operator[2] }}', '{{ operator[3] or "" }}')">Tahrirlash</button>
-                        <button class="delete-btn" onclick="deleteOperator({{ operator[0] }})">O‘chirish</button>
-                    </td>
-                </tr>
-            {% endfor %}
-        </table>
-    </div>
-    <div class="section">
-        <h2 id="export_title">Hisobot eksport qilish</h2>
-        <form id="exportReportForm">
-            <label for="exportOperatorId">Operator:</label>
-            <select id="exportOperatorId">
-                <option value="">Barcha operatorlar</option>
-                {% for operator in operators %}
-                    <option value="{{ operator[0] }}">{{ operator[1] }}</option>
-                {% endfor %}
-            </select>
-            <label for="exportServiceId">Xizmat:</label>
-            <select id="exportServiceId">
-                <option value="">Barcha xizmatlar</option>
-                {% for service in services %}
-                    <option value="{{ service[0] }}">{{ service[1] }}</option>
-                {% endfor %}
-            </select>
-            <label for="startDate">Boshlanish sanasi:</label>
-            <input type="date" id="startDate">
-            <label for="endDate">Tugash sanasi:</label>
-            <input type="date" id="endDate">
-            <label for="reportType">Hisobot turi:</label>
-            <select id="reportType">
-                <option value="overall">Umumiy</option>
-                <option value="monthly">Oylik</option>
-                <option value="yearly">Yillik</option>
-                <option value="by_operator">Operator bo‘yicha</option>
-            </select>
-            <button class="add-btn" type="submit">Eksport qilish</button>
-        </form>
-    </div>
-    <div class="section">
-        <h2 id="analytics_title">Analitika</h2>
-        <div class="stats">
-            <p id="waiting">Kutayotganlar: {{ waiting|length }}</p>
-            <p id="avg_time">O‘rtacha xizmat vaqti: {{ avg_time }} daqiqa</p>
+    <div class="header">
+        <div class="header-left">
+            <h1>Admin Paneli</h1>
         </div>
-        <h3 id="waiting_title">Kutayotgan mijozlar</h3>
-        <table>
-            <tr><th>Navbat</th><th>Xizmat</th></tr>
-            {% for ticket in waiting %}
-                <tr><td>{{ ticket[0] }}</td><td>{{ ticket[1] }}</td></tr>
-            {% endfor %}
-        </table>
-        <h3 id="finished_title">Tugatilgan navbatlar</h3>
-        <table>
-            <tr><th>Navbat</th><th>Xizmat</th><th>Operator</th><th>Yaratildi</th><th>Tugatildi</th></tr>
-            {% for stat in stats %}
-                <tr><td>{{ stat[0] }}</td><td>{{ stat[1] }}</td><td>{{ stat[2] or 'N/A' }}</td><td>{{ stat[3] }}</td><td>{{ stat[4] }}</td></tr>
-            {% endfor %}
-        </table>
+        <div class="header-right">
+            <div class="lang-switcher">
+                <button class="lang-btn active" onclick="setLanguage('uz_lat')">O'zbek</button>
+                <button class="lang-btn" onclick="setLanguage('uz_cyr')">Ўзбек</button>
+                <button class="lang-btn" onclick="setLanguage('ru')">Русский</button>
+                <button class="lang-btn" onclick="setLanguage('en')">English</button>
+            </div>
+            <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
+            <button class="logout-button" onclick="location.href='{{ server_url }}/admin_logout'">Выйти</button>
+        </div>
     </div>
+
+    <div class="tabs">
+        <button class="tab-button active" data-tab="operators" id="operatorsTab">Операторы</button>
+        <button class="tab-button" data-tab="services" id="servicesTab">Услуги</button>
+        <button class="tab-button" data-tab="assignments" id="assignmentsTab">Назначения</button>
+        <button class="tab-button" data-tab="reports" id="reportsTab">Отчеты</button>
+        <button class="tab-button" data-tab="analytics" id="analyticsTab">Аналитика</button>
+    </div>
+
+    <div id="operators_tab" class="tab-content active section">
+        <h2 class="section-title" id="operatorListTitle">Управление операторами</h2>
+        <form id="operatorForm">
+            <input type="hidden" id="operatorId">
+            <div class="form-group">
+                <label for="operatorName" id="labelOperatorName">Имя оператора:</label>
+                <input type="text" id="operatorName" placeholder="Имя оператора" required>
+            </div>
+            <div class="form-group">
+                <label for="operatorUsername" id="labelOperatorUsername">Логин:</label>
+                <input type="text" id="operatorUsername" placeholder="Логин" required>
+            </div>
+            <div class="form-group">
+                <label for="operatorPassword" id="labelOperatorPassword">Пароль:</label>
+                <input type="password" id="operatorPassword" placeholder="Пароль">
+                <small id="passwordHelpText" style="color: var(--text-light);"></small>
+            </div>
+            <div class="form-group">
+                <label for="operatorNumber" id="labelOperatorNumber">Номер оператора:</label>
+                <input type="text" id="operatorNumber" placeholder="Номер оператора" required>
+            </div>
+            <div class="form-group">
+                <label for="telegramChatId" id="labelTelegramChatId">ID чата Telegram (опционально):</label>
+                <input type="text" id="telegramChatId" placeholder="ID чата Telegram">
+            </div>
+            <div class="form-group">
+                <label for="notificationPreference" id="labelNotificationPreference">Предпочтения уведомлений:</label>
+                <select id="notificationPreference">
+                    <option value="panel" id="optPanel">Только панель</option>
+                    <option value="telegram" id="optTelegram">Только Telegram</option>
+                    <option value="both" id="optBoth">Панель и Telegram</option>
+                    <option value="none" id="optNone">Ничего</option>
+                </select>
+            </div>
+            <div class="button-group">
+                <button type="submit" class="button" id="addOperatorBtn">Добавить оператора</button>
+                <button type="button" class="button danger" id="cancelEditOperatorBtn" style="display:none;">Отмена</button>
+            </div>
+        </form>
+
+        <div class="table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th id="thOperatorName">Имя</th>
+                        <th id="thOperatorUsername">Логин</th>
+                        <th id="thOperatorNumber">Номер</th>
+                        <th id="thTelegramChatId">Telegram ID</th>
+                        <th id="thNotificationPreference">Уведомления</th>
+                        <th id="thOperatorActions">Действия</th>
+                    </tr>
+                </thead>
+                <tbody id="operatorsTableBody">
+                    <!-- Операторы будут загружаться сюда -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="services_tab" class="tab-content section">
+        <h2 class="section-title" id="serviceListTitle">Управление услугами и категориями</h2>
+        <form id="serviceForm">
+            <input type="hidden" id="serviceId">
+            <div class="form-group">
+                <label for="serviceName" id="labelServiceName">Название услуги/категории:</label>
+                <input type="text" id="serviceName" placeholder="Название услуги/категории" required>
+            </div>
+            <div class="form-group">
+                <label for="parentService" id="labelParentService">Родительская категория (опционально):</label>
+                <select id="parentService">
+                    <option value="" id="optNoParent">-- Нет родителя --</option>
+                    <!-- Категории будут загружаться сюда -->
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="flex items-center gap-2">
+                    <input type="checkbox" id="isServiceCheckbox">
+                    <span id="labelIsService">Является услугой (а не категорией)</span>
+                </label>
+            </div>
+            <div class="button-group">
+                <button type="submit" class="button" id="addServiceBtn">Добавить</button>
+                <button type="button" class="button danger" id="cancelEditServiceBtn" style="display:none;">Отмена</button>
+            </div>
+        </form>
+
+        <div class="table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th id="thServiceListName">Название</th>
+                        <th id="thServiceListParent">Родитель</th>
+                        <th id="thServiceListType">Тип</th>
+                        <th id="thServiceListActions">Действия</th>
+                    </tr>
+                </thead>
+                <tbody id="servicesTableBody">
+                    <!-- Услуги будут загружаться сюда -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="assignments_tab" class="tab-content section">
+        <h2 class="section-title" id="assignmentTitle">Назначение услуг операторам</h2>
+        <div class="form-group">
+            <label for="assignOperatorSelect" id="labelAssignOperator">Выберите оператора:</label>
+            <select id="assignOperatorSelect" class="w-full p-2 border rounded-md"></select>
+        </div>
+        <div class="form-group">
+            <label id="labelAssignedServices">Назначенные услуги:</label>
+            <div id="servicesForAssignment" class="service-tree form-group checkbox-group">
+                <!-- Дерево услуг будет загружаться сюда -->
+            </div>
+        </div>
+        <button class="button" id="saveAssignmentsBtn">Сохранить назначения</button>
+    </div>
+
+    <div id="reports_tab" class="tab-content section">
+        <h2 class="section-title" id="reportGenerationTitle">Генерация отчетов</h2>
+        <form id="reportForm">
+            <div class="form-group">
+                <label for="reportOperator" id="labelReportOperator">Оператор (опционально):</label>
+                <select id="reportOperator">
+                    <option value="" id="optAllOperators">-- Все операторы --</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="reportService" id="labelReportService">Услуга (опционально):</label>
+                <select id="reportService">
+                    <option value="" id="optAllServices">-- Все услуги --</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="startDate" id="labelStartDate">Начальная дата:</label>
+                <input type="date" id="startDate">
+            </div>
+            <div class="form-group">
+                <label for="endDate" id="labelEndDate">Конечная дата:</label>
+                <input type="date" id="endDate">
+            </div>
+            <div class="form-group">
+                <label for="reportType" id="labelReportType">Тип отчета:</label>
+                <select id="reportType">
+                    <option value="detailed" id="optDetailed">Подробный</option>
+                    <option value="summary" id="optSummary">Сводный</option>
+                    <option value="operator_performance" id="optOperatorPerformance">Производительность операторов</option>
+                    <option value="service_performance" id="optServicePerformance">Производительность услуг</option>
+                </select>
+            </div>
+            <button type="submit" class="button" id="generateReportBtn">Сгенерировать отчет</button>
+        </form>
+    </div>
+
+    <div id="analytics_tab" class="tab-content section">
+        <h2 class="section-title" id="analyticsDashboardTitle">Панель аналитики в реальном времени</h2>
+        <p class="sub-text mb-4" id="lastUpdatedTime">Последнее обновление: Загрузка...</p>
+        <div class="analytics-grid">
+            <div class="analytics-card">
+                <h3 id="totalTicketsTodayLabel">Всего талонов сегодня</h3>
+                <p id="totalTicketsTodayValue">0</p>
+            </div>
+            <div class="analytics-card">
+                <h3 id="waitingTicketsLabel">В ожидании</h3>
+                <p id="waitingTicketsValue">0</p>
+                <span class="sub-text" id="avgWaitTimeLabel">Ожидание: N/A</span>
+            </div>
+            <div class="analytics-card">
+                <h3 id="calledTicketsLabel">Вызваны</h3>
+                <p id="calledTicketsValue">0</p>
+            </div>
+            <div class="analytics-card">
+                <h3 id="finishedTicketsTodayLabel">Завершены сегодня</h3>
+                <p id="finishedTicketsTodayValue">0</p>
+                <span class="sub-text" id="avgServiceTimeLabel">Обслуживание: N/A</span>
+            </div>
+        </div>
+
+        <h3 class="section-title mt-8" id="currentQueueListTitle">Текущая очередь</h3>
+        <div class="tickets-list-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th id="thAnalyticsTicketNumber">Номер талона</th>
+                        <th id="thAnalyticsStatus">Статус</th>
+                        <th id="thAnalyticsService">Услуга</th>
+                        <th id="thAnalyticsOperator">Оператор</th>
+                        <th id="thAnalyticsStartTime">Время выдачи</th>
+                        <th id="thAnalyticsCallTime">Время вызова</th>
+                        <th id="thAnalyticsEstimatedWait">Прим. ожидание</th>
+                    </tr>
+                </thead>
+                <tbody id="activeTicketsTableBody">
+                    <!-- Активные талоны будут загружаться сюда -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="notification"></div>
 
     <script>
         const serverUrl = "{{ server_url }}";
         const socket = io(serverUrl);
+        let allOperators = [];
+        let allServices = []; // Все услуги и категории для построения дерева
+        let currentTab = 'operators'; // Текущая активная вкладка
+
         const translations = {
-            uz_lat: { 
-                title: "Admin paneli",
-                categories: "Kategoriyalar",
-                services: "Xizmatlar",
-                operators_title: "Operatorlar",
-                analytics_title: "Analitika",
-                export_title: "Hisobot eksport qilish",
-                add: "Qo‘shish",
-                edit: "Tahrirlash",
-                delete_btn: "O‘chirish",
-                assign: "Xizmatni olib tashlash",
-                name: {
-                    category_name: "Kategoriya nomi",
-                    service: "Xizmat nomi",
-                    category_id: "Kategoriyani tanlang",
-                    operator_name: "Operator ismi",
-                    parent_id: "Yuqori kategoriya"
-                },
-                actions: "Amallar",
-                id: "ID",
-                status: "Holati",
-                none: "Yo‘q",
-                waiting: "Kutayotganlar",
-                avg_time: "O‘rtacha xizmat vaqti",
-                waiting_title: "Kutayotgan mijozlar",
-                finished_title: "Tugatilgan navbatlar",
-                export: "Eksport qilish",
-                all_operators: "Barcha operatorlar",
-                all_services: "Barcha xizmatlar",
-                start_date: "Boshlanish sanasi",
-                end_date: "Tugash sanasi",
-                report_type: "Hisobot turi",
-                overall: "Umumiy",
-                monthly: "Oylik",
-                yearly: "Yillik",
-                by_operator: "Operator bo‘yicha"
+            uz_lat: {
+                operators_tab: "Operatorlar",
+                services_tab: "Xizmatlar",
+                assignments_tab: "Tayinlashlar",
+                reports_tab: "Hisobotlar",
+                analytics_tab: "Tahlillar",
+                operatorListTitle: "Operatorlarni boshqarish",
+                labelOperatorName: "Operator nomi:",
+                labelOperatorUsername: "Login:",
+                labelOperatorPassword: "Parol:",
+                passwordHelpText: "Parolni o'zgartirish uchun kiriting. Bo'sh qoldiring, agar o'zgartirmasangiz.",
+                labelOperatorNumber: "Operator raqami:",
+                labelTelegramChatId: "Telegram chat ID (ixtiyoriy):",
+                labelNotificationPreference: "Bildirishnoma afzalliklari:",
+                optPanel: "Faqat panel",
+                optTelegram: "Faqat Telegram",
+                optBoth: "Panel va Telegram",
+                optNone: "Hech qanday",
+                addOperatorBtn: "Operator qo'shish",
+                editOperatorBtn: "Saqlash",
+                cancelEditOperatorBtn: "Bekor qilish",
+                thOperatorName: "Ism",
+                thOperatorUsername: "Login",
+                thOperatorNumber: "Raqam",
+                thTelegramChatId: "Telegram ID",
+                thNotificationPreference: "Bildirishnomalar",
+                thOperatorActions: "Harakatlar",
+                serviceListTitle: "Xizmatlar va toifalarni boshqarish",
+                labelServiceName: "Xizmat/toifa nomi:",
+                labelParentService: "Asosiy toifa (ixtiyoriy):",
+                optNoParent: "-- Asosiy yo'q --",
+                labelIsService: "Xizmat (toifa emas)",
+                addServiceBtn: "Qo'shish",
+                editServiceBtn: "Saqlash",
+                cancelEditServiceBtn: "Bekor qilish",
+                thServiceListName: "Nomi",
+                thServiceListParent: "Asosiy",
+                thServiceListType: "Turi",
+                thServiceListActions: "Harakatlar",
+                assignmentTitle: "Operatorlarga xizmatlarni tayinlash",
+                labelAssignOperator: "Operatorni tanlang:",
+                labelAssignedServices: "Tayinlangan xizmatlar:",
+                saveAssignmentsBtn: "Tayinlashlarni saqlash",
+                reportGenerationTitle: "Hisobot yaratish",
+                labelReportOperator: "Operator (ixtiyoriy):",
+                optAllOperators: "-- Barcha operatorlar --",
+                labelReportService: "Xizmat (ixtiyoriy):",
+                optAllServices: "-- Barcha xizmatlar --",
+                labelStartDate: "Boshlang'ich sana:",
+                labelEndDate: "Tugash sanasi:",
+                labelReportType: "Hisobot turi:",
+                optDetailed: "Batafsil",
+                optSummary: "Umumiy",
+                optOperatorPerformance: "Operator samaradorligi",
+                optServicePerformance: "Xizmat samaradorligi",
+                generateReportBtn: "Hisobot yaratish",
+                analyticsDashboardTitle: "Haqiqiy vaqt tahlil paneli",
+                totalTicketsTodayLabel: "Bugungi jami talonlar",
+                waitingTicketsLabel: "Kutilmoqda",
+                avgWaitTimeLabel: "O'rtacha kutish vaqti:",
+                calledTicketsLabel: "Chaqirilgan",
+                finishedTicketsTodayLabel: "Bugun yakunlangan",
+                avgServiceTimeLabel: "O'rtacha xizmat ko'rsatish vaqti:",
+                currentQueueListTitle: "Joriy navbat",
+                thAnalyticsTicketNumber: "Talon raqami",
+                thAnalyticsStatus: "Holat",
+                thAnalyticsService: "Xizmat",
+                thAnalyticsOperator: "Operator",
+                thAnalyticsStartTime: "Berilgan vaqt",
+                thAnalyticsCallTime: "Chaqirilgan vaqt",
+                thAnalyticsEstimatedWait: "Taxm. kutish",
+                confirm_delete_operator: "Operatoni o'chirishni tasdiqlaysizmi?",
+                confirm_delete_service: "Xizmatni/toifani o'chirishni tasdiqlaysizmi?",
+                success_add_operator: "Operator muvaffaqiyatli qo'shildi!",
+                success_update_operator: "Operator muvaffaqiyatli yangilandi!",
+                success_delete_operator: "Operator muvaffaqiyatli o'chirildi!",
+                success_add_service: "Xizmat/toifa muvaffaqiyatli qo'shildi!",
+                success_update_service: "Xizmat/toifa muvaffaqiyatli yangilandi!",
+                success_delete_service: "Xizmat/toifa muvaffaqiyatli o'chirildi!",
+                success_update_assignments: "Tayinlashlar muvaffaqiyatli yangilandi!",
+                error_fetch: "Ma'lumotlarni yuklashda xato yuz berdi:",
+                error_add: "Qo'shishda xato yuz berdi:",
+                error_update: "Yangilashda xato yuz berdi:",
+                error_delete: "O'chirishda xato yuz berdi:",
+                error_already_exists: "Bunday nomdagi xizmat/toifa ushbu darajada allaqachon mavjud.",
+                error_parent_not_category: "Noto'g'ri asosiy toifa yoki asosiy xizmat. Iltimos, kategoriyani tanlang.",
+                error_delete_category_with_children: "Ichki toifalar yoki xizmatlarga ega kategoriyani o'chirish mumkin emas.",
+                ticket_status_waiting: "Kutilmoqda",
+                ticket_status_called: "Chaqirilgan",
+                ticket_status_finished: "Tugatilgan",
+                ticket_status_redirected: "Yo'naltirilgan",
+                ticket_status_cancelled: "Bekor qilingan",
+                logout: "Chiqish",
+                category_type: "Kategoriya",
+                service_type: "Xizmat",
+                last_updated: "Oxirgi yangilanish:",
+                invalid_date_range: "Boshlang'ich sana tugash sanasidan keyin bo'lishi mumkin emas."
             },
-            uz_cyr: { 
-                title: "Админ панели",
-                categories: "Категориялар",
-                services: "Хизматлар",
-                operators_title: "Операторлар",
-                analytics_title: "Аналитика",
-                export_title: "Ҳисобот экспорт қилиш",
-                add: "Қўшиш",
-                edit: "Таҳрирлаш",
-                delete_btn: "Ўчириш",
-                assign: "Хизматни олиб ташлаш",
-                name: {
-                    category_name: "Категория номи",
-                    service: "Хизмат номи",
-                    category_id: "Категорияни танланг",
-                    operator_name: "Оператор исми",
-                    parent_id: "Юқори категория"
-                },
-                actions: "Амаллар",
-                id: "ID",
-                status: "Ҳолати",
-                none: "Йўқ",
-                waiting: "Кутаётганлар",
-                avg_time: "Ўртача хизмат вақти",
-                waiting_title: "Кутаётган мижозлар",
-                finished_title: "Тугатилган навбатлар",
-                export: "Экспорт қилиш",
-                all_operators: "Барча операторлар",
-                all_services: "Барча хизматлар",
-                start_date: "Бошланиш санаси",
-                end_date: "Тугаш санаси",
-                report_type: "Ҳисобот тури",
-                overall: "Умумий",
-                monthly: "Ойлик",
-                yearly: "Йиллик",
-                by_operator: "Оператор бўйича"
+            uz_cyr: {
+                operators_tab: "Операторлар",
+                services_tab: "Хизматлар",
+                assignments_tab: "Тайинлашлар",
+                reports_tab: "Ҳисоботлар",
+                analytics_tab: "Таҳлиллар",
+                operatorListTitle: "Операторларни бошқариш",
+                labelOperatorName: "Оператор номи:",
+                labelOperatorUsername: "Логин:",
+                labelOperatorPassword: "Парол:",
+                passwordHelpText: "Паролни ўзгартириш учун киритинг. Бўш қолдиринг, агар ўзгартирмасангиз.",
+                labelOperatorNumber: "Оператор рақами:",
+                labelTelegramChatId: "Телеграм чат ID (ихтиёрий):",
+                labelNotificationPreference: "Билдиришнома афзалликлари:",
+                optPanel: "Фақат панел",
+                optTelegram: "Фақат Телеграм",
+                optBoth: "Панел ва Телеграм",
+                optNone: "Ҳеч қандай",
+                addOperatorBtn: "Оператор қўшиш",
+                editOperatorBtn: "Сақлаш",
+                cancelEditOperatorBtn: "Бекор қилиш",
+                thOperatorName: "Исм",
+                thOperatorUsername: "Логин",
+                thOperatorNumber: "Рақам",
+                thTelegramChatId: "Телеграм ID",
+                thNotificationPreference: "Билдиришномалар",
+                thOperatorActions: "Ҳаракатлар",
+                serviceListTitle: "Хизматлар ва тоифаларни бошқариш",
+                labelServiceName: "Хизмат/тоифа номи:",
+                labelParentService: "Асосий тоифа (ихтиёрий):",
+                optNoParent: "-- Асосий йўқ --",
+                labelIsService: "Хизмат (тоифа эмас)",
+                addServiceBtn: "Қўшиш",
+                editServiceBtn: "Сақлаш",
+                cancelEditServiceBtn: "Бекор қилиш",
+                thServiceListName: "Номи",
+                thServiceListParent: "Асосий",
+                thServiceListType: "Тури",
+                thServiceListActions: "Ҳаракатлар",
+                assignmentTitle: "Операторларга хизматларни тайинлаш",
+                labelAssignOperator: "Операторни танланг:",
+                labelAssignedServices: "Тайинланган хизматлар:",
+                saveAssignmentsBtn: "Тайинлашларни сақлаш",
+                reportGenerationTitle: "Ҳисобот яратиш",
+                labelReportOperator: "Оператор (ихтиёрий):",
+                optAllOperators: "-- Барча операторлар --",
+                labelReportService: "Хизмат (ихтиёрий):",
+                optAllServices: "-- Барча хизматлар --",
+                labelStartDate: "Бошланғич сана:",
+                labelEndDate: "Тугаш санаси:",
+                labelReportType: "Ҳисобот тури:",
+                optDetailed: "Батафсил",
+                optSummary: "Умумий",
+                optOperatorPerformance: "Оператор самарадорлиги",
+                optServicePerformance: "Хизмат самарадорлиги",
+                generateReportBtn: "Ҳисобот яратиш",
+                analyticsDashboardTitle: "Ҳақиқий вақт таҳлил панели",
+                totalTicketsTodayLabel: "Бугунги жами талонлар",
+                waitingTicketsLabel: "Кутилмоқда",
+                avgWaitTimeLabel: "Ўртача кутиш вақти:",
+                calledTicketsLabel: "Чақирилган",
+                finishedTicketsTodayLabel: "Бугун якунланган",
+                avgServiceTimeLabel: "Ўртача хизмат кўрсатиш вақти:",
+                currentQueueListTitle: "Жорий навбат",
+                thAnalyticsTicketNumber: "Талон рақами",
+                thAnalyticsStatus: "Ҳолат",
+                thAnalyticsService: "Хизмат",
+                thAnalyticsOperator: "Оператор",
+                thAnalyticsStartTime: "Берилган вақт",
+                thAnalyticsCallTime: "Чақирилган вақт",
+                thAnalyticsEstimatedWait: "Тахм. кутиш",
+                confirm_delete_operator: "Операторни ўчиришни тасдиқлайсизми?",
+                confirm_delete_service: "Хизматни/тоифани ўчиришни тасдиқлайсизми?",
+                success_add_operator: "Оператор муваффақиятли қўшилди!",
+                success_update_operator: "Оператор муваффақиятли янгиланди!",
+                success_delete_operator: "Оператор муваффақиятли ўчирилди!",
+                success_add_service: "Хизмат/тоифа муваффақиятли қўшилди!",
+                success_update_service: "Хизмат/тоифа муваффақиятли янгиланди!",
+                success_delete_service: "Хизмат/тоифа муваффақиятли ўчирилди!",
+                success_update_assignments: "Тайинлашлар муваффақиятли янгиланди!",
+                error_fetch: "Маълумотларни юклашда хато юз берди:",
+                error_add: "Қўшишда хато юз берди:",
+                error_update: "Янгилашда хато юз берди:",
+                error_delete: "Ўчиришда хато юз берди:",
+                error_already_exists: "Бундай номдаги хизмат/тоифа ушбу даражада аллақачон мавжуд.",
+                error_parent_not_category: "Нотўғри асосий тоифа ёки асосий хизмат. Илтимос, категорияни танланг.",
+                error_delete_category_with_children: "Ички тоифалар ёки хизматларга эга категорияни ўчириш мумкин эмас.",
+                ticket_status_waiting: "Кутилмоқда",
+                ticket_status_called: "Чақирилган",
+                ticket_status_finished: "Тугатилган",
+                ticket_status_redirected: "Йўналтирилган",
+                ticket_status_cancelled: "Бекор қилинган",
+                logout: "Чиқиш",
+                category_type: "Категория",
+                service_type: "Хизмат",
+                last_updated: "Охирги янгиланиш:",
+                invalid_date_range: "Бошланғич сана тугаш санасидан кейин бўлиши мумкин эмас."
             },
-            ru: { 
-                title: "Админ-панель",
-                categories: "Категории",
-                services: "Услуги",
-                operators_title: "Операторы",
-                analytics_title: "Аналитика",
-                export_title: "Экспорт отчёта",
-                add: "Добавить",
-                edit: "Редактировать",
-                delete_btn: "Удалить",
-                assign: "Удалить услугу",
-                name: {
-                    category_name: "Название категории",
-                    service: "Название услуги",
-                    category_id: "Выберите категорию",
-                    operator_name: "Имя оператора",
-                    parent_id: "Родительская категория"
-                },
-                actions: "Действия",
-                id: "ID",
-                status: "Статус",
-                none: "Нет",
-                waiting: "Ожидающие",
-                avg_time: "Среднее время обслуживания",
-                waiting_title: "Ожидающие клиенты",
-                finished_title: "Завершённые талоны",
-                export: "Экспортировать",
-                all_operators: "Все операторы",
-                all_services: "Все услуги",
-                start_date: "Дата начала",
-                end_date: "Дата окончания",
-                report_type: "Тип отчёта",
-                overall: "Общий",
-                monthly: "Месячный",
-                yearly: "Годовой",
-                by_operator: "По оператору"
+            ru: {
+                operators_tab: "Операторы",
+                services_tab: "Услуги",
+                assignments_tab: "Назначения",
+                reports_tab: "Отчеты",
+                analytics_tab: "Аналитика",
+                operatorListTitle: "Управление операторами",
+                labelOperatorName: "Имя оператора:",
+                labelOperatorUsername: "Логин:",
+                labelOperatorPassword: "Пароль:",
+                passwordHelpText: "Введите для изменения пароля. Оставьте пустым, если не меняете.",
+                labelOperatorNumber: "Номер оператора:",
+                labelTelegramChatId: "ID чата Telegram (опционально):",
+                labelNotificationPreference: "Предпочтения уведомлений:",
+                optPanel: "Только панель",
+                optTelegram: "Только Telegram",
+                optBoth: "Панель и Telegram",
+                optNone: "Ничего",
+                addOperatorBtn: "Добавить оператора",
+                editOperatorBtn: "Сохранить",
+                cancelEditOperatorBtn: "Отмена",
+                thOperatorName: "Имя",
+                thOperatorUsername: "Логин",
+                thOperatorNumber: "Номер",
+                thTelegramChatId: "Telegram ID",
+                thNotificationPreference: "Уведомления",
+                thOperatorActions: "Действия",
+                serviceListTitle: "Управление услугами и категориями",
+                labelServiceName: "Название услуги/категории:",
+                labelParentService: "Родительская категория (опционально):",
+                optNoParent: "-- Нет родителя --",
+                labelIsService: "Является услугой (а не категорией)",
+                addServiceBtn: "Добавить",
+                editServiceBtn: "Сохранить",
+                cancelEditServiceBtn: "Отмена",
+                thServiceListName: "Название",
+                thServiceListParent: "Родитель",
+                thServiceListType: "Тип",
+                thServiceListActions: "Действия",
+                assignmentTitle: "Назначение услуг операторам",
+                labelAssignOperator: "Выберите оператора:",
+                labelAssignedServices: "Назначенные услуги:",
+                saveAssignmentsBtn: "Сохранить назначения",
+                reportGenerationTitle: "Генерация отчетов",
+                labelReportOperator: "Оператор (опционально):",
+                optAllOperators: "-- Все операторы --",
+                labelReportService: "Услуга (опционально):",
+                optAllServices: "-- Все услуги --",
+                labelStartDate: "Начальная дата:",
+                labelEndDate: "Конечная дата:",
+                labelReportType: "Тип отчета:",
+                optDetailed: "Подробный",
+                optSummary: "Сводный",
+                optOperatorPerformance: "Производительность операторов",
+                optServicePerformance: "Производительность услуг",
+                generateReportBtn: "Сгенерировать отчет",
+                analyticsDashboardTitle: "Панель аналитики в реальном времени",
+                totalTicketsTodayLabel: "Всего талонов сегодня",
+                waitingTicketsLabel: "В ожидании",
+                avgWaitTimeLabel: "Среднее время ожидания:",
+                calledTicketsLabel: "Вызваны",
+                finishedTicketsTodayLabel: "Завершены сегодня",
+                avgServiceTimeLabel: "Среднее время обслуживания:",
+                currentQueueListTitle: "Текущая очередь",
+                thAnalyticsTicketNumber: "Номер талона",
+                thAnalyticsStatus: "Статус",
+                thAnalyticsService: "Услуга",
+                thAnalyticsOperator: "Оператор",
+                thAnalyticsStartTime: "Время выдачи",
+                thAnalyticsCallTime: "Время вызова",
+                thAnalyticsEstimatedWait: "Прим. ожидание",
+                confirm_delete_operator: "Подтвердите удаление оператора?",
+                confirm_delete_service: "Подтвердите удаление услуги/категории?",
+                success_add_operator: "Оператор успешно добавлен!",
+                success_update_operator: "Оператор успешно обновлен!",
+                success_delete_operator: "Оператор успешно удален!",
+                success_add_service: "Услуга/категория успешно добавлена!",
+                success_update_service: "Услуга/категория успешно обновлена!",
+                success_delete_service: "Услуга/категория успешно удалена!",
+                success_update_assignments: "Назначения успешно обновлены!",
+                error_fetch: "Ошибка загрузки данных:",
+                error_add: "Ошибка при добавлении:",
+                error_update: "Ошибка при обновлении:",
+                error_delete: "Ошибка при удалении:",
+                error_already_exists: "Услуга/категория с таким именем уже существует на этом уровне.",
+                error_parent_not_category: "Неверная родительская категория или родитель является услугой. Пожалуйста, выберите категорию.",
+                error_delete_category_with_children: "Невозможно удалить категорию с существующими подкатегориями или услугами.",
+                ticket_status_waiting: "В ожидании",
+                ticket_status_called: "Вызван",
+                ticket_status_finished: "Завершен",
+                ticket_status_redirected: "Перенаправлен",
+                ticket_status_cancelled: "Отменен",
+                logout: "Выйти",
+                category_type: "Категория",
+                service_type: "Услуга",
+                last_updated: "Последнее обновление:",
+                invalid_date_range: "Начальная дата не может быть позже конечной даты."
             },
-            en: { 
-                title: "Admin Panel",
-                categories: "Categories",
-                services: "Services",
-                operators_title: "Operators",
-                analytics_title: "Analytics",
-                export_title: "Export Report",
-                add: "Add",
-                edit: "Edit",
-                delete_btn: "Delete",
-                assign: "Remove Service",
-                name: {
-                    category_name: "Category Name",
-                    service: "Service Name",
-                    category_id: "Select Category",
-                    operator_name: "Operator Name",
-                    parent_id: "Parent Category"
-                },
-                actions: "Actions",
-                id: "ID",
-                status: "Status",
-                none: "None",
-                waiting: "Waiting",
-                avg_time: "Average Service Time",
-                waiting_title: "Waiting Clients",
-                finished_title: "Finished Tickets",
-                export: "Export",
-                all_operators: "All Operators",
-                all_services: "All Services",
-                start_date: "Start Date",
-                end_date: "End Date",
-                report_type: "Report Type",
-                overall: "Overall",
-                monthly: "Monthly",
-                yearly: "Yearly",
-                by_operator: "By Operator"
+            en: {
+                operators_tab: "Operators",
+                services_tab: "Services",
+                assignments_tab: "Assignments",
+                reports_tab: "Reports",
+                analytics_tab: "Analytics",
+                operatorListTitle: "Manage Operators",
+                labelOperatorName: "Operator Name:",
+                labelOperatorUsername: "Username:",
+                labelOperatorPassword: "Password:",
+                passwordHelpText: "Enter to change password. Leave blank if not changing.",
+                labelOperatorNumber: "Operator Number:",
+                labelTelegramChatId: "Telegram Chat ID (Optional):",
+                labelNotificationPreference: "Notification Preference:",
+                optPanel: "Panel only",
+                optTelegram: "Telegram only",
+                optBoth: "Panel and Telegram",
+                optNone: "None",
+                addOperatorBtn: "Add Operator",
+                editOperatorBtn: "Save",
+                cancelEditOperatorBtn: "Cancel",
+                thOperatorName: "Name",
+                thOperatorUsername: "Username",
+                thOperatorNumber: "Number",
+                thTelegramChatId: "Telegram ID",
+                thNotificationPreference: "Notifications",
+                thOperatorActions: "Actions",
+                serviceListTitle: "Manage Services and Categories",
+                labelServiceName: "Service/Category Name:",
+                labelParentService: "Parent Category (Optional):",
+                optNoParent: "-- No parent --",
+                labelIsService: "Is a Service (not a Category)",
+                addServiceBtn: "Add",
+                editServiceBtn: "Save",
+                cancelEditServiceBtn: "Cancel",
+                thServiceListName: "Name",
+                thServiceListParent: "Parent",
+                thServiceListType: "Type",
+                thServiceListActions: "Actions",
+                assignmentTitle: "Assign Services to Operators",
+                labelAssignOperator: "Select Operator:",
+                labelAssignedServices: "Assigned Services:",
+                saveAssignmentsBtn: "Save Assignments",
+                reportGenerationTitle: "Generate Reports",
+                labelReportOperator: "Operator (Optional):",
+                optAllOperators: "-- All Operators --",
+                labelReportService: "Service (Optional):",
+                optAllServices: "-- All Services --",
+                labelStartDate: "Start Date:",
+                labelEndDate: "End Date:",
+                labelReportType: "Report Type:",
+                optDetailed: "Detailed",
+                optSummary: "Summary",
+                optOperatorPerformance: "Operator Performance",
+                optServicePerformance: "Service Performance",
+                generateReportBtn: "Generate Report",
+                analyticsDashboardTitle: "Real-time Analytics Dashboard",
+                totalTicketsTodayLabel: "Total Tickets Today",
+                waitingTicketsLabel: "Waiting",
+                avgWaitTimeLabel: "Avg Wait Time:",
+                calledTicketsLabel: "Called",
+                finishedTicketsTodayLabel: "Finished Today",
+                avgServiceTimeLabel: "Avg Service Time:",
+                currentQueueListTitle: "Current Queue",
+                thAnalyticsTicketNumber: "Ticket Number",
+                thAnalyticsStatus: "Status",
+                thAnalyticsService: "Service",
+                thAnalyticsOperator: "Operator",
+                thAnalyticsStartTime: "Issue Time",
+                thAnalyticsCallTime: "Call Time",
+                thAnalyticsEstimatedWait: "Est. Wait",
+                confirm_delete_operator: "Confirm deletion of operator?",
+                confirm_delete_service: "Confirm deletion of service/category?",
+                success_add_operator: "Operator added successfully!",
+                success_update_operator: "Operator updated successfully!",
+                success_delete_operator: "Operator deleted successfully!",
+                success_add_service: "Service/category added successfully!",
+                success_update_service: "Service/category updated successfully!",
+                success_delete_service: "Service/category deleted successfully!",
+                success_update_assignments: "Assignments updated successfully!",
+                error_fetch: "Error fetching data:",
+                error_add: "Error adding:",
+                error_update: "Error updating:",
+                error_delete: "Error deleting:",
+                error_already_exists: "Service/category with this name already exists at this level.",
+                error_parent_not_category: "Invalid parent category or parent is a service. Please select a category.",
+                error_delete_category_with_children: "Cannot delete category with existing sub-categories or services.",
+                ticket_status_waiting: "Waiting",
+                ticket_status_called: "Called",
+                ticket_status_finished: "Finished",
+                ticket_status_redirected: "Redirected",
+                ticket_status_cancelled: "Cancelled",
+                logout: "Logout",
+                category_type: "Category",
+                service_type: "Service",
+                last_updated: "Last updated:",
+                invalid_date_range: "Start date cannot be after end date."
             }
         };
-        let currentLang = "uz_lat";
+        let currentLang = 'uz_lat'; // Default language
 
-        function setLanguage(lang) {
-            currentLang = lang;
-            document.querySelectorAll(".lang-btn").forEach(btn => btn.classList.remove("active"));
-            document.querySelector(`button[onclick="setLanguage('${lang}')"]`).classList.add("active");
-            document.getElementById("title").innerText = translations[lang].title;
-            document.getElementById("categories_title").innerText = translations[lang].categories;
-            document.getElementById("services_title").innerText = translations[lang].services;
-            document.getElementById("operators_title").innerText = translations[lang].operators_title;
-            document.getElementById("analytics_title").innerText = translations[lang].analytics_title;
-            document.getElementById("export_title").innerText = translations[lang].export_title;
-            document.getElementById("waiting_title").innerText = translations[lang].waiting_title;
-            document.getElementById("finished_title").innerText = translations[lang].finished_title;
-            document.querySelectorAll(".add-btn").forEach(btn => btn.innerText = translations[lang].add);
-            document.querySelectorAll(".edit-btn").forEach(btn => btn.innerText = translations[lang].edit);
-            document.querySelectorAll(".delete-btn").forEach(btn => btn.innerText = translations[lang].delete_btn);
-            document.querySelectorAll(".assign-btn").forEach(btn => btn.innerText = translations[lang].assign);
-            document.querySelector(".section:nth-child(2) table th:nth-child(1)").innerText = translations[lang].id;
-            document.querySelector(".section:nth-child(2) table th:nth-child(2)").innerText = translations[lang].name.category_name;
-            document.querySelector(".section:nth-child(2) table th:nth-child(3)").innerText = translations[lang].name.parent_id;
-            document.querySelector(".section:nth-child(2) table th:nth-child(4)").innerText = translations[lang].actions;
-            document.querySelector(".section:nth-child(3) table th:nth-child(1)").innerText = translations[lang].id;
-            document.querySelector(".section:nth-child(3) table th:nth-child(2)").innerText = translations[lang].name.service;
-            document.querySelector(".section:nth-child(3) table th:nth-child(3)").innerText = translations[lang].name.category_id;
-            document.querySelector(".section:nth-child(3) table th:nth-child(4)").innerText = translations[lang].actions;
-            document.querySelector(".section:nth-child(4) table th:nth-child(1)").innerText = translations[lang].id;
-            document.querySelector(".section:nth-child(4) table th:nth-child(2)").innerText = translations[lang].name.operator_name;
-            document.querySelector(".section:nth-child(4) table th:nth-child(3)").innerText = translations[lang].status;
-            document.querySelector(".section:nth-child(4) table th:nth-child(4)").innerText = translations[lang].services;
-            document.querySelector(".section:nth-child(4) table th:nth-child(5)").innerText = translations[lang].actions;
-            document.querySelector("form[action='/add_category'] input[name='name']").placeholder = translations[lang].name.category_name;
-            document.querySelector("form[action='/add_service'] input[name='name']").placeholder = translations[lang].name.service;
-            document.querySelector("form[action='/add_service'] select[name='category_id'] option:first-child").innerText = translations[lang].name.category_id;
-            document.querySelector("form[action='/add_operator'] input[name='name']").placeholder = translations[lang].name.operator_name;
-            document.getElementById("waiting").innerText = `${translations[lang].waiting}: {{ waiting|length }}`;
-            document.getElementById("avg_time").innerText = `${translations[lang].avg_time}: {{ avg_time }} daqiqa`;
-            document.querySelector("#exportReportForm select#exportOperatorId option:first-child").innerText = translations[lang].all_operators;
-            document.querySelector("#exportReportForm select#exportServiceId option:first-child").innerText = translations[lang].all_services;
-            document.querySelector("#exportReportForm label[for='startDate']").innerText = translations[lang].start_date + ':';
-            document.querySelector("#exportReportForm label[for='endDate']").innerText = translations[lang].end_date + ':';
-            document.querySelector("#exportReportForm label[for='reportType']").innerText = translations[lang].report_type + ':';
-            document.querySelector("#exportReportForm #reportType option[value='overall']").innerText = translations[lang].overall;
-            document.querySelector("#exportReportForm #reportType option[value='monthly']").innerText = translations[lang].monthly;
-            document.querySelector("#exportReportForm #reportType option[value='yearly']").innerText = translations[lang].yearly;
-            document.querySelector("#exportReportForm #reportType option[value='by_operator']").innerText = translations[lang].by_operator;
+        function showNotification(message, type = 'primary') {
+            const existing = document.querySelector('.notification');
+            if (existing) existing.remove();
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerText = message;
+            document.body.appendChild(notification);
+            setTimeout(() => notification.remove(), 5000);
         }
 
-        function editCategory(id, name) {
-            const newName = prompt(`${translations[currentLang].name.category_name}:`, name);
-            if (newName) {
-                fetch(`${serverUrl}/edit_category`, {
-                    method: "POST",
-                    headers: {"Content-Type": "application/json"},
-                    body: JSON.stringify({id: id, name: newName})
-                }).then(response => response.json()).then(data => {
-                    if (data.status === "error") throw new Error(data.message);
-                    location.reload();
-                }).catch(error => alert(error.message));
+        // Function to open specific tab
+        function openTab(tabName) {
+            currentTab = tabName;
+            // Deactivate all tab buttons and hide all tab contents
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+
+            // Activate the selected tab button and show its content
+            document.getElementById(`${tabName}Tab`).classList.add('active');
+            document.getElementById(`${tabName}_tab`).classList.add('active');
+
+            // Load data for the active tab
+            if (tabName === 'operators') {
+                loadOperators();
+            } else if (tabName === 'services') {
+                loadServices();
+            } else if (tabName === 'assignments') {
+                loadOperatorsForAssignments();
+                loadServicesForAssignments(); // Ensures all services are loaded to render checkboxes
+            } else if (tabName === 'reports') {
+                fetchOperatorsForReports();
+                fetchServicesForReports();
+            } else if (tabName === 'analytics') {
+                updateAnalyticsDashboard();
             }
         }
 
-        function deleteCategory(id) {
-            if (confirm(`${translations[currentLang].categories} o‘chirishni tasdiqlaysizmi?`)) {
-                fetch(`${serverUrl}/delete_category`, {
-                    method: "POST",
-                    headers: {"Content-Type": "application/json"},
-                    body: JSON.stringify({id: id})
-                }).then(response => response.json()).then(data => {
-                    if (data.status === "error") throw new Error(data.message);
-                    location.reload();
-                }).catch(error => alert(error.message));
+        // --- Operator Management ---
+        async function loadOperators() {
+            try {
+                const response = await fetch(`${serverUrl}/api/operators`);
+                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                allOperators = await response.json(); // Store all operators globally
+                const tableBody = document.getElementById('operatorsTableBody');
+                tableBody.innerHTML = '';
+                allOperators.forEach(operator => {
+                    const row = tableBody.insertRow();
+                    row.insertCell().innerText = operator.name;
+                    row.insertCell().innerText = operator.username;
+                    row.insertCell().innerText = operator.operator_number;
+                    row.insertCell().innerText = operator.telegram_chat_id || 'N/A';
+                    row.insertCell().innerText = translations[currentLang][`opt${operator.notification_preference.charAt(0).toUpperCase() + operator.notification_preference.slice(1)}`];
+                    
+                    const actionsCell = row.insertCell();
+                    const editButton = document.createElement('button');
+                    editButton.innerText = translations[currentLang].editOperatorBtn;
+                    editButton.className = 'button secondary'; // Changed to secondary for edit
+                    editButton.onclick = () => editOperator(operator);
+
+                    const deleteButton = document.createElement('button');
+                    deleteButton.innerText = translations[currentLang].error_delete.split(":")[0]; // "Удалить"
+                    deleteButton.className = 'button danger ml-2';
+                    deleteButton.onclick = () => deleteOperator(operator.id);
+
+                    actionsCell.classList.add('action-buttons');
+                    actionsCell.appendChild(editButton);
+                    actionsCell.appendChild(deleteButton);
+                });
+                resetOperatorForm(); // Reset form after loading
+            } catch (error) {
+                console.error("Error loading operators:", error);
+                showNotification(`${translations[currentLang].error_fetch} ${error.message}`, 'danger');
             }
         }
 
-        function editService(id, name) {
-            const newName = prompt(`${translations[currentLang].name.service}:`, name);
-            if (newName) {
-                fetch(`${serverUrl}/edit_service`, {
-                    method: "POST",
-                    headers: {"Content-Type": "application/json"},
-                    body: JSON.stringify({id: id, name: newName})
-                }).then(response => response.json()).then(data => {
-                    if (data.status === "error") throw new Error(data.message);
-                    location.reload();
-                }).catch(error => alert(error.message));
+        function resetOperatorForm() {
+            document.getElementById('operatorId').value = '';
+            document.getElementById('operatorName').value = '';
+            document.getElementById('operatorUsername').value = '';
+            document.getElementById('operatorPassword').value = '';
+            document.getElementById('operatorNumber').value = '';
+            document.getElementById('telegramChatId').value = '';
+            document.getElementById('notificationPreference').value = 'panel';
+            document.getElementById('addOperatorBtn').innerText = translations[currentLang].addOperatorBtn;
+            document.getElementById('addOperatorBtn').classList.remove('secondary');
+            document.getElementById('cancelEditOperatorBtn').style.display = 'none';
+            document.getElementById('passwordHelpText').innerText = ''; // Clear help text
+        }
+
+        function editOperator(operator) {
+            document.getElementById('operatorId').value = operator.id;
+            document.getElementById('operatorName').value = operator.name;
+            document.getElementById('operatorUsername').value = operator.username;
+            document.getElementById('operatorNumber').value = operator.operator_number;
+            document.getElementById('telegramChatId').value = operator.telegram_chat_id || '';
+            document.getElementById('notificationPreference').value = operator.notification_preference || 'panel';
+            document.getElementById('operatorPassword').value = ''; // Clear password field for security
+            document.getElementById('passwordHelpText').innerText = translations[currentLang].passwordHelpText;
+
+            document.getElementById('addOperatorBtn').innerText = translations[currentLang].editOperatorBtn;
+            document.getElementById('addOperatorBtn').classList.add('secondary'); // Optional: change button color
+            document.getElementById('cancelEditOperatorBtn').style.display = 'inline-block';
+        }
+
+        document.getElementById('operatorForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const operatorId = document.getElementById('operatorId').value;
+            const name = document.getElementById('operatorName').value;
+            const username = document.getElementById('operatorUsername').value;
+            const password = document.getElementById('operatorPassword').value;
+            const operator_number = document.getElementById('operatorNumber').value;
+            const telegram_chat_id = document.getElementById('telegramChatId').value;
+            const notification_preference = document.getElementById('notificationPreference').value;
+
+            const method = operatorId ? 'PUT' : 'POST';
+            const url = operatorId ? `${serverUrl}/api/operators/${operatorId}` : `${serverUrl}/api/operators`;
+            
+            const body = { name, username, operator_number, telegram_chat_id, notification_preference };
+            if (password) { // Only send password if it's not empty
+                body.password = password;
+            }
+
+            try {
+                const response = await fetch(url, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || `HTTP error! Status: ${response.status}`);
+                }
+                showNotification(operatorId ? translations[currentLang].success_update_operator : translations[currentLang].success_add_operator);
+                loadOperators(); // Reload operators after add/edit
+            } catch (error) {
+                console.error("Error saving operator:", error);
+                showNotification(`${operatorId ? translations[currentLang].error_update : translations[currentLang].error_add} ${error.message}`, 'danger');
+            }
+        });
+
+        document.getElementById('cancelEditOperatorBtn').addEventListener('click', resetOperatorForm);
+
+        async function deleteOperator(id) {
+            if (!confirm(translations[currentLang].confirm_delete_operator)) return;
+            try {
+                const response = await fetch(`${serverUrl}/api/operators/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || `HTTP error! Status: ${response.status}`);
+                }
+                showNotification(translations[currentLang].success_delete_operator);
+                loadOperators(); // Reload operators after deletion
+            } catch (error) {
+                console.error("Error deleting operator:", error);
+                showNotification(`${translations[currentLang].error_delete} ${error.message}`, 'danger');
             }
         }
 
-        function deleteService(id) {
-            if (confirm(`${translations[currentLang].services} o‘chirishni tasdiqlaysizmi?`)) {
-                fetch(`${serverUrl}/delete_service`, {
-                    method: "POST",
-                    headers: {"Content-Type": "application/json"},
-                    body: JSON.stringify({id: id})
-                }).then(response => response.json()).then(data => {
-                    if (data.status === "error") throw new Error(data.message);
-                    location.reload();
-                }).catch(error => alert(error.message));
+        // --- Service Management ---
+        async function loadServices() {
+            try {
+                const response = await fetch(`${serverUrl}/api/services`);
+                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                allServices = await response.json(); // Store all services globally
+                
+                const tableBody = document.getElementById('servicesTableBody');
+                tableBody.innerHTML = '';
+                const parentServiceSelect = document.getElementById('parentService');
+                parentServiceSelect.innerHTML = `<option value="" id="optNoParent">${translations[currentLang].optNoParent}</option>`;
+
+                // Populate parentService dropdown with categories (is_service = 0)
+                allServices.filter(s => !s.is_service).forEach(category => {
+                    const option = document.createElement('option');
+                    option.value = category.id;
+                    option.innerText = category.name;
+                    parentServiceSelect.appendChild(option);
+                });
+
+                // Render services in table
+                allServices.forEach(service => {
+                    const row = tableBody.insertRow();
+                    row.insertCell().innerText = service.name;
+                    // Find the parent name
+                    const parent = allServices.find(s => s.id === service.parent_id);
+                    row.insertCell().innerText = parent ? parent.name : 'N/A';
+                    row.insertCell().innerText = service.is_service ? translations[currentLang].service_type : translations[currentLang].category_type;
+                    
+                    const actionsCell = row.insertCell();
+                    const editButton = document.createElement('button');
+                    editButton.innerText = translations[currentLang].editServiceBtn;
+                    editButton.className = 'button secondary';
+                    editButton.onclick = () => editService(service);
+
+                    const deleteButton = document.createElement('button');
+                    deleteButton.innerText = translations[currentLang].error_delete.split(":")[0];
+                    deleteButton.className = 'button danger ml-2';
+                    deleteButton.onclick = () => deleteService(service.id);
+
+                    actionsCell.classList.add('action-buttons');
+                    actionsCell.appendChild(editButton);
+                    actionsCell.appendChild(deleteButton);
+                });
+                resetServiceForm();
+            } catch (error) {
+                console.error("Error loading services:", error);
+                showNotification(`${translations[currentLang].error_fetch} ${error.message}`, 'danger');
             }
         }
 
-        function editOperator(id, name, status, operator_number) {
-            const newName = prompt(`${translations[currentLang].name.operator_name}:`, name);
-            const newPassword = prompt("Yangi parol (bo‘sh qoldirish mumkin):", "");
-            const newStatus = prompt("Status (active/break):", status);
-            const newNumber = prompt("Operator raqami:", operator_number || "");
-            if (newName) {
-                fetch(`${serverUrl}/edit_operator`, {
-                    method: "POST",
-                    headers: {"Content-Type": "application/json"},
-                    body: JSON.stringify({
-                        id: id,
-                        name: newName,
-                        password: newPassword,
-                        status: newStatus || status,
-                        operator_number: newNumber || null
-                    })
-                }).then(response => response.json()).then(data => {
-                    if (data.status === "error") throw new Error(data.message);
-                    location.reload();
-                }).catch(error => alert(error.message));
+        function resetServiceForm() {
+            document.getElementById('serviceId').value = '';
+            document.getElementById('serviceName').value = '';
+            document.getElementById('parentService').value = '';
+            document.getElementById('isServiceCheckbox').checked = false;
+            document.getElementById('addServiceBtn').innerText = translations[currentLang].addServiceBtn;
+            document.getElementById('addServiceBtn').classList.remove('secondary');
+            document.getElementById('cancelEditServiceBtn').style.display = 'none';
+        }
+
+        function editService(service) {
+            document.getElementById('serviceId').value = service.id;
+            document.getElementById('serviceName').value = service.name;
+            document.getElementById('parentService').value = service.parent_id || '';
+            document.getElementById('isServiceCheckbox').checked = service.is_service;
+
+            document.getElementById('addServiceBtn').innerText = translations[currentLang].editServiceBtn;
+            document.getElementById('addServiceBtn').classList.add('secondary');
+            document.getElementById('cancelEditServiceBtn').style.display = 'inline-block';
+        }
+
+        document.getElementById('serviceForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const serviceId = document.getElementById('serviceId').value;
+            const name = document.getElementById('serviceName').value;
+            const parent_id = document.getElementById('parentService').value || null;
+            const is_service = document.getElementById('isServiceCheckbox').checked ? 1 : 0;
+
+            const method = serviceId ? 'PUT' : 'POST';
+            const url = serviceId ? `${serverUrl}/api/services/${serviceId}` : `${serverUrl}/api/services`;
+            
+            try {
+                const response = await fetch(url, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, parent_id, is_service })
+                });
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || `HTTP error! Status: ${response.status}`);
+                }
+                showNotification(serviceId ? translations[currentLang].success_update_service : translations[currentLang].success_add_service);
+                loadServices(); // Reload services after add/edit
+                // Also reload services for assignments in case of changes
+                loadServicesForAssignments(); 
+            } catch (error) {
+                console.error("Error saving service:", error);
+                showNotification(`${serviceId ? translations[currentLang].error_update : translations[currentLang].error_add} ${error.message}`, 'danger');
+            }
+        });
+
+        document.getElementById('cancelEditServiceBtn').addEventListener('click', resetServiceForm);
+
+        async function deleteService(id) {
+            if (!confirm(translations[currentLang].confirm_delete_service)) return;
+            try {
+                const response = await fetch(`${serverUrl}/api/services/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || `HTTP error! Status: ${response.status}`);
+                }
+                showNotification(translations[currentLang].success_delete_service);
+                loadServices(); // Reload services after deletion
+                // Also reload services for assignments in case of changes
+                loadServicesForAssignments(); 
+            } catch (error) {
+                console.error("Error deleting service:", error);
+                showNotification(`${translations[currentLang].error_delete} ${error.message}`, 'danger');
             }
         }
 
-        function deleteOperator(id) {
-            if (confirm(`${translations[currentLang].operators_title} o‘chirishni tasdiqlaysizmi?`)) {
-                fetch(`${serverUrl}/delete_operator`, {
-                    method: "POST",
-                    headers: {"Content-Type": "application/json"},
-                    body: JSON.stringify({id: id})
-                }).then(response => response.json()).then(data => {
-                    if (data.status === "error") throw new Error(data.message);
-                    location.reload();
-                }).catch(error => alert(error.message));
+        // --- Assignments Tab ---
+        async function loadOperatorsForAssignments() {
+            try {
+                const response = await fetch(`${serverUrl}/api/get_all_operators`);
+                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                const operators = await response.json();
+                const select = document.getElementById('assignOperatorSelect');
+                select.innerHTML = `<option value="">-- ${translations[currentLang].labelAssignOperator} --</option>`; // Default option
+                operators.forEach(op => {
+                    const option = document.createElement('option');
+                    option.value = op.id;
+                    option.innerText = op.name;
+                    select.appendChild(option);
+                });
+                select.onchange = loadAssignedServices; // Load assignments when operator is selected
+            } catch (error) {
+                console.error("Error loading operators for assignments:", error);
+                showNotification(`${translations[currentLang].error_fetch} ${error.message}`, 'danger');
             }
         }
 
-        function assignService(operatorId, serviceId) {
-            if (serviceId) {
-                fetch(`${serverUrl}/assign_service`, {
-                    method: "POST",
-                    headers: {"Content-Type": "application/json"},
-                    body: JSON.stringify({operator_id: operatorId, service_id: serviceId})
-                }).then(response => response.json()).then(data => {
-                    if (data.status === "error") throw new Error(data.message);
-                    // Update UI without reloading
-                    const serviceSelect = document.getElementById(`service_select_${operatorId}`);
-                    const serviceName = serviceSelect.options[serviceSelect.selectedIndex].text;
-                    const serviceList = document.getElementById(`service_list_${operatorId}`);
-                    const li = document.createElement("li");
-                    li.dataset.serviceId = serviceId;
-                    li.textContent = serviceName;
-                    serviceList.appendChild(li);
-                    serviceSelect.value = ""; // Reset select
-                }).catch(error => alert(error.message));
+        async function loadServicesForAssignments() {
+            try {
+                // This route should fetch all services, including categories, that can be assigned.
+                // The backend needs to expose this endpoint.
+                const response = await fetch(`${serverUrl}/api/services_for_assignment`);
+                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                allServices = await response.json(); // Update allServices
+                const servicesForAssignmentDiv = document.getElementById('servicesForAssignment');
+                servicesForAssignmentDiv.innerHTML = ''; // Clear previous tree
+                renderServiceTreeForAssignment(allServices, null, servicesForAssignmentDiv);
+            } catch (error) {
+                console.error("Error loading services for assignment tree:", error);
+                showNotification(`${translations[currentLang].error_fetch} ${error.message}`, 'danger');
             }
         }
 
-        function unassignService(operatorId) {
-            const serviceId = prompt("O‘chiriladigan xizmat ID sini kiriting:");
-            if (serviceId) {
-                fetch(`${serverUrl}/unassign_service`, {
-                    method: "POST",
-                    headers: {"Content-Type": "application/json"},
-                    body: JSON.stringify({operator_id: operatorId, service_id: serviceId})
-                }).then(response => response.json()).then(data => {
-                    if (data.status === "error") throw new Error(data.message);
-                    // Update UI without reloading
-                    const serviceList = document.getElementById(`service_list_${operatorId}`);
-                    const li = serviceList.querySelector(`li[data-service-id="${serviceId}"]`);
-                    if (li) li.remove();
-                }).catch(error => alert(error.message));
+        function renderServiceTreeForAssignment(services, parentId, containerElement) {
+            const children = services.filter(s => s.parent_id === parentId);
+            if (children.length === 0 && parentId !== null && !services.some(s => s.parent_id === parentId)) {
+                return; // Don't create empty ul for leaf nodes if no children
+            }
+
+            const ul = document.createElement('ul');
+            ul.className = parentId === null ? '' : 'ml-4'; // Indent children, no indent for top level
+
+            children.forEach(item => {
+                const li = document.createElement('li');
+                li.className = 'mb-1';
+                
+                const label = document.createElement('label');
+                label.className = 'checkbox-label'; // Используем новый класс для стилей
+
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.value = item.id;
+                checkbox.dataset.isService = item.is_service; // Store if it's a service
+                checkbox.className = 'form-checkbox h-5 w-5 text-primary-500 rounded';
+
+                const span = document.createElement('span');
+                span.className = 'text-base text-gray-700 dark:text-gray-300';
+                span.innerText = item.name;
+
+                const typeSpan = document.createElement('span');
+                typeSpan.className = `ml-2 px-2 py-1 text-xs font-semibold rounded-full`;
+                typeSpan.innerText = item.is_service ? translations[currentLang].service_type : translations[currentLang].category_type; // Use localized text
+                typeSpan.style.backgroundColor = item.is_service ? 'var(--primary)' : 'var(--secondary)'; // Use CSS variables
+
+                label.appendChild(checkbox);
+                label.appendChild(span);
+                label.appendChild(typeSpan);
+                li.appendChild(label);
+                ul.appendChild(li);
+
+                if (!item.is_service) { // If it's a category, render its children
+                    renderServiceTreeForAssignment(services, item.id, li); // Pass li as container for children
+                }
+            });
+
+            if (children.length > 0 || parentId === null) { // Only append if there are children or it's the root
+                containerElement.appendChild(ul);
             }
         }
 
-        function logout() {
-            window.location.href = '/admin_logout';
+
+        async function loadAssignedServices() {
+            const operatorId = document.getElementById('assignOperatorSelect').value;
+            const servicesForAssignmentDiv = document.getElementById('servicesForAssignment');
+            // Clear all checkboxes before loading new assignments
+            servicesForAssignmentDiv.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+
+
+            if (!operatorId) {
+                return; // No operator selected, do nothing
+            }
+
+            try {
+                const response = await fetch(`${serverUrl}/api/operator_service_assignments?operator_id=${operatorId}`);
+                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                const assignedServiceIds = await response.json();
+                
+                // Check the checkboxes for assigned services
+                assignedServiceIds.forEach(serviceId => {
+                    const checkbox = servicesForAssignmentDiv.querySelector(`input[type="checkbox"][value="${serviceId}"]`);
+                    if (checkbox) {
+                        checkbox.checked = true;
+                    }
+                });
+
+            } catch (error) {
+                console.error("Error loading assigned services:", error);
+                showNotification(`${translations[currentLang].error_fetch} ${error.message}`, 'danger');
+            }
         }
 
-        function toggleTheme() {
-            document.body.classList.toggle("dark");
-            const isDark = document.body.classList.contains("dark");
-            localStorage.setItem("theme", isDark ? "dark" : "light");
-            document.querySelector(".theme-toggle").innerText = isDark ? "☀️" : "🌙";
+        document.getElementById('saveAssignmentsBtn').addEventListener('click', async function() {
+            const operatorId = document.getElementById('assignOperatorSelect').value;
+            if (!operatorId) {
+                showNotification(translations[currentLang].labelAssignOperator, 'danger');
+                return;
+            }
+
+            const selectedServiceIds = Array.from(document.querySelectorAll('#servicesForAssignment input[type="checkbox"]:checked'))
+                                            .map(checkbox => parseInt(checkbox.value));
+            try {
+                const response = await fetch(`${serverUrl}/api/operator_service_assignments`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ operator_id: operatorId, service_ids: selectedServiceIds })
+                });
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || `HTTP error! Status: ${response.status}`);
+                }
+                showNotification(translations[currentLang].success_update_assignments);
+            } catch (error) {
+                console.error("Error saving assignments:", error);
+                showNotification(`${translations[currentLang].error_update} ${error.message}`, 'danger');
+            }
+        });
+
+        // --- Reports Tab ---
+        async function fetchOperatorsForReports() {
+            try {
+                const response = await fetch(`${serverUrl}/api/get_all_operators`);
+                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                const operators = await response.json();
+                const select = document.getElementById('reportOperator');
+                select.innerHTML = `<option value="" id="optAllOperators">${translations[currentLang].optAllOperators}</option>`;
+                operators.forEach(op => {
+                    const option = document.createElement('option');
+                    option.value = op.id;
+                    option.innerText = op.name;
+                    select.appendChild(option);
+                });
+            } catch (error) {
+                console.error("Error loading operators for reports:", error);
+                showNotification(`${translations[currentLang].error_fetch} ${error.message}`, 'danger');
+            }
         }
 
-        // Export form submission
-        document.getElementById("exportReportForm")?.addEventListener("submit", async (e) => {
-            e.preventDefault();
-            const operatorId = document.getElementById("exportOperatorId").value || null;
-            const serviceId = document.getElementById("exportServiceId").value || null;
-            const startDate = document.getElementById("startDate").value || null;
-            const endDate = document.getElementById("endDate").value || null;
-            const reportType = document.getElementById("reportType").value;
+        async function fetchServicesForReports() {
+            try {
+                // Добавим новый API-эндпоинт в app.py, чтобы получить плоский список всех услуг и категорий
+                const response = await fetch(`${serverUrl}/api/get_all_services_flat`);
+                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                const services = await response.json();
+                const select = document.getElementById('reportService');
+                select.innerHTML = `<option value="" id="optAllServices">${translations[currentLang].optAllServices}</option>`;
+                services.forEach(svc => {
+                    const option = document.createElement('option');
+                    option.value = svc.id;
+                    option.innerText = svc.name + (svc.is_service ? ` (${translations[currentLang].service_type})` : ` (${translations[currentLang].category_type})`);
+                    select.appendChild(option);
+                });
+            } catch (error) {
+                console.error("Error loading services for reports:", error);
+                showNotification(`${translations[currentLang].error_fetch} ${error.message}`, 'danger');
+            }
+        }
+
+        document.getElementById('reportForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const operatorId = document.getElementById('reportOperator').value || null;
+            const serviceId = document.getElementById('reportService').value || null;
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            const reportType = document.getElementById('reportType').value;
+
+            // Валидация дат
+            if (startDate && endDate && new Date(startDate) > new Date(endDate)) {
+                showNotification(translations[currentLang].invalid_date_range, 'danger');
+                return;
+            }
 
             try {
                 const response = await fetch(`${serverUrl}/export_report`, {
-                    method: "POST",
-                    headers: {"Content-Type": "application/json"},
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         operator_id: operatorId,
                         service_id: serviceId,
@@ -628,32 +1615,247 @@
                     })
                 });
 
-                if (!response.ok) throw new Error("Hisobotni yuklab olishda xato: " + response.statusText);
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || `HTTP error! Status: ${response.statusText}`);
+                }
                 
                 const blob = await response.blob();
                 const url = window.URL.createObjectURL(blob);
-                const a = document.createElement("a");
+                const a = document.createElement('a');
                 a.href = url;
-                a.download = `report_${Date.now()}.xlsx`;
+                a.download = `report_${reportType}_${new Date().toISOString().slice(0,10)}.xlsx`;
                 document.body.appendChild(a);
                 a.click();
                 a.remove();
                 window.URL.revokeObjectURL(url);
+                showNotification("Отчет успешно загружен!");
             } catch (error) {
-                alert(error.message);
+                console.error("Error generating report:", error);
+                showNotification(`${translations[currentLang].error_fetch} ${error.message}`, 'danger');
             }
         });
 
-        socket.on('new_ticket', () => {
-            console.log("New ticket added");
-            location.reload();
-        });
+        // --- Analytics Tab ---
+        async function updateAnalyticsDashboard() {
+            try {
+                const today = new Date().toISOString().slice(0, 10); //YYYY-MM-DD
+                // Ensure this API route exists and returns data
+                const response = await fetch(`${serverUrl}/api/admin_analytics?date=${today}`);
+                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                const data = await response.json();
 
-        // Initialize theme
+                document.getElementById('totalTicketsTodayValue').innerText = data.total_tickets_today;
+                document.getElementById('waitingTicketsValue').innerText = data.waiting_tickets;
+                document.getElementById('calledTicketsValue').innerText = data.called_tickets;
+                document.getElementById('finishedTicketsTodayValue').innerText = data.finished_tickets_today;
+
+                // Update text for average wait and service times with localized labels
+                document.getElementById('avgWaitTimeLabel').innerText = `${translations[currentLang].avgWaitTimeLabel} ${data.avg_wait_time !== null ? data.avg_wait_time.toFixed(2) + ' мин.' : 'N/A'}`;
+                document.getElementById('avgServiceTimeLabel').innerText = `${translations[currentLang].avgServiceTimeLabel} ${data.avg_service_time !== null ? data.avg_service_time.toFixed(2) + ' мин.' : 'N/A'}`;
+                
+                // Update active tickets table
+                const activeTicketsTableBody = document.getElementById('activeTicketsTableBody');
+                activeTicketsTableBody.innerHTML = ''; // Clear previous data
+                
+                data.active_tickets.forEach(ticket => {
+                    const row = activeTicketsTableBody.insertRow();
+                    row.insertCell().innerText = ticket.ticket_number;
+                    // Ensure status localization
+                    row.insertCell().innerText = translations[currentLang][`ticket_status_${ticket.status}`] || ticket.status; 
+                    row.insertCell().innerText = ticket.service_name;
+                    row.insertCell().innerText = ticket.operator_name;
+                    // Format times for display
+                    row.insertCell().innerText = ticket.start_time ? new Date(ticket.start_time).toLocaleTimeString(currentLang.replace('_lat', '-Latn'), {hour: '2-digit', minute: '2-digit'}) : 'N/A';
+                    row.insertCell().innerText = ticket.call_time ? new Date(ticket.call_time).toLocaleTimeString(currentLang.replace('_lat', '-Latn'), {hour: '2-digit', minute: '2-digit'}) : 'N/A';
+                    row.insertCell().innerText = ticket.estimated_wait_time !== null ? `${ticket.estimated_wait_time} мин.` : 'N/A';
+                });
+
+                // Update last updated time
+                const now = new Date();
+                const formattedTime = now.toLocaleTimeString(currentLang.replace('_lat', '-Latn'), {hour: '2-digit', minute: '2-digit', second: '2-digit'});
+                document.getElementById('lastUpdatedTime').innerText = `${translations[currentLang].last_updated} ${formattedTime}`;
+
+            } catch (error) {
+                console.error("Error updating analytics dashboard:", error);
+                showNotification(`${translations[currentLang].error_fetch} ${error.message}`, 'danger');
+            }
+        }
+
+
+        function setLanguage(lang) {
+            currentLang = lang;
+            document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelector(`button[onclick="setLanguage('${lang}')"]`).classList.add('active');
+            
+            // Update tab button texts
+            document.getElementById('operatorsTab').innerText = translations[lang].operators_tab;
+            document.getElementById('servicesTab').innerText = translations[lang].services_tab;
+            document.getElementById('assignmentsTab').innerText = translations[lang].assignments_tab;
+            document.getElementById('reportsTab').innerText = translations[lang].reports_tab;
+            document.getElementById('analyticsTab').innerText = translations[lang].analytics_tab;
+            document.querySelector('.logout-button').innerText = translations[lang].logout;
+
+
+            // Update Operator tab
+            document.getElementById('operatorListTitle').innerText = translations[lang].operatorListTitle;
+            document.getElementById('labelOperatorName').innerText = translations[lang].labelOperatorName;
+            document.getElementById('labelOperatorUsername').innerText = translations[lang].labelOperatorUsername;
+            document.getElementById('labelOperatorPassword').innerText = translations[lang].labelOperatorPassword;
+            document.getElementById('passwordHelpText').innerText = translations[lang].passwordHelpText;
+            document.getElementById('labelOperatorNumber').innerText = translations[lang].labelOperatorNumber;
+            document.getElementById('labelTelegramChatId').innerText = translations[lang].labelTelegramChatId;
+            document.getElementById('labelNotificationPreference').innerText = translations[lang].labelNotificationPreference;
+            document.getElementById('optPanel').innerText = translations[lang].optPanel;
+            document.getElementById('optTelegram').innerText = translations[lang].optTelegram;
+            document.getElementById('optBoth').innerText = translations[lang].optBoth;
+            document.getElementById('optNone').innerText = translations[lang].optNone;
+            document.getElementById('addOperatorBtn').innerText = document.getElementById('operatorId').value ? translations[lang].editOperatorBtn : translations[lang].addOperatorBtn;
+            document.getElementById('cancelEditOperatorBtn').innerText = translations[lang].cancelEditOperatorBtn;
+            document.getElementById('thOperatorName').innerText = translations[lang].thOperatorName;
+            document.getElementById('thOperatorUsername').innerText = translations[lang].thOperatorUsername;
+            document.getElementById('thOperatorNumber').innerText = translations[lang].thOperatorNumber;
+            document.getElementById('thTelegramChatId').innerText = translations[lang].thTelegramChatId;
+            document.getElementById('thNotificationPreference').innerText = translations[lang].thNotificationPreference;
+            document.getElementById('thOperatorActions').innerText = translations[lang].thOperatorActions;
+
+            // Update Services tab
+            document.getElementById('serviceListTitle').innerText = translations[lang].serviceListTitle;
+            document.getElementById('labelServiceName').innerText = translations[lang].labelServiceName;
+            document.getElementById('labelParentService').innerText = translations[lang].labelParentService;
+            document.getElementById('optNoParent').innerText = translations[lang].optNoParent;
+            document.getElementById('labelIsService').innerText = translations[lang].labelIsService;
+            document.getElementById('addServiceBtn').innerText = document.getElementById('serviceId').value ? translations[lang].editServiceBtn : translations[lang].addServiceBtn;
+            document.getElementById('cancelEditServiceBtn').innerText = translations[lang].cancelEditServiceBtn;
+            document.getElementById('thServiceListName').innerText = translations[lang].thServiceListName;
+            document.getElementById('thServiceListParent').innerText = translations[lang].thServiceListParent;
+            document.getElementById('thServiceListType').innerText = translations[lang].thServiceListType;
+            document.getElementById('thServiceListActions').innerText = translations[lang].thServiceListActions;
+
+            // Update Assignments tab
+            document.getElementById('assignmentTitle').innerText = translations[lang].assignmentTitle;
+            document.getElementById('labelAssignOperator').innerText = translations[lang].labelAssignOperator;
+            document.getElementById('labelAssignedServices').innerText = translations[lang].labelAssignedServices;
+            document.getElementById('saveAssignmentsBtn').innerText = translations[lang].saveAssignmentsBtn;
+
+            // Update Reports tab
+            document.getElementById('reportGenerationTitle').innerText = translations[lang].reportGenerationTitle;
+            document.getElementById('labelReportOperator').innerText = translations[lang].labelReportOperator;
+            document.getElementById('optAllOperators').innerText = translations[lang].optAllOperators;
+            document.getElementById('labelReportService').innerText = translations[lang].labelReportService;
+            document.getElementById('optAllServices').innerText = translations[lang].optAllServices;
+            document.getElementById('labelStartDate').innerText = translations[lang].labelStartDate;
+            document.getElementById('labelEndDate').innerText = translations[lang].labelEndDate;
+            document.getElementById('labelReportType').innerText = translations[lang].labelReportType;
+            document.getElementById('optDetailed').innerText = translations[lang].optDetailed;
+            document.getElementById('optSummary').innerText = translations[lang].optSummary;
+            document.getElementById('optOperatorPerformance').innerText = translations[lang].optOperatorPerformance;
+            document.getElementById('optServicePerformance').innerText = translations[lang].optServicePerformance;
+            document.getElementById('generateReportBtn').innerText = translations[lang].generateReportBtn;
+
+            // Update Analytics tab
+            document.getElementById('analyticsDashboardTitle').innerText = translations[lang].analyticsDashboardTitle;
+            document.getElementById('totalTicketsTodayLabel').innerText = translations[lang].totalTicketsTodayLabel;
+            document.getElementById('waitingTicketsLabel').innerText = translations[lang].waitingTicketsLabel;
+            document.getElementById('avgWaitTimeLabel').innerText = translations[lang].avgWaitTimeLabel; // Will be updated by updateAnalyticsDashboard
+            document.getElementById('calledTicketsLabel').innerText = translations[lang].calledTicketsLabel;
+            document.getElementById('finishedTicketsTodayLabel').innerText = translations[lang].finishedTicketsTodayLabel;
+            document.getElementById('avgServiceTimeLabel').innerText = translations[lang].avgServiceTimeLabel; // Will be updated by updateAnalyticsDashboard
+            document.getElementById('currentQueueListTitle').innerText = translations[lang].currentQueueListTitle;
+            document.getElementById('thAnalyticsTicketNumber').innerText = translations[lang].thAnalyticsTicketNumber;
+            document.getElementById('thAnalyticsStatus').innerText = translations[lang].thAnalyticsStatus;
+            document.getElementById('thAnalyticsService').innerText = translations[lang].thAnalyticsService;
+            document.getElementById('thAnalyticsOperator').innerText = translations[lang].thAnalyticsOperator;
+            document.getElementById('thAnalyticsStartTime').innerText = translations[lang].thAnalyticsStartTime;
+            document.getElementById('thAnalyticsCallTime').innerText = translations[lang].thAnalyticsCallTime;
+            document.getElementById('thAnalyticsEstimatedWait').innerText = translations[lang].thAnalyticsEstimatedWait;
+            document.getElementById('lastUpdatedTime').innerText = translations[lang].last_updated; // Will be updated by updateAnalyticsDashboard
+
+            // Обновить списки операторов и услуг в формах отчетов и управления
+            if (currentTab === 'operators') loadOperators();
+            if (currentTab === 'services') loadServices();
+            if (currentTab === 'assignments') {
+                loadOperatorsForAssignments();
+                loadServicesForAssignments();
+                loadAssignedServices(); // Reload assigned services for selected operator
+            }
+            if (currentTab === 'reports') {
+                fetchOperatorsForReports();
+                fetchServicesForReports();
+            }
+            if (currentTab === 'analytics') {
+                updateAnalyticsDashboard();
+            }
+        }
+
+        function toggleTheme() {
+            document.body.classList.toggle('dark');
+            const isDark = document.body.classList.contains('dark');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            document.querySelector('.theme-toggle').innerText = isDark ? '☀️' : '🌙';
+        }
+
+        // Инициализация
         if (localStorage.getItem("theme") === "dark") {
             document.body.classList.add("dark");
             document.querySelector(".theme-toggle").innerText = "☀️";
         }
+        setLanguage("uz_lat"); // Устанавливаем язык по умолчанию
+        openTab('operators'); // Открываем вкладку "Операторы" по умолчанию
 
-        setLanguage("uz_lat");
+        // Добавляем слушатели событий для кнопок вкладок
+        document.querySelectorAll('.tab-button').forEach(button => {
+            button.addEventListener('click', () => {
+                openTab(button.dataset.tab);
+            });
+        });
+
+        // Обновление аналитики каждые 10 секунд
+        setInterval(updateAnalyticsDashboard, 10000);
+
+        // Socket.IO для обновления в реальном времени (пример)
+        socket.on('new_ticket', (data) => {
+            console.log("Новый талон добавлен:", data.number);
+            if (currentTab === 'analytics') {
+                updateAnalyticsDashboard();
+            }
+        });
+
+        socket.on('ticket_called', (data) => {
+            console.log("Талон вызван:", data.ticket);
+            if (currentTab === 'analytics') {
+                updateAnalyticsDashboard();
+            }
+        });
+
+        socket.on('ticket_finished', (data) => {
+            console.log("Талон завершен:", data.ticket);
+            if (currentTab === 'analytics') {
+                updateAnalyticsDashboard();
+            }
+        });
+
+        socket.on('ticket_redirected', (data) => {
+            console.log("Талон перенаправлен:", data.ticket);
+            if (currentTab === 'analytics') {
+                updateAnalyticsDashboard();
+            }
+        });
+
+        socket.on('new_feedback', () => {
+            console.log("Новый отзыв добавлен.");
+            if (currentTab === 'analytics') { // Также обновим аналитику, если там есть счетчики отзывов
+                updateAnalyticsDashboard();
+            }
+        });
+
+        socket.on('new_dispute', () => {
+            console.log("Новая жалоба добавлена.");
+            if (currentTab === 'analytics') { // Также обновим аналитику, если там есть счетчики жалоб
+                updateAnalyticsDashboard();
+            }
+        });
+
     </script>
+</body>
+</html>

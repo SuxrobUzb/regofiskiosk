@@ -1,0 +1,47 @@
+2025-06-12 17:47:01,426 - INFO - Translations loaded successfully.
+2025-06-12 17:47:01,834 - INFO - Super admin user created.
+2025-06-12 17:47:01,835 - INFO - Telegram bot loading process started in a separate thread for webhooks.
+2025-06-12 17:47:01,835 - INFO - Flask app starting on 0.0.0.0:5000 (Debug: True)
+2025-06-12 17:47:01,838 - INFO - Found 0 branches with bot tokens to load and configure webhooks.
+2025-06-12 17:47:01,839 - INFO - All configured Telegram bots attempted to start.
+2025-06-12 17:54:45,803 - INFO - Translations loaded successfully.
+2025-06-12 17:54:46,053 - INFO - Super admin user created.
+2025-06-12 17:54:46,054 - INFO - Telegram bot loading process started in a separate thread for webhooks.
+2025-06-12 17:54:46,055 - INFO - Flask app starting on 0.0.0.0:5000 (Debug: True)
+2025-06-12 17:54:46,057 - INFO - Found 0 branches with bot tokens to load and configure webhooks.
+2025-06-12 17:54:46,057 - INFO - All configured Telegram bots attempted to start.
+2025-06-12 17:55:21,679 - INFO - Translations loaded successfully.
+2025-06-12 17:55:21,949 - INFO - Super admin user created.
+2025-06-12 17:55:21,950 - INFO - Telegram bot loading process started in a separate thread for webhooks.
+2025-06-12 17:55:21,951 - INFO - Flask app starting on 0.0.0.0:5000 (Debug: True)
+2025-06-12 17:55:21,953 - INFO - Found 0 branches with bot tokens to load and configure webhooks.
+2025-06-12 17:55:21,954 - INFO - All configured Telegram bots attempted to start.
+2025-06-12 18:18:04,824 - INFO - Telegram Bot (Aiogram) успешно инициализирован для режима polling.
+2025-06-12 18:18:04,826 - INFO - Translations loaded successfully.
+2025-06-12 18:18:05,211 - INFO - Super admin user created.
+2025-06-12 18:18:05,216 - INFO - Telegram bot запущен в режиме polling в отдельном потоке.
+2025-06-12 18:18:05,216 - INFO - Flask app starting on 0.0.0.0:5000 (Debug: False)
+2025-06-12 18:18:05,219 - INFO - Start polling
+2025-06-12 18:18:05,610 - INFO - Run polling for bot @regofficesamdukf_bot id=7800821253 - 'regofficesamdukf'
+2025-06-12 18:18:23,531 - ERROR - Telegram user 6148272773 not found and no branches exist in DB. Cannot assign branch_id.
+2025-06-12 18:18:23,532 - ERROR - Could not find or assign branch_id for Telegram user 6148272773. Update ignored.
+2025-06-12 18:18:23,892 - INFO - Update id=281278973 is handled. Duration 363 ms by bot id=7800821253
+2025-06-12 18:18:27,325 - ERROR - Telegram user 6148272773 not found and no branches exist in DB. Cannot assign branch_id.
+2025-06-12 18:18:27,325 - ERROR - Could not find or assign branch_id for Telegram user 6148272773. Update ignored.
+2025-06-12 18:18:27,521 - INFO - Update id=281278974 is handled. Duration 197 ms by bot id=7800821253
+2025-06-12 19:09:18,400 - INFO - Telegram Bot (Aiogram) успешно инициализирован для режима polling.
+2025-06-12 19:09:18,402 - INFO - Translations loaded successfully.
+2025-06-12 19:09:19,029 - INFO - Super admin user created.
+2025-06-12 19:09:19,033 - INFO - Telegram bot запущен в режиме polling в отдельном потоке.
+2025-06-12 19:09:19,034 - INFO - Flask app starting on 0.0.0.0:5000 (Debug: False)
+2025-06-12 19:09:19,035 - INFO - Start polling
+2025-06-12 19:09:19,418 - INFO - Run polling for bot @regofficesamdukf_bot id=7800821253 - 'regofficesamdukf'
+2025-06-12 19:09:26,650 - ERROR - Telegram user 6148272773 not found and no branches exist in DB. Cannot assign branch_id.
+2025-06-12 19:09:26,650 - ERROR - Could not find or assign branch_id for Telegram user 6148272773. Update ignored.
+2025-06-12 19:09:27,023 - INFO - Update id=281278975 is handled. Duration 376 ms by bot id=7800821253
+2025-06-12 19:29:16,802 - INFO - Telegram Bot (Aiogram) успешно инициализирован для режима polling.
+2025-06-12 19:29:16,803 - INFO - Translations loaded successfully.
+2025-06-12 19:29:17,288 - INFO - Super admin user created.
+2025-06-12 19:29:17,299 - INFO - Telegram bot launched in polling mode in a separate thread.
+2025-06-12 19:29:17,300 - INFO - Flask app starting on 0.0.0.0:5000 (Debug: True)
+2025-06-12 19:29:17,302 - INFO - Start polling
